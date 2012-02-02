@@ -1,0 +1,6 @@
+
+*.ncb
+*.sln
+*.user
+*.suo
+/ultrasonix/bin/**/*
