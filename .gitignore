@@ -3,4 +3,5 @@
 *.sln
 *.user
 *.suo
+/ultrasonix/bin/*
 /ultrasonix/bin/**/*
