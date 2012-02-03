@@ -7,6 +7,23 @@
 #include "Frame.h"
 
 /* CLASS */
+class FastAveragedFrame: public Frame {
+
+protected:
+	int numberOfLinesToAvg;
+	int digitalGain;
+	unsigned char * average(signed short *);
+
+public:
+	FastAveragedFrame() {}
+	FastAveragedFrame(texo *, texoTransmitParams *, texoReceiveParams *);
+	~FastAveragedFrame() {}
+	void loadTable();
+	void saveToBuffer(Buffer *);
+	void setNumberOfLinesToAvg(int _numberOfLinesToAvg) {numberOfLinesToAvg = _numberOfLinesToAvg;}
+	void setDigitalGain(int _digitalGain) {digitalGain = _digitalGain;}
+};
+
 class AveragedFrame: public Frame {
 
 protected:

@@ -16,6 +16,8 @@ void AveragedPASequence::collectSequence() {
 	strcpy(tx->pulseShape, "00");
 	rx->aperture = 64;
 
+	tex->addTransmit(
+
 	for (int channel = 0; channel < 128; channel++) { // channel loop
 
 		system("cls");
