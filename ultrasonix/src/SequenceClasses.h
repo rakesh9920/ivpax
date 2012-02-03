@@ -11,7 +11,10 @@ class AveragedNonBFSequence: public Sequence {
 
 protected:
 	AveragedFrame frm;
-	averagedNonBFParams prm;
+	int numberOfParts;
+	int numberOfImageLines;
+	int numberOfLinesToAvg;
+	char fileName[50];
 
 public:
 	AveragedNonBFSequence() {}
@@ -27,10 +30,12 @@ class SpatialCompoundingSequence: public Sequence {
 
 protected:
 	ScanningChannelFrame frm;
-	spatialCompoundingParams prm;
 	int minAngle;
 	int maxAngle;
 	void setManualDelays(int);
+	int angleIncrement;
+	int numberOfAngles;
+	char fileName[50];
 
 public:
 	SpatialCompoundingSequence() {}
@@ -46,7 +51,9 @@ class NonBFSequence: public Sequence {
 
 protected:
 	ScanningChannelFrame frm;
-	nonBFParams prm;
+	int numberOfParts;
+	int numberOfImageLines;
+	char fileName[50];
 
 public:
 	NonBFSequence() {}
@@ -62,7 +69,9 @@ class AveragedPASequence: public Sequence {
 
 protected:
 	AveragedFrame frm;
-	averagedPAParams prm;
+	int numberOfLinesToAvg;
+	int digitalGain;
+	char fileName[50];
 
 public:
 	AveragedPASequence() {}
@@ -78,7 +87,8 @@ class NoiseSequence: public Sequence {
 
 protected:
 	NoiseFrame frm;
-	NoiseParams prm;
+	int receiveTime; //in seconds
+	char fileName[50];
 
 public:
 	NoiseSequence() {}
@@ -89,3 +99,5 @@ public:
 	void printStats();
 	void saveHeaderFile();
 };
+
+#endif

@@ -1,14 +1,6 @@
 /* INCLUDE */
 #include "SequenceClasses.h"
 
-/* STRUCT */
-struct averagedPAParams {
-
-	int numberOfLinesToAvg;
-	int digitalGain;
-	char fileName[50];
-};
-
 /* CONSTRUCTORS & DESTRUCTORS */
 AveragedPASequence::AveragedPASequence(texo * _tex, texoTransmitParams * _tx, texoReceiveParams * _rx, Buffer * _buf) 
 : Sequence(_tex, _tx, _rx, _buf), frm(_tex, _tx, _rx) {}
@@ -61,7 +53,7 @@ void AveragedPASequence::collectSequence() {
 
 	stringstream ss;
 	ss << "rfdata/";
-	ss << prm.fileName;
+	ss << fileName;
 	ss << ".rf";
 
 	buf->saveToFile(ss.str());
@@ -71,11 +63,11 @@ void AveragedPASequence::collectSequence() {
 void AveragedPASequence::querySequenceParams() {
 
 	printf("SEQUENCE PARAMETERS\n\n");
-	printf("filename: \n"); scanf("%s", &prm.fileName);
-	printf("Number of lines to average: \n"); scanf("%d", &prm.numberOfLinesToAvg);
-	printf("Digital gain multiplier: \n"); scanf("%d", &prm.digitalGain);
-	frm.setNumberOfLinesToAvg(prm.numberOfLinesToAvg);
-	frm.setDigitalGain(prm.digitalGain);
+	printf("filename: \n"); scanf("%s", &fileName);
+	printf("Number of lines to average: \n"); scanf("%d", &numberOfLinesToAvg);
+	printf("Digital gain multiplier: \n"); scanf("%d", &digitalGain);
+	frm.setNumberOfLinesToAvg(numberOfLinesToAvg);
+	frm.setDigitalGain(digitalGain);
 	linesPerPart = 128;
 	frm.loadTable();
 	lineSize = frm.getLineSize();
@@ -103,11 +95,11 @@ void AveragedPASequence::saveHeaderFile() {
 	h.focusDepth = 0;
 
 	ss << "rfdata/";
-	ss << prm.fileName;
+	ss << fileName;
 	ss << ".bmh";
 
 	fp = fopen(ss.str().c_str(), "wb+");
-	fwrite(prm.fileName, 1, 50, fp);
+	fwrite(fileName, 1, 50, fp);
 	fwrite(&h, sizeof(h), 1, fp);
 	fclose(fp);
 }

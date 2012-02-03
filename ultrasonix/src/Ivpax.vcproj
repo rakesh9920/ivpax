@@ -207,6 +207,18 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\AveragedFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AveragedNonBFSequence.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AveragedPASequence.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Buffer.cpp"
 				>
 			</File>
@@ -219,7 +231,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NoiseFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NoiseSequence.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NonBFSequence.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ScanningChannelFrame.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Sequence.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SpatialCompoundingSequence.cpp"
 				>
 			</File>
 		</Filter>
@@ -240,11 +272,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FrameClasses.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Ivpax.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Sequence.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SequenceClasses.h"
 				>
 			</File>
 		</Filter>

@@ -2,11 +2,7 @@
 #include "SequenceClasses.h"
 
 /* STRUCT */
-struct NoiseParams {
 
-	int receiveTime; //in seconds
-	char fileName[50];
-};
 
 /* CONSTRUCTORS & DESTRUCTORS */
 NoiseSequence::NoiseSequence(texo * _tex, texoTransmitParams * _tx, texoReceiveParams * _rx, Buffer * _buf) 
@@ -33,7 +29,7 @@ void NoiseSequence::collectSequence() {
 
 	frm.loadTable();
 
-	int noParts = prm.receiveTime/3;
+	int noParts = receiveTime/3;
 
 	for (int part = 0; part < noParts; part++) {
 		for (int frame = 0; frame < 60; frame++) { // frame loop
@@ -64,7 +60,7 @@ void NoiseSequence::collectSequence() {
 		}
 
 		stringstream ss;
-		ss << "rfdata/" << prm.fileName;
+		ss << "rfdata/" << fileName;
 		ss << "_p" << part+1 <<".rf";
 
 		buf->saveToFile(ss.str());
@@ -75,8 +71,8 @@ void NoiseSequence::collectSequence() {
 void NoiseSequence::querySequenceParams() {
 
 	printf("SEQUENCE PARAMETERS\n\n");
-	printf("filename: \n"); scanf("%s", &prm.fileName);
-	printf("Receive time in seconds: \n"); scanf("%d", &prm.receiveTime);
+	printf("filename: \n"); scanf("%s", &fileName);
+	printf("Receive time in seconds: \n"); scanf("%d", &receiveTime);
 
 	frm.loadTable();
 	lineSize = frm.getLineSize();
@@ -101,16 +97,16 @@ void NoiseSequence::saveHeaderFile() {
 
 	h.partSize = partSize;
 	h.linesPerPart = 1;
-	h.totalParts = prm.receiveTime/3;
+	h.totalParts = receiveTime/3;
 	h.beamformed = 0;
 	h.focusDepth = 0;
 
 	ss << "rfdata/";
-	ss << prm.fileName;
+	ss << fileName;
 	ss << ".bmh";
 
 	fp = fopen(ss.str().c_str(), "wb+");
-	fwrite(prm.fileName, 1, 50, fp);
+	fwrite(fileName, 1, 50, fp);
 	fwrite(&h, sizeof(h), 1, fp);
 	fclose(fp);
 }

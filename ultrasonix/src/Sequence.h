@@ -9,7 +9,7 @@
 #include <texo_def.h>
 #include <sstream>
 #include <conio.h>
-#include "Frame.h"
+#include "FrameClasses.h"
 #include "Buffer.h"
 #include "Errors.h"
 #include <cmath>

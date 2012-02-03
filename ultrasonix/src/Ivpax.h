@@ -7,6 +7,7 @@
 #include <texo.h>
 #include <texo_def.h>
 #include "Sequence.h"
+#include "SequenceClasses.h"
 #include "Buffer.h"
 #include "Errors.h"	
 
@@ -45,7 +46,7 @@ public:
 	void shutdown();
 };
 
-/* MISC */
+/* METHODS */
 bool newImage(void *, unsigned char *, int) {return true;}
 
 #endif

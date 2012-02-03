@@ -1,15 +1,6 @@
 /* INCLUDE */
 #include "SequenceClasses.h"
 
-/* STRUCT */
-struct averagedNonBFParams {
-
-	int numberOfParts;
-	int numberOfImageLines;
-	int numberOfLinesToAvg;
-	char fileName[50];
-};
-
 /* CONSTRUCTORS & DESTRUCTORS */
 AveragedNonBFSequence::AveragedNonBFSequence(texo * _tex, texoTransmitParams * _tx, texoReceiveParams * _rx, Buffer * _buf) 
 : Sequence(_tex, _tx, _rx, _buf), frm(_tex, _tx, _rx) {}
@@ -22,20 +13,20 @@ void AveragedNonBFSequence::collectSequence() {
 
 	saveHeaderFile();
 
-	for (int part = 0; part < prm.numberOfParts; part++) { // part loop
+	for (int part = 0; part < numberOfParts; part++) { // part loop
 
-		int start = part * prm.numberOfImageLines/prm.numberOfParts;
-		int end = start + prm.numberOfImageLines/prm.numberOfParts;
+		int start = part * numberOfImageLines/numberOfParts;
+		int end = start + numberOfImageLines/numberOfParts;
 
 		for (int line = start; line < end; line++) { // line loop
 
-			tx->centerElement = (line * 1280/prm.numberOfImageLines) + 5;
+			tx->centerElement = (line * 1280/numberOfImageLines) + 5;
 
 			for (int channel = 0; channel < 128; channel++) { // channel loop
 
 				system("cls");
 				printf("RUNNING SEQUENCE\n\n");
-				printf("Part: %d/%d\n", part+1, prm.numberOfParts);
+				printf("Part: %d/%d\n", part+1, numberOfParts);
 				printf("Line: %d/%d\n", line-start+1, end-start);
 				printf("Channel: %d/128\n\n", channel+1);
 
@@ -64,7 +55,7 @@ void AveragedNonBFSequence::collectSequence() {
 
 		stringstream ss;
 		ss << "rfdata/";
-		ss << prm.fileName;
+		ss << fileName;
 		ss << "_p";
 		ss << part+1;
 
@@ -76,13 +67,13 @@ void AveragedNonBFSequence::collectSequence() {
 void AveragedNonBFSequence::querySequenceParams() {
 
 	printf("SEQUENCE PARAMETERS\n\n");
-	printf("filename: \n"); scanf("%s", &prm.fileName);
-	printf("Number of image lines: \n"); scanf("%d", &prm.numberOfImageLines);
-	printf("Number of parts: \n"); scanf("%d", &prm.numberOfParts);
-	printf("Number of lines to average: \n"); scanf("%d", &prm.numberOfLinesToAvg);
-	frm.setNumberOfLinesToAvg(prm.numberOfLinesToAvg);
+	printf("filename: \n"); scanf("%s", &fileName);
+	printf("Number of image lines: \n"); scanf("%d", &numberOfImageLines);
+	printf("Number of parts: \n"); scanf("%d", &numberOfParts);
+	printf("Number of lines to average: \n"); scanf("%d", &numberOfLinesToAvg);
+	frm.setNumberOfLinesToAvg(numberOfLinesToAvg);
 
-	linesPerPart = prm.numberOfImageLines/prm.numberOfParts*128;
+	linesPerPart = numberOfImageLines/numberOfParts*128;
 	frm.loadTable();
 	lineSize = frm.getLineSize();
 	partSize = lineSize*linesPerPart;
@@ -94,7 +85,7 @@ void AveragedNonBFSequence::printStats() {
 	printf("Part size = %d bytes\n", partSize);
 	printf("Line size = %d bytes\n", lineSize);
 	printf("Lines per part = %d\n", linesPerPart);
-	printf("Number of parts = %d\n", prm.numberOfParts);
+	printf("Number of parts = %d\n", numberOfParts);
 }
 
 void AveragedNonBFSequence::saveHeaderFile() {
@@ -105,16 +96,16 @@ void AveragedNonBFSequence::saveHeaderFile() {
 
 	h.partSize = partSize;
 	h.linesPerPart = linesPerPart;
-	h.totalParts = prm.numberOfParts;
+	h.totalParts = numberOfParts;
 	h.beamformed = 0;
 	h.focusDepth = tx->focusDistance;
 
 	ss << "rfdata/";
-	ss << prm.fileName;
+	ss << fileName;
 	ss << ".bmh";
 
 	fp = fopen(ss.str().c_str(), "wb+");
-	fwrite(prm.fileName, 1, 50, fp);
+	fwrite(fileName, 1, 50, fp);
 	fwrite(&h, sizeof(h), 1, fp);
 	fclose(fp);
 }

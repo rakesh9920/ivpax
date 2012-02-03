@@ -66,9 +66,7 @@ void Ivpax::selectionMenu() {
 	printf("(2) Non-BeamFormed RF \n");
 	printf("(3) Spatial Compounding RF \n");
 	printf("(4) Averaged Photoacoustic RF \n");
-	printf("(5) Averaged Photoacoustic RF Type 2 (Channel Mask) \n");
-	printf("(6) Non-BeamFormed RF Type 2 (Channel Mask) \n");
-	printf("(7) Noise Sequence \n");
+	printf("(5) Noise Sequence \n");
 	printf("(x) Exit \n");
 	scanf("%c", &tprm.sequenceSelect); 
 }
@@ -103,9 +101,7 @@ Sequence * Ivpax::seqInit() {
 		case '2': { NonBFSequence * seq = new NonBFSequence(&tex, &tx, &rx, &buf); return seq; }
 		case '3': { SpatialCompoundingSequence * seq = new SpatialCompoundingSequence(&tex, &tx, &rx, &buf); return seq; }
 		case '4': { AveragedPASequence * seq = new AveragedPASequence(&tex, &tx, &rx, &buf); return seq; }
-		case '5': { AveragedPASequence2 * seq = new AveragedPASequence2(&tex, &tx, &rx, &buf); return seq; }
-		case '6': { NonBFSequence2 * seq = new NonBFSequence2(&tex, &tx, &rx, &buf); return seq; } 
-		case '7': { NoiseSequence * seq = new NoiseSequence(&tex, &tx, &rx, &buf); return seq; } 
+		case '5': { NoiseSequence * seq = new NoiseSequence(&tex, &tx, &rx, &buf); return seq; } 
 		case 'x': return NULL;
 		default: return NULL;
 	}

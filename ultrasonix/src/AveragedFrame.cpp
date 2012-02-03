@@ -1,5 +1,5 @@
 /* INCLUDE */
-#include "Frame.h"
+#include "FrameClasses.h"
 
 /* CONSTRUCTORS & DESTRUCTORS */
 AveragedFrame::AveragedFrame(texo * _tex, texoTransmitParams * _tx, texoReceiveParams * _rx)

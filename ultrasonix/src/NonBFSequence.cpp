@@ -2,12 +2,7 @@
 #include "SequenceClasses.h"
 
 /* STRUCT */
-struct nonBFParams {
 
-	int numberOfParts;
-	int numberOfImageLines;
-	char fileName[50];
-};
 
 /* CONSTRUCTORS & DESTRUCTORS */
 NonBFSequence::NonBFSequence(texo * _tex, texoTransmitParams * _tx, texoReceiveParams * _rx, Buffer * _buf)
@@ -21,18 +16,18 @@ void NonBFSequence::collectSequence() {
 
 	saveHeaderFile();
 
-	for (int part = 0; part < prm.numberOfParts; part++) { // part loop
+	for (int part = 0; part < numberOfParts; part++) { // part loop
 
-		int start = part * prm.numberOfImageLines/prm.numberOfParts;
-		int end = start + prm.numberOfImageLines/prm.numberOfParts;
+		int start = part * numberOfImageLines/numberOfParts;
+		int end = start + numberOfImageLines/numberOfParts;
 
 		for (int line = start; line < end; line++) { // line loop
 
-			tx->centerElement = (line * 1280/prm.numberOfImageLines) + 5;
+			tx->centerElement = (line * 1280/numberOfImageLines) + 5;
 
 			system("cls");
 			printf("RUNNING SEQUENCE\n\n");
-			printf("Part: %d/%d\n", part+1, prm.numberOfParts);
+			printf("Part: %d/%d\n", part+1, numberOfParts);
 			printf("Line: %d/%d\n\n", line-start+1, end-start);
 
 			switch (cat) {
@@ -57,7 +52,7 @@ void NonBFSequence::collectSequence() {
 
 		stringstream ss;
 		ss << "rfdata/";
-		ss << prm.fileName;
+		ss << fileName;
 		ss << "_p";
 		ss << part+1;
 
@@ -69,11 +64,11 @@ void NonBFSequence::collectSequence() {
 void NonBFSequence::querySequenceParams() {
 
 	printf("SEQUENCE PARAMETERS\n\n");
-	printf("filename: \n"); scanf("%s", &prm.fileName);
-	printf("Number of image lines: \n"); scanf("%d", &prm.numberOfImageLines);
-	printf("Number of parts: \n"); scanf("%d", &prm.numberOfParts);
+	printf("filename: \n"); scanf("%s", &fileName);
+	printf("Number of image lines: \n"); scanf("%d", &numberOfImageLines);
+	printf("Number of parts: \n"); scanf("%d", &numberOfParts);
 
-	linesPerPart = prm.numberOfImageLines/prm.numberOfParts*128;
+	linesPerPart = numberOfImageLines/numberOfParts*128;
 	frm.loadTable();
 	lineSize = frm.getLineSize();
 	partSize = lineSize*linesPerPart;
@@ -85,7 +80,7 @@ void NonBFSequence::printStats() {
 	printf("Part size = %d bytes\n", partSize);
 	printf("Line size = %d bytes\n", lineSize);
 	printf("Lines per part = %d\n", linesPerPart);
-	printf("Number of parts = %d\n", prm.numberOfParts);
+	printf("Number of parts = %d\n", numberOfParts);
 	printf("Transmit On/Off: %s\n", tx->pulseShape);
 }
 
@@ -97,16 +92,16 @@ void NonBFSequence::saveHeaderFile() {
 
 	h.partSize = partSize;
 	h.linesPerPart = linesPerPart;
-	h.totalParts = prm.numberOfParts;
+	h.totalParts = numberOfParts;
 	h.beamformed = 0;
 	h.focusDepth = tx->focusDistance;
 
 	ss << "rfdata/";
-	ss << prm.fileName;
+	ss << fileName;
 	ss << ".bmh";
 
 	fp = fopen(ss.str().c_str(), "wb+");
-	fwrite(prm.fileName, 1, 50, fp);
+	fwrite(fileName, 1, 50, fp);
 	fwrite(&h, sizeof(h), 1, fp);
 	fclose(fp);
 }
