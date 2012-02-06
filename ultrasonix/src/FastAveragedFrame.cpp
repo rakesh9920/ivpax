@@ -11,28 +11,13 @@ void FastAveragedFrame::loadTable() {
 	if (!tex->beginSequence()) 
 		throw Error("Could not define sequence");
 
-	rx->aperture = 64;
-	tex->addTransmit(*tx);
-
-	for (int channel = 0; channel < 128; channel++) {
-
-		if (channel < 64) 
-			rx->centerElement = 315;
-		else 
-			rx->centerElement = 955;
-
-		int c = channel % 64;
-		rx->channelMask[0] = (c < 32) ? (1 << c) : 0;
-		rx->channelMask[1] = (c >= 32) ? (1 << (c - 32)) : 0;
-		tex->addReceive(*rx);
-	}
-
 	lineCount = 0;
-	for (int channel = 0; channel < 128; channel++) {
-		for (int line = 0; line < numberOfLinesToAvg; line++) {
+	for (int channel = startChannel; channel < stopChannel + 1; channel++) {
 
-			tx->tableIndex = 0;
-			rx->tableIndex = channel;
+		tx->tableIndex = 0;
+		rx->tableIndex = channel;
+
+		for (int line = 0; line < numberOfLinesToAvg; line++) {
 
 			lineSize = tex->addLine(rfData, *tx, *rx);
 
@@ -50,6 +35,25 @@ void FastAveragedFrame::loadTable() {
 		lineSize -= 4;
 
 	validsequence = true;
+}
+
+void FastAveragedFrame::populateTable() {
+
+	rx->aperture = 64;
+	tex->addTransmit(*tx);
+
+	for (int channel = startChannel; channel < stopChannel + 1; channel++) {
+
+		if (channel < 64) 
+			rx->centerElement = 315;
+		else 
+			rx->centerElement = 955;
+
+		int c = channel % 64;
+		rx->channelMask[0] = (c < 32) ? (1 << c) : 0;
+		rx->channelMask[1] = (c >= 32) ? (1 << (c - 32)) : 0;
+		tex->addReceive(*rx);
+	}
 }
 
 unsigned char * FastAveragedFrame::average(signed short * set) {
@@ -72,5 +76,5 @@ unsigned char * FastAveragedFrame::average(signed short * set) {
 void FastAveragedFrame::saveToBuffer(Buffer * buf) {
 
 	average((signed short *) tex->getCineStart(0));
-	buf->transferLine(tex->getCineStart(0), lineSize*128);
+	buf->transferLine(tex->getCineStart(0), lineSize*(stopChannel-startChannel));
 }

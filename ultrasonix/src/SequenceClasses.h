@@ -71,6 +71,7 @@ protected:
 	FastAveragedFrame frm;
 	int numberOfLinesToAvg;
 	int digitalGain;
+	int totalSections;
 	char fileName[50];
 
 public:

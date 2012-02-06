@@ -16,28 +16,36 @@ void AveragedPASequence::collectSequence() {
 	strcpy(tx->pulseShape, "00");
 	rx->aperture = 64;
 
-	system("cls");
-	printf("RUNNING SEQUENCE\n\n");
-	//printf("Channel: %d/128\n\n", channel+1);
+	for (int section = 0; section < totalSections; section++) {
 
-	switch (cat) {
+		system("cls");
+		printf("RUNNING SEQUENCE\n\n");
+		printf("Channel: %d/%d\n\n", section+1, totalSections);
+
+		switch (cat) {
 					case 0: {printf("om\n"); cat++; break;}
 					case 1: {printf("   nom\n"); cat++; break; }
 					case 2: {printf("       nom\n"); cat = 0; break;}
+		}
+
+		printf("\nPress any key to terminate sequence\n");
+
+		if (_kbhit()) {
+			_getch();
+			fflush(stdin);
+			throw Error("Sequence cancelled by user");
+			return;
+		}
+
+		int startChannel = section*128/totalSections;
+		int stopChannel = startChannel + 128/totalSections - 1;
+
+		frm.setStartChannel(startChannel);
+		frm.setStopChannel(stopChannel);
+		frm.loadTable();
+		frm.collectFrame();
+		frm.saveToBuffer(buf);		
 	}
-
-	printf("\nPress any key to terminate sequence\n");
-
-	if (_kbhit()) {
-		_getch();
-		fflush(stdin);
-		throw Error("Sequence cancelled by user");
-		return;
-	}
-
-	frm.loadTable();
-	frm.collectFrame();
-	frm.saveToBuffer(buf);
 	
 	stringstream ss;
 	ss << "rfdata/";
@@ -54,6 +62,7 @@ void AveragedPASequence::querySequenceParams() {
 	printf("filename: \n"); scanf("%s", &fileName);
 	printf("Number of lines to average: \n"); scanf("%d", &numberOfLinesToAvg);
 	printf("Digital gain multiplier: \n"); scanf("%d", &digitalGain);
+	printf("Number of sections: \n"); scanf("%d", &totalSections);
 	frm.setNumberOfLinesToAvg(numberOfLinesToAvg);
 	frm.setDigitalGain(digitalGain);
 	linesPerPart = 128;

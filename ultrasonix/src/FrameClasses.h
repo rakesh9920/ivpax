@@ -12,6 +12,8 @@ class FastAveragedFrame: public Frame {
 protected:
 	int numberOfLinesToAvg;
 	int digitalGain;
+	int startChannel;
+	int stopChannel;
 	unsigned char * average(signed short *);
 
 public:
@@ -20,8 +22,11 @@ public:
 	~FastAveragedFrame() {}
 	void loadTable();
 	void saveToBuffer(Buffer *);
+	void setStartChannel(int _startChannel) {startChannel = _startChannel;}
+	void setStopChannel(int _stopChannel) {stopChannel = _stopChannel;}
 	void setNumberOfLinesToAvg(int _numberOfLinesToAvg) {numberOfLinesToAvg = _numberOfLinesToAvg;}
 	void setDigitalGain(int _digitalGain) {digitalGain = _digitalGain;}
+	void populateTable();
 };
 
 class AveragedFrame: public Frame {
