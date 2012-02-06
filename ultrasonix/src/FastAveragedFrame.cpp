@@ -31,7 +31,7 @@ void FastAveragedFrame::loadTable() {
 	for (int channel = 0; channel < 128; channel++) {
 		for (int line = 0; line < numberOfLinesToAvg; line++) {
 
-			tx->tableIndex = 1;
+			tx->tableIndex = 0;
 			rx->tableIndex = channel;
 
 			lineSize = tex->addLine(rfData, *tx, *rx);
