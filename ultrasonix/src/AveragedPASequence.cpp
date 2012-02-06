@@ -11,8 +11,6 @@ void AveragedPASequence::collectSequence() {
 
 	int cat = 0;
 
-	saveHeaderFile();
-
 	strcpy(tx->pulseShape, "00");
 	rx->aperture = 64;
 
@@ -47,6 +45,11 @@ void AveragedPASequence::collectSequence() {
 		frm.saveToBuffer(buf);		
 	}
 	
+	lineSize = frm.getLineSize();
+	partSize = lineSize*linesPerPart;
+
+	saveHeaderFile();
+
 	stringstream ss;
 	ss << "rfdata/";
 	ss << fileName;
@@ -66,16 +69,16 @@ void AveragedPASequence::querySequenceParams() {
 	frm.setNumberOfLinesToAvg(numberOfLinesToAvg);
 	frm.setDigitalGain(digitalGain);
 	linesPerPart = 128;
-	frm.loadTable();
-	lineSize = frm.getLineSize();
-	partSize = lineSize*linesPerPart;
+	//frm.loadTable();
+	//lineSize = frm.getLineSize();
+	//partSize = lineSize*linesPerPart;
 }
 
 void AveragedPASequence::printStats() {
 
 	printf("SEQUENCE STATISTICS\n\n");
-	printf("Part size = %d bytes\n", partSize);
-	printf("Line size = %d bytes\n", lineSize);
+	//printf("Part size = %d bytes\n", partSize);
+	//printf("Line size = %d bytes\n", lineSize);
 	printf("Lines per part = %d\n", linesPerPart);
 }
 
