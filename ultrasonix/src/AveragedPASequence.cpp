@@ -16,43 +16,29 @@ void AveragedPASequence::collectSequence() {
 	strcpy(tx->pulseShape, "00");
 	rx->aperture = 64;
 
-	tex->addTransmit(
+	system("cls");
+	printf("RUNNING SEQUENCE\n\n");
+	//printf("Channel: %d/128\n\n", channel+1);
 
-	for (int channel = 0; channel < 128; channel++) { // channel loop
-
-		system("cls");
-		printf("RUNNING SEQUENCE\n\n");
-		printf("Channel: %d/128\n\n", channel+1);
-
-		switch (cat) {
+	switch (cat) {
 					case 0: {printf("om\n"); cat++; break;}
 					case 1: {printf("   nom\n"); cat++; break; }
 					case 2: {printf("       nom\n"); cat = 0; break;}
-		}
-
-		printf("\nPress any key to terminate sequence\n");
-
-		if (_kbhit()) {
-			_getch();
-			fflush(stdin);
-			throw Error("Sequence cancelled by user");
-			return;
-		}
-
-		if (channel < 64) 
-			rx->centerElement = 315;
-		else 
-			rx->centerElement = 955;
-
-		int c = channel % 64;
-		rx->channelMask[0] = (c < 32) ? (1 << c) : 0;
-		rx->channelMask[1] = (c >= 32) ? (1 << (c - 32)) : 0;
-
-		frm.loadTable();
-		frm.collectFrame();
-		frm.saveToBuffer(buf);
 	}
 
+	printf("\nPress any key to terminate sequence\n");
+
+	if (_kbhit()) {
+		_getch();
+		fflush(stdin);
+		throw Error("Sequence cancelled by user");
+		return;
+	}
+
+	frm.loadTable();
+	frm.collectFrame();
+	frm.saveToBuffer(buf);
+	
 	stringstream ss;
 	ss << "rfdata/";
 	ss << fileName;

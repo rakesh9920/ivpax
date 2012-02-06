@@ -68,7 +68,7 @@ public:
 class AveragedPASequence: public Sequence {
 
 protected:
-	AveragedFrame frm;
+	FastAveragedFrame frm;
 	int numberOfLinesToAvg;
 	int digitalGain;
 	char fileName[50];

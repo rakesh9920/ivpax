@@ -223,7 +223,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\FastAveragedFrame.h"
+				RelativePath=".\FastAveragedFrame.cpp"
 				>
 			</File>
 			<File
