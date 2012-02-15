@@ -1,9 +1,9 @@
-%% scope get data
+% scope get data
 function [t,data]=scopesave(chan)
 
 
-scope = gpib('ni', 0, 7);
- set(scope,'InputBufferSize',10000);
+scope = gpib('ni', 0, 1);
+set(scope,'InputBufferSize',10000);
 
 try
 

@@ -3,6 +3,7 @@
 *.sln
 *.user
 *.suo
+*.mat
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*
 /imgre/rfdata/*

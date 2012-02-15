@@ -33,8 +33,8 @@ void FastAveragedFrame::loadTable() {
 	if (!tex->endSequence()) 
 		throw Error("Could not define sequence");
 
-	if (numberOfLinesToAvg == 1)
-		lineSize -= 4;
+	//if (numberOfLinesToAvg == 1)
+		//lineSize -= 4;
 
 	validsequence = true;
 }
