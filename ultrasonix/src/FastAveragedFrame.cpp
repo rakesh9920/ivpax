@@ -11,13 +11,21 @@ void FastAveragedFrame::loadTable() {
 	if (!tex->beginSequence()) 
 		throw Error("Could not define sequence");
 
-	populateTable();
+	//populateTable();
+	tx->tableIndex = -1;
+	rx->tableIndex = -1;
 
 	lineCount = 0;
 	for (int channel = startChannel; channel < stopChannel + 1; channel++) {
 
-		tx->tableIndex = 0;
-		rx->tableIndex = channel;
+		if (channel < 64) 
+			rx->centerElement = 315;
+		else 
+			rx->centerElement = 955;
+
+		int c = channel % 64;
+		rx->channelMask[0] = (c < 32) ? (1 << c) : 0;
+		rx->channelMask[1] = (c >= 32) ? (1 << (c - 32)) : 0;
 
 		for (int line = 0; line < numberOfLinesToAvg; line++) {
 
@@ -34,7 +42,7 @@ void FastAveragedFrame::loadTable() {
 		throw Error("Could not define sequence");
 
 	//if (numberOfLinesToAvg == 1)
-		//lineSize -= 4;
+	//lineSize -= 4;
 
 	validsequence = true;
 }
@@ -46,7 +54,7 @@ void FastAveragedFrame::populateTable() {
 	tx->tableIndex = -1;
 
 	tex->addTransmit(*tx);
-	
+
 	for (int channel = 0; channel < 128; channel++) {
 
 		if (channel < 64) 
