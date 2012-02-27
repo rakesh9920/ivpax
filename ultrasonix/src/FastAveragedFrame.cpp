@@ -42,8 +42,11 @@ void FastAveragedFrame::loadTable() {
 void FastAveragedFrame::populateTable() {
 
 	rx->aperture = 64;
-	tex->addTransmit(*tx);
+	rx->tableIndex = -1;
+	tx->tableIndex = -1;
 
+	tex->addTransmit(*tx);
+	
 	for (int channel = 0; channel < 128; channel++) {
 
 		if (channel < 64) 

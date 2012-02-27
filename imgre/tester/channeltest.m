@@ -67,12 +67,12 @@ end
 figure;
 
 for line = 1;
-    for channel = 1:32
+    for channel = 1:128
         
         %subplot(8,1,sp);
-        plot(squeeze(rfc_b(line,:,channel)));
+        plot(rfc(line,:,channel));
         %plot(sigs(channel,:),'b'); %hold on;
-        axis([0 size(rfc,2) -.1 .1]);
+        axis([0 size(rfc,2) -4e4 4e4]);
         title(num2str(channel));
         %sum2 = sum2 + int16(avg_fc2(line,:,channel));
         pause;

@@ -22,7 +22,7 @@ void AveragedPASequence::collectSequence() {
 
 		switch (cat) {
 					case 0: {printf("om\n"); cat++; break;}
-					case 1: {printf("   nom\n"); cat++; break; }
+					case 1: {printf("   nom\n"); cat++; break;}
 					case 2: {printf("       nom\n"); cat = 0; break;}
 		}
 

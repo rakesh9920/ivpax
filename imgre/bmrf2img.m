@@ -1,7 +1,7 @@
 %% Data Extraction %%
 
-filename = 'rfdata/resolution2.rf'; % path to RF file
-header = 'rfdata/resolution2.bmh'; % path to BMH file
+filename = 'rfdata/pana1.rf'; % path to RF file
+header = 'rfdata/pana1.bmh'; % path to BMH file
 
 % Extract RF data from file
 hd = readheader(header);
@@ -14,7 +14,7 @@ clear filename header;
 %rfc_l = lowpass(rfc,10.1,40);
 
 % Bandpass filter
-rfc_b = bandpass(rfc2,6.6,5.28,40); % 6.6 MHz and 80% FBW
+rfc_b = bandpass(rfc,6.6,5.28,40); % 6.6 MHz and 80% FBW
 %rfc_b = bandpass(nl1_rfc,8.2,3.28,40);
 %rfc_b = bandpass(rfc,10,7,40); % 10 MHz and 70% FBW
 
