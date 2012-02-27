@@ -15,7 +15,8 @@ void FastAveragedFrame::loadTable() {
 	tx->tableIndex = -1;
 	rx->tableIndex = -1;
 
-	lineCount = 0;
+	tex->addTransmit(*tx);
+
 	for (int channel = startChannel; channel < stopChannel + 1; channel++) {
 
 		if (channel < 64) 
@@ -26,6 +27,13 @@ void FastAveragedFrame::loadTable() {
 		int c = channel % 64;
 		rx->channelMask[0] = (c < 32) ? (1 << c) : 0;
 		rx->channelMask[1] = (c >= 32) ? (1 << (c - 32)) : 0;
+	}
+
+	lineCount = 0;
+	for (int channel = startChannel; channel < stopChannel + 1; channel++) {
+
+		tx->tableIndex = 0;
+		rx->tableIndex = channel;
 
 		for (int line = 0; line < numberOfLinesToAvg; line++) {
 
