@@ -1,4 +1,4 @@
-function [img] = imager(bfrf,varargin)
+function [img2] = imager(bfrf,varargin)
 
 % variable initialization
 [nXPixels, samplesPerLine] = size(bfrf);
@@ -8,10 +8,8 @@ nYPixels = ceil(samplesPerLine*1540*25e-9/150e-6);
 %nYPixels = 278;
 
 if nargin > 1
-    dyn = varargin{1};
-    
+    dyn = varargin{1}; 
     %minVal = 10^(-dyn/20)*maxVal;
-    
     %img = mat2gray(img, [-dyn 0]);
 else
     dyn = 200;
@@ -20,11 +18,17 @@ end
 
 img = double(bfrf.');
 img = medfilt2(img,[2 2]);
-maxVal = max(max(img));
+
+if nargin > 2
+    ref = varargin{2};
+else
+    ref = max(max(img));
+end
+
 %img = adapthisteq(img);
-img = 20*log10(img./maxVal);
+img = 20*log10(img./ref);
 img(img < -200) = -200;
 img2 = imresize(img, [nYPixels nXPixels]);
-imtool(img2,'InitialMagnification',100,'DisplayRange',[-dyn 0]);
+imtool(img2,'InitialMagnification',200,'DisplayRange',[-dyn 0]);
 
 end

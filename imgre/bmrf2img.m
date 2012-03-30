@@ -1,7 +1,7 @@
 %% Data Extraction %%
 
-filename = 'rfdata/frametest3.rf'; % path to RF file
-header = 'rfdata/frametest3.bmh'; % path to BMH file
+filename = 'rfdata/beam4.rf'; % path to RF file
+header = 'rfdata/beam4.bmh'; % path to BMH file
 
 % Extract RF data from file
 hd = readheader(header);
