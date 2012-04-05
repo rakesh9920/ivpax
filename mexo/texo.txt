@@ -2,7 +2,7 @@ texo
 
 texo();
 ~texo();
-bool init(char*, int, int, int, int, int, int)
+bool init(const char*, int, int, int, int, int, int)
 bool shutdown()
 bool isInitialized();
 bool isImaging();
