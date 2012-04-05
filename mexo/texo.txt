@@ -1,0 +1,20 @@
+texo
+
+texo();
+~texo();
+bool init(char*, int, int, int, int, int, int)
+bool shutdown()
+bool isInitialized();
+bool isImaging();
+bool activateProbeConnector(int);
+bool beginSequence();
+int addLine(texoDataFormat, texoTransmitParams, texoReceieveParams);
+int endSequence();
+bool addTGC(CURVE*, int);
+bool addReceive(texoReceiveParams);
+bool addTransmit(texoTransmitParams);
+bool setPower(int, int, int);
+bool runImage();
+bool stopImage();
+unsigned char* getCineStart(unsigned int);
+bool setSyncSignals(int, int, int);
