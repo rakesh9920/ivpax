@@ -4,6 +4,7 @@
 *.user
 *.suo
 *.mat
+*.dll
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*
 /imgre/rfdata/*
