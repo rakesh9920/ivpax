@@ -2,9 +2,12 @@
 *.ncb
 *.sln
 *.user
+*.xml
 *.suo
 *.mat
 *.dll
+*.bit
+/dat/*
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*
 /imgre/rfdata/*
