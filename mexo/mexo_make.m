@@ -8,3 +8,4 @@ mex texo_activateProbeConnector.cpp texo.lib
 mex texoTransmitParams_constructor.cpp texo.lib
 mex texoTransmitParams_destructor.cpp texo.lib
 mex texoTransmitParams_setter.cpp texo.lib
+mex texoTransmitParams_getter.cpp texo.lib

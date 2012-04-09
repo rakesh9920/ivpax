@@ -1,5 +1,6 @@
 #include "texo.h"
 #include <mex.h>
+#include "stdint.h"
   
 void mexFunction(int nlhs, mxArray * plhs[],
 int nrhs, const mxArray * prhs[]) { 
@@ -9,8 +10,8 @@ int nrhs, const mxArray * prhs[]) {
     char firmwarePath [50];
     
     // read prhs
-	unsigned long * ptr = (unsigned long *) mxGetData(prhs[0]);
-    texo * tex = (texo *) ptr[0];
+	uint32_t * ptr = static_cast <uint32_t *> (mxGetData(prhs[0]));
+    texo * tex = reinterpret_cast <texo *> (ptr[0]);
     mxGetString(prhs[1], firmwarePath, mxGetN(prhs[1])+ 1);
     pci = (int) mxGetScalar(prhs[2]);
     usm = (int) mxGetScalar(prhs[3]);

@@ -1,9 +1,10 @@
 #include "texo.h"
 #include <mex.h>
+#include "stdint.h"
      
 void mexFunction(int nlhs, mxArray * plhs[],
 int nrhs, const mxArray * prhs[]) { 
 
-	unsigned long * ptr = (unsigned long *) mxGetData(prhs[0]);
-	delete (texoTransmitParams *) ptr[0];
+	uint32_t * ptr = static_cast <uint32_t *> (mxGetData(prhs[0]));
+	delete reinterpret_cast <texoTransmitParams *> (ptr[0]);
 }
