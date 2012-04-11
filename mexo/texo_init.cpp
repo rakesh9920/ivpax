@@ -1,7 +1,9 @@
 #include "texo.h"
 #include <mex.h>
 #include "stdint.h"
-  
+
+bool newImage(void *, unsigned char *, int) {return true;}
+
 void mexFunction(int nlhs, mxArray * plhs[],
 int nrhs, const mxArray * prhs[]) { 
 
@@ -20,7 +22,9 @@ int nrhs, const mxArray * prhs[]) {
     tx = (int) mxGetScalar(prhs[6]);
     szCine = (int) mxGetScalar(prhs[7]);
     
+    tex->setCallback(newImage, 0);
 	// create plhs
     bool suc = tex->init(firmwarePath, pci, usm, hv, channels, tx, szCine);
     plhs[0] = mxCreateLogicalScalar(suc); 
+    
 }

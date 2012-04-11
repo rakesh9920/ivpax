@@ -1,5 +1,7 @@
 #include "Ivpax.h"
 
+bool newImage(void *, unsigned char *, int) {return true;}
+
 /* MAIN */
 int main() {
 
