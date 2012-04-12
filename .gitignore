@@ -1,4 +1,4 @@
-
+*.asv
 *.ncb
 *.sln
 *.user
@@ -7,6 +7,7 @@
 *.mat
 *.dll
 *.bit
+*.mexw32
 /dat/*
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*

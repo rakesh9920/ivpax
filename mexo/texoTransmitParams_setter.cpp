@@ -25,11 +25,13 @@ void mexFunction(int nlhs, mxArray * plhs[],
         strcpy(tx->pulseShape, value); break; }
         case 6: { int value = (int) mxGetScalar(prhs[2]); tx->speedOfSound = value; break; }
         case 7: { bool value = (bool) mxGetScalar(prhs[2]); tx->useManualDelays = value; break; }
-        case 8: { int value = (int) mxGetScalar(prhs[2]); tx->tableIndex = value; break; }
-        case 9: { bool value = (bool) mxGetScalar(prhs[2]); tx->useDeadElements = value; break; }
-        case 10: { int * value = static_cast <int *> (mxGetData(prhs[2]));
+        case 8: { int * value = static_cast <int *> (mxGetData(prhs[2]));
+            memcpy(tx->manualDelays, value, sizeof(int)*129); break; }
+        case 9: { int value = (int) mxGetScalar(prhs[2]); tx->tableIndex = value; break; }
+        case 10: { bool value = (bool) mxGetScalar(prhs[2]); tx->useDeadElements = value; break; }
+        case 11: { int * value = static_cast <int *> (mxGetData(prhs[2]));
         memcpy(tx->deadElements, value, sizeof(int)*128); break; }
-        case 11: { bool value = (bool) mxGetScalar(prhs[2]); tx->trex = value; break; }
+        case 12: { bool value = (bool) mxGetScalar(prhs[2]); tx->trex = value; break; }
         default: ;
     }
 }

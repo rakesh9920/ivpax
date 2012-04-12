@@ -3,6 +3,7 @@ classdef texoTransmitParams < handle
     properties (SetAccess = private)
         obj_handle;
     end
+    
     properties (Dependent)
         centerElement; %0
         aperture; %1
@@ -12,10 +13,11 @@ classdef texoTransmitParams < handle
         pulseShape; %5
         speedOfSound; %6
         useManualDelays; %7
-        tableIndex; %8
-        useDeadElements %9
-        deadElements; %10
-        trex; %11
+        manualDelays %8
+        tableIndex; %9
+        useDeadElements %10
+        deadElements; %11
+        trex; %12
     end
     
     methods
@@ -52,17 +54,20 @@ classdef texoTransmitParams < handle
         function set.useManualDelays(obj, value)
            texoTransmitParams_setter(obj.obj_handle, 7, value);
         end
-        function set.tableIndex(obj, value)
-           texoTransmitParams_setter(obj.obj_handle, 8, value);
+        function set.manualDelays(obj, value)
+           texoTransmitParams_setter(obj.obj_handle, 8, value); 
         end
-        function set.useDeadElements(obj, value)
+        function set.tableIndex(obj, value)
            texoTransmitParams_setter(obj.obj_handle, 9, value);
         end
-        function set.deadElements(obj, value)
+        function set.useDeadElements(obj, value)
            texoTransmitParams_setter(obj.obj_handle, 10, value);
         end
-        function set.trex(obj, value)
+        function set.deadElements(obj, value)
            texoTransmitParams_setter(obj.obj_handle, 11, value);
+        end
+        function set.trex(obj, value)
+           texoTransmitParams_setter(obj.obj_handle, 12, value);
         end
         % getters
         function value = get.centerElement(obj)

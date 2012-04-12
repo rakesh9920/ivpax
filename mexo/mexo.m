@@ -26,6 +26,9 @@ classdef mexo < handle
             bool = texo_addLine(obj.obj_handle, dataFormat, ...
                 tx.obj_handle, rx.obj_handle);
         end
+        function bool = addReceive(obj, rx)
+            bool = texo_addReceive(obj.obj_handle, rx.obj_handle);
+        end
         function bool = addTransmit(obj, tx)
             bool = texo_addTransmit(obj.obj_handle, tx.obj_handle);
         end
@@ -50,6 +53,9 @@ classdef mexo < handle
         function bool = endSequence(obj)
             bool = texo_endSequence(obj.obj_handle);
         end
+        function bool = runImage(obj)
+            bool = texo_runImage(obj.obj_handle);
+        end
         function bool = setPower(obj, power, maxPositive, maxNegative)
             bool = texo_setPower(obj.obj_handle, int32(power), ...
                 int32(maxPositive), int32(maxNegative));
@@ -60,6 +66,9 @@ classdef mexo < handle
         end
         function bool = shutdown(obj)
             bool = texo_shutdown(obj.obj_handle);
+        end
+        function bool = stopImage(obj)
+            bool = texo_stopImage(obj.obj_handle);
         end
     end
 end
