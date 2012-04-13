@@ -53,6 +53,21 @@ classdef mexo < handle
         function bool = endSequence(obj)
             bool = texo_endSequence(obj.obj_handle);
         end
+        function data = getCine(obj, value)
+            data = texo_getCine(obj.obj_handle, value);
+        end
+        function ptr = getCineStart(obj, value)
+           ptr = texo_getCineStart(obj.obj_handle, value);
+        end
+        function value = getCollectedFrameCount(obj)
+            value = texo_getCollectedFrameCount(obj.obj_handle);
+        end
+        function value = getFrameSize(obj)
+            value = texo_getFrameSize(obj.obj_handle);
+        end
+        function value = getMaxFrameCount(obj)
+            value = texo_getMaxFrameCount(obj.obj_handle);
+        end
         function bool = runImage(obj)
             bool = texo_runImage(obj.obj_handle);
         end

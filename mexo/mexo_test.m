@@ -40,7 +40,7 @@ tex.activateProbeConnector(0)
 
 %%
 tex.beginSequence()
-tex.addTransmit(tx)
+%tex.addTransmit(tx)
 tex.addLine(texoDataFormat.rfData, tx, rx)
 tex.endSequence()
 %%
