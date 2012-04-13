@@ -43,20 +43,4 @@ tex.beginSequence()
 %tex.addTransmit(tx)
 tex.addLine(texoDataFormat.rfData, tx, rx)
 tex.endSequence()
-%%
-if ~tex.init('../dat/', 3, 3, 0, 64, 3, 128)
-    error('texo init failed');
-end
-
-if ~tex.beginSequence()
-    error('texo begin sequence failed');
-end
-
-if ~tex.addTransmit(tx)
-    error('texo add transmit failed');
-end
-
-if ~tex.endSequence()
-    error('texo end sequence failed');
-end
 
