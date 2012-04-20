@@ -1,3 +1,5 @@
+warning off
+
 addpath ./beamformer/
 addpath ./imager/
 addpath ./simulator/

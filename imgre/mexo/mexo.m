@@ -19,6 +19,9 @@ classdef mexo < handle
             bool = texo_activateProbeConnector(obj.obj_handle, ...
                 int32(probe));
         end
+        function bool = addFlatTGC(obj, percent)
+            bool = texo_addFlatTGC(obj.obj_handle, double(percent));
+        end
         function bool = addTGC(obj, percent)
             bool = texo_addTGC(obj.obj_handle, double(percent));
         end
@@ -37,6 +40,9 @@ classdef mexo < handle
         end
         function clearTGCs(obj)
             texo_clearTGCs(obj.obj_handle);
+        end
+        function bool = collectFrames(obj, value)
+            bool = texo_collectFrames(obj.obj_handle, value);
         end
         function bool = isImaging(obj)
             bool = texo_isImaging(obj.obj_handle);
