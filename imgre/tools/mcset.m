@@ -1,6 +1,6 @@
 function mcset(c1,c2,c3)
 
-mc = gpib('agilent', 7, 1);
+mc = gpib('ni', 0, 1);
 
  fopen(mc);
 

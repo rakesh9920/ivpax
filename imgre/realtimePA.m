@@ -56,35 +56,39 @@ samplesPerLine = samplesPerFrame/linesPerFrame;
 %%
 dyn = 40;
 NX = 128;
-NY = ceil(1620*1482*25e-9/300e-6);
+NY = ceil(810*1482*25e-9/300e-6);
 iptsetpref('ImshowAxesVisible','on');
+iptsetpref('ImshowInitialMagnification',300);
+iptsetpref('ImshowBorder','loose');
 img = zeros(NX,NY);
-imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
-    [0 NY.*300e-3],'InitialMagnification',200);
+fhandle = imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
+    [0 NY.*300e-3]);
 xlabel('lateral [mm]');
 ylabel('axial [mm]');
 colormap('hot');
 
-
-numberOfFrames = 100;
+numberOfFrames = 20;
 while true
-    avg = zeros(samplesPerLine, linesPerFrame);
+    %avg = zeros(samplesPerLine, linesPerFrame);
     for part = 1:1
         tex.collectFrames(numberOfFrames);
         rfc = reshape(tex.getCine(samplesPerFrame*numberOfFrames),...
             samplesPerLine, linesPerFrame, numberOfFrames);
-        avg = avg + mean(1000.*rfc,3);
+        %avg = avg + mean(100.*rfc,3);
+        avg = mean(100.*rfc,3);
     end
     
     img = envelope(double(avg'))';
-    img = medfilt2(img,[2 2]);
+    %img = medfilt2(img,[2 2]);
     ref = max(max(img));
     img = 20*log10(img./ref);
     img(img < -200) = -200;
     img = imresize(img, [NY NX]);
     
-    imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
-        [0 NY.*300e-3],'InitialMagnification',400);
+    %imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
+     %   [0 NY.*300e-3],'InitialMagnification',400);
+    %colormap('hot');
+    set(fhandle, 'cdata', img);
     drawnow;
 end
 

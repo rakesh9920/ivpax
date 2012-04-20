@@ -56,9 +56,11 @@ dyn = 60;
 NX = 128;
 NY = ceil(810*1482*25e-9/300e-6);
 iptsetpref('ImshowAxesVisible','on');
+iptsetpref('ImshowInitialMagnification',300);
+iptsetpref('ImshowBorder','loose');
 img = zeros(NX,NY);
-imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
-    [0 NY.*300e-3],'InitialMagnification',200);
+fhandle = imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
+    [0 NY.*300e-3]);
 xlabel('lateral [mm]');
 ylabel('axial [mm]');
 colormap('gray');
@@ -74,8 +76,7 @@ while true
     img(img < -200) = -200;
     img = imresize(img, [NY NX]);
     
-    imshow(img, [-dyn 0],'XData',[0 NX.*300e-3],'YData',...
-        [0 NY.*300e-3],'InitialMagnification',250);
+    set(fhandle,'cdata',img);
     drawnow;
     %refresh(fig);
 end
