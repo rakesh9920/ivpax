@@ -50,5 +50,5 @@ bfmopt = bfmset( ...
 clear prm pa;
 %% Image Filtering/Processing %%
 
-img = imager(envelope(bfm),60);
+img = imager(envelope(bfm),30);
 

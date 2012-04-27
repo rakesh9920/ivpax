@@ -4,9 +4,9 @@ tx = texoTransmitParams();
 rx = texoReceiveParams();
 %%
 tx.centerElement = 640;
-tx.aperture = 64;
-tx.focusDistance = 15000;
-tx.frequency = 6600000;
+tx.aperture = 2;
+tx.focusDistance = 300000;
+tx.frequency = 10000000;
 tx.pulseShape = '00';
 tx.speedOfSound = 1482;
 tx.tableIndex = -1;
@@ -14,8 +14,8 @@ tx.tableIndex = -1;
 rx.centerElement = 640;
 rx.aperture = 64; %1
 rx.angle = 0; %2
-rx.maxApertureDepth = 15000; %3
-rx.acquisitionDepth = 30000; %4
+rx.maxApertureDepth = 20000; %3
+rx.acquisitionDepth = 20000; %4
 rx.saveDelay = 0; %5
 rx.speedOfSound = 1482;  %6
 rx.channelMask = [uint32(2^32) uint32(2^32)]; %7
@@ -34,7 +34,7 @@ tex.init('../dat/', 3, 3, 0, 64, 3, 128)
 %%
 tex.clearTGCs();
 tex.addFlatTGC(100);
-tex.setPower(15,15,15);
+tex.setPower(0,0,0);
 tex.setSyncSignals(1,0,0);
 tex.activateProbeConnector(0);
 
@@ -72,15 +72,19 @@ samplesPerLine = samplesPerFrame/linesPerFrame;
 %%
 tic;
 avg = zeros(samplesPerLine, linesPerFrame);
-numberOfFrames = 250;
-for part = 1:4
+numberOfFrames = 200;
+for part = 1:5
+    fprintf('collecting frames ... ');
     tex.collectFrames(numberOfFrames);
+    fprintf('[ok]\n'); drawnow;
     rfc = reshape(tex.getCine(samplesPerFrame*numberOfFrames),...
         samplesPerLine, linesPerFrame, numberOfFrames);
-    avg = avg + mean(1000.*rfc,3)./2;
-    name = strcat('avg', num2str(part));
-    save(name, 'avg', '-v6');
+    avg = avg + mean(1000.*rfc,3)./5;
+    clear rfc;
 end
+
+%name = strcat('avg', num2str(part));
+save('avg', 'avg', '-v6');
 toc
 
 

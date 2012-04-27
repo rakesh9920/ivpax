@@ -4,8 +4,8 @@ tx = texoTransmitParams();
 rx = texoReceiveParams();
 %%
 tx.centerElement = 640;
-tx.aperture = 64;
-tx.focusDistance = 15000;
+tx.aperture = 0;
+tx.focusDistance = 300000;
 tx.frequency = 6600000;
 tx.pulseShape = '00';
 tx.speedOfSound = 1482;
@@ -14,8 +14,8 @@ tx.tableIndex = -1;
 rx.centerElement = 640;
 rx.aperture = 64; 
 rx.angle = 0; 
-rx.maxApertureDepth = 7500; 
-rx.acquisitionDepth = 30000; 
+rx.maxApertureDepth = 20000; 
+rx.acquisitionDepth = 20000; 
 rx.saveDelay = 0; 
 rx.speedOfSound = 1482;  
 rx.channelMask = [uint32(2^32) uint32(2^32)]; 
@@ -54,9 +54,9 @@ samplesPerFrame = frameSize/2;
 samplesPerLine = samplesPerFrame/linesPerFrame;
 
 %%
-dyn = 40;
+dyn = 30;
 NX = 128;
-NY = ceil(810*1482*25e-9/300e-6);
+NY = ceil(samplesPerLine*1482*25e-3/300);
 iptsetpref('ImshowAxesVisible','on');
 iptsetpref('ImshowInitialMagnification',300);
 iptsetpref('ImshowBorder','loose');
@@ -67,7 +67,7 @@ xlabel('lateral [mm]');
 ylabel('axial [mm]');
 colormap('hot');
 
-numberOfFrames = 20;
+numberOfFrames = 1;
 while true
     %avg = zeros(samplesPerLine, linesPerFrame);
     for part = 1:1
@@ -75,11 +75,12 @@ while true
         rfc = reshape(tex.getCine(samplesPerFrame*numberOfFrames),...
             samplesPerLine, linesPerFrame, numberOfFrames);
         %avg = avg + mean(100.*rfc,3);
-        avg = mean(100.*rfc,3);
+        %avg = mean(1000.*rfc,3);
+        avg = rfc;
     end
     
     img = envelope(double(avg'))';
-    %img = medfilt2(img,[2 2]);
+    img = medfilt2(img,[2 2]);
     ref = max(max(img));
     img = 20*log10(img./ref);
     img(img < -200) = -200;
