@@ -2,18 +2,16 @@ function [img2] = imager(bfrf,varargin)
 
 % variable initialization
 [nXPixels, samplesPerLine] = size(bfrf);
-nYPixels = ceil(samplesPerLine*1540*25e-9/150e-6);
-
-%nXPixels = 256*2;
-%nYPixels = 278;
+if nXPixels == 128
+    nYPixels = ceil(samplesPerLine*1482*25e-9/300e-6);
+elseif nXPixels == 256
+    nYPixels = ceil(samplesPerLine*1482*25e-9/150e-6);
+end
 
 if nargin > 1
     dyn = varargin{1}; 
-    %minVal = 10^(-dyn/20)*maxVal;
-    %img = mat2gray(img, [-dyn 0]);
 else
     dyn = 200;
-    %img = mat2gray(transpose(bfrf));
 end
 
 img = double(bfrf.');
@@ -25,7 +23,6 @@ else
     ref = max(max(img));
 end
 
-%img = adapthisteq(img);
 img = 20*log10(img./ref);
 img(img < -200) = -200;
 img2 = imresize(img, [nYPixels nXPixels]);
