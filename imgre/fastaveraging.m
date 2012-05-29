@@ -84,7 +84,7 @@ end
 save('avg', 'avg', '-v6');
 toc
 %% PROCESS RF DATA
-rfc = reshape(avg,1,2160,128); %1620
+rfc = reshape(avg,1,2144,64); %1620
 rfc_c = zeromean(rfc);
 rfc_b = bandpass(rfc_c,6.6,5.28,40);
 %% DESTROY OBJECTS

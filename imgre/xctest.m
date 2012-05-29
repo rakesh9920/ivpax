@@ -1,6 +1,10 @@
-cutoff1 = 900;
-cutoff2 = 1300;
-refchan = 70;
+%%
+rfc_c = zeromean(rfc_noabb);
+rfc_b = bandpass(rfc_c,6.6,5.28,40);
+%%
+cutoff1 = 500;
+cutoff2 = 700;
+refchan = 72;
 
 refsig = squeeze(rfc_b(1,cutoff1:cutoff2,refchan))';
 
@@ -17,5 +21,11 @@ end
 %%
 for c = 1:128
     plot(sig(c,:));
+    pause;
+end
+%%
+for c = 1:128
+    plot(rfc_b(1,500:700,c));
+    title(num2str(c));
     pause;
 end

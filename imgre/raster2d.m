@@ -21,9 +21,9 @@ tx.tableIndex = -1;
 rx.centerElement = 640;
 rx.aperture = 64;
 rx.angle = 0;
-rx.maxApertureDepth = 30000;
-rx.acquisitionDepth = 30000;
-rx.saveDelay = 15000;
+rx.maxApertureDepth = 40000;
+rx.acquisitionDepth = 40000;
+rx.saveDelay = 20000;
 rx.speedOfSound = 1494;
 rx.channelMask = [uint32(2^32) uint32(2^32)];
 rx.applyFocus = 0;
@@ -57,8 +57,8 @@ samplesPerFrame = frameSize/2;
 samplesPerLine = samplesPerFrame/linesPerFrame;
 %% RUN
 
-numberOfFrames = 500;
-numberOfParts = 2;
+numberOfFrames = 250;
+numberOfParts = 4;
 dGain = 1000;
 
 no = 1;
@@ -75,7 +75,7 @@ for x = 0:0.5:5
             rfc = rfc + mean(dGain.*stream,3)./numberOfParts;
         end
         clear stream;
-        name = strcat('rfc',num2str(no));
+        name = strcat('Z:\home\Bernie Shieh\Data\Raster2d\rfc',num2str(no));
         save(name,'rfc');
         save lastcoords x y;
         fprintf('no: %d | x: %0.1f | y: %0.1f | time: %0.2f\n', no, x, y, toc);
