@@ -8,6 +8,7 @@
 *.dll
 *.bit
 *.mexw32
+*.fig
 /dat/*
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*
