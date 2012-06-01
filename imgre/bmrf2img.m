@@ -45,7 +45,7 @@ bfmopt = bfmset( ...
     'Photoacoustic', true ...
     );
 
-[bfm] = timebeamform(rfc_b, bfmopt);
+[bfm] = timebeamform(rfc_p, bfmopt);
 
 clear prm pa;
 %% Image Filtering/Processing %%
