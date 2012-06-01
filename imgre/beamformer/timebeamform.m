@@ -32,7 +32,8 @@ array = (0:pitch:(numofchannels-1)*pitch) + pitch/2; % x location of sensors
 
 if pa
     numoflines = 256;
-    distinsamples = numofsamples;
+    %distinsamples = numofsamples;
+    distinsamples = round(numofsamples/2);
 else
     numoflines = numofscanlines;
     distinsamples = round(numofsamples/2);
@@ -94,7 +95,8 @@ for line = 1:numoflines
         % calculate delays (in units of samples)
         receivedelays = sqrt((array(activeChannels)-x).^2 + y^2)./wavespeed/timeres;
         if pa
-            delays = round(receivedelays);
+            %delays = round(receivedelays);
+            delays = round(receivedelays + y/wavespeed/timeres);
         else
             delays = round(receivedelays + y/wavespeed/timeres);
         end
