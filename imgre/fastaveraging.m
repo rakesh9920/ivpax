@@ -5,26 +5,26 @@ rx = texoReceiveParams();
 %% INIT TEXO
 tex.init('../dat/', 3, 3, 0, 64, 3, 128)
 tex.clearTGCs();
-tex.addFlatTGC(100);
-tex.setPower(0,0,0);
+tex.addFlatTGC(20);
+tex.setPower(15,15,15);
 tex.setSyncSignals(1,0,0);
 tex.activateProbeConnector(0);
 %% DEFINE SEQUENCE
 tx.centerElement = 645;
-tx.aperture = 0; %0
-tx.focusDistance = 300000;%25000
+tx.aperture = 64; %0
+tx.focusDistance = 25000;%25000
 tx.frequency = 6600000;
-tx.pulseShape = '00';
-tx.speedOfSound = 1482;
+tx.pulseShape = '+-';
+tx.speedOfSound = 1494;
 tx.tableIndex = -1;
 
 rx.centerElement = 640;
 rx.aperture = 64; %1
 rx.angle = 0; %2
-rx.maxApertureDepth = 40000; %40000
-rx.acquisitionDepth = 40000; %40000
-rx.saveDelay = 20000; %20000
-rx.speedOfSound = 1482;  %6
+rx.maxApertureDepth = 30000; %40000
+rx.acquisitionDepth = 30000; %40000
+rx.saveDelay = 0; %20000
+rx.speedOfSound = 1494;  %6
 rx.channelMask = [uint32(2^32) uint32(2^32)]; %7
 rx.applyFocus = 0; %8
 rx.useManualDelays = 0; %9
@@ -68,14 +68,14 @@ samplesPerLine = samplesPerFrame/linesPerFrame;
 %% RUN
 tic;
 avg = zeros(samplesPerLine, linesPerFrame);
-numberOfFrames = 200;
-for part = 1:5
+numberOfFrames = 1;
+for part = 1:1
     fprintf('collecting frames ... ');
     tex.collectFrames(numberOfFrames);
     fprintf('[ok]\n'); drawnow;
     rfc = reshape(tex.getCine(samplesPerFrame*numberOfFrames),...
         samplesPerLine, linesPerFrame, numberOfFrames);
-    avg = avg + mean(1000.*rfc,3)./5;
+    avg = avg + mean(1000.*rfc,3)./1;
     %avg = rfc;
     clear rfc;
 end
@@ -84,9 +84,9 @@ end
 save('avg', 'avg', '-v6');
 toc
 %% PROCESS RF DATA
-rfc = reshape(avg,1,2144,64); %1620
-rfc_c = zeromean(rfc);
-rfc_b = bandpass(rfc_c,6.6,5.28,40);
+rfc = reshape(avg,1,samplesPerLine,128); %1620
+%rfc_c = zeromean(rfc);
+%rfc_b = bandpass(rfc_c,6.6,5.28,40);
 %% DESTROY OBJECTS
 delete(tex);
 delete(tx);
