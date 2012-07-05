@@ -9,6 +9,9 @@
 *.bit
 *.mexw32
 *.fig
+*.bmp
+*.png
+*.tif
 /dat/*
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*

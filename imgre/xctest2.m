@@ -1,5 +1,15 @@
+%% FIND MAX FRAME
+cutoff1 = 500;
+
+e = abs(rfc(:,cutoff1:end,:));
+
+[v indc] = max(max(max(e))); 
+[v indy] = max(max(e(:,:,indc))); 
+[v indx] = max(e(:,indy,indc));
+
+indy = indy + cutoff1 - 1;
 %% UPSAMPLE
-rfc_c = zeromean(uni1_rfc);
+rfc_c = zeromean(rfc(indx,:,:));
 upfactor = 8;
 rfc_i = zeros(1,size(rfc_c,2)*upfactor,size(rfc_c,3));
 for channel = 1:128
@@ -25,27 +35,28 @@ bfmopt = bfmset( ...
     'RxMaxElements', 64, ... %64
     'RxCurveDepth', 0.055, ...
     'SampleFreq', 40e6*upfactor, ...
-    'SoundSpeed', 1494, ...
+    'SoundSpeed', 1477, ...
     'Photoacoustic', true ...
     );
 
-[bfm] = timebeamform(rfc_i, bfmopt);
+[bfm] = timebeamform(rfc_p, bfmopt);
 %% CALCULATE GEOM DELAYS
 env = envelope(bfm);
 [val indy] = max(max(env));
 [val indx] = max(env(:,indy));
+wavespeed = 1477; %bfm.SoundSpeed
 
 pitch = 300e-6;
 numofchannels = 128;
 array = (0:pitch:(numofchannels-1)*pitch) + pitch/2;
 %xs0 = indx % x sample location
 %ys0 = 2037; % y sample location
-x0 = indx*150e-6;
-y0 = indy*1494/(40e6*upfactor);
+x0 = array(round(indx/2));%indx*150e-6;
+y0 = indy*wavespeed/(40e6*upfactor);
 
 geo = zeros(1,128);
 for c = 1:128
-   geo(c) = sqrt((array(c) - x0)^2 + y0^2)*40e6*upfactor/1494; 
+   geo(c) = sqrt((array(c) - x0)^2 + y0^2)*40e6*upfactor/wavespeed; 
 end
 
 geo = geo - min(geo);
@@ -55,8 +66,8 @@ for channel = 1:128
     rfc_p(1,:,channel) = circshift(rfc_i(1,:,channel),[0 round(-geo(channel)) 0]);
 end
 %% CALCULATE PHASE ERROR
-cutoff1 = 7200;
-cutoff2 = 8600; 
+cutoff1 = 8000;
+cutoff2 = 9000; 
 
 xcv = zeros(1,127);
 xcd = zeros(1,127);
@@ -86,26 +97,33 @@ plot(-delays+i,'.');
 %4: start to 118
 %5: start to 59
 
-d1 = delays1(64:end);
-d2 = delays2(48:116);
-d3 = delays3;
-d4 = delays4(1:118);
-d5 = delays5(1:59);
+d1 = delays1; %10
+d2 = delays2; %37
+d3 = delays3; %56
+d4 = delays4(27:end); %87
+d5 = delays5(37:end); %118
 
-plot(delays1-mean(d1),'b.'); hold on;
-plot(delays2-mean(d2),'r.');
-plot(delays3-mean(d3),'g.');
-plot(delays4-mean(d4),'k.');
-plot(delays5-mean(d5),'c.');
+plot(1:128,(d1-max(d1)).*3.125,'b.'); hold on;
+plot(1:128,(d2-max(d2)).*3.125,'r.');
+plot(1:128,(d3-max(d3)).*3.125,'g.');
+plot(27:128,(d4-max(d4)).*3.125,'k.');
+plot(37:128,(d5-max(d5)).*3.125,'c.');
+%%
+plot((speed1469 - speed1469(56)).*3.125,'.'); hold on;
+plot((speed1474 - speed1474(56)).*3.125,'c.');
+plot((speed1479 - speed1479(56)).*3.125,'r.');
+plot((speed1484 - speed1484(56)).*3.125,'k.');
+plot((speed1489 - speed1489(56)).*3.125,'y.');
+legend('1469 m/s','1474 m/s','1479 m/s','1484 m/s','1489 m/s');
 %%
 rfc_p = zeros(1,6480,128);
 for c = 1:128
    rfc_p(1,:,c) = circshift(rfc_i(1,:,c),[0 -round(geo(c)-delays(c)) 0]); 
 end
 %%
-rfc_p = zeros(1,6480,128);
+rfc_p = zeros(size(rfc_i));
 for c = 1:128
-   rfc_p(1,:,c) = circshift(rfc_i(1,:,c),[0 -round(-delays(c)) 0]); 
+   rfc_p(1,:,c) = circshift(rfc_i(1,:,c),[0 round(delays(c)) 0]); 
 end
 %% no ab
 delays(1) = -24;

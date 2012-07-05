@@ -66,17 +66,18 @@ end
 %rfc_new = zeros(1,1080,128,'int16');
 figure;
 
-for line = 1;
-    for channel = 1:128
+for line = 100:128;
+    %for channel = 1
         
         %subplot(8,1,sp);
-        plot(rfc(line,:,channel));
+        %plot(rfc(line,:,channel));
         %plot(sigs(channel,:),'b'); %hold on;
-        axis([0 size(rfc,2) -4e4 4e4]);
-        title(num2str(channel));
+        %axis([0 size(rfc,2) -4e4 4e4]);
+        imagesc(squeeze(rfc(line,:,:)));
+        title(num2str(line));
         %sum2 = sum2 + int16(avg_fc2(line,:,channel));
         pause;
-    end
+    %end
 end
 
 clear sp ang channel line

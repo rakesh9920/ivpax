@@ -95,9 +95,9 @@ for tline = 1:128
     tex.endSequence();
 
     fprintf('collecting frames ... ');
-    tex.collectFrames(numberOfFrames);
+    tex.collectFrames(1);
     fprintf('[ok]\n'); drawnow;
-    rfc(tline, :, :) = reshape(tex.getCine(samplesPerFrame*numberOfFrames),...
+    rfc(tline, :, :) = reshape(tex.getCine(samplesPerFrame),...
         samplesPerLine, linesPerFrame); 
 end
 
