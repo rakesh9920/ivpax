@@ -19,6 +19,7 @@ Names = {
     'HorizPixelPitch'
     'MinimumVariance'
     'MVSubarrayLength'
+    'PhaseCorrection'
     'Photoacoustic'
     'RxApertureCurve'
     'RxCurveTop'

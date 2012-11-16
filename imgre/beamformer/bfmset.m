@@ -8,6 +8,7 @@ if (nargin == 0) && (nargout == 0)
     fprintf(' GaussApodization: [ boolean ]\n');
     fprintf('    GaussWinAlpha: [ positive scalar ]\n');
     fprintf('  HorizPixelPitch: [ positive scalar in m ]\n');
+    fprintf('  PhaseCorrection: [ vector ]\n');
     fprintf('    Photoacoustic: [ boolean ]\n');
     fprintf('       RxCurveBtm: [ positive integer ]\n');
     fprintf('       RxCurveMid: [ positive integer ]\n');
@@ -31,6 +32,7 @@ Names = {
     'HorizPixelPitch'
     'MinimumVariance'
     'MVSubarrayLength'
+    'PhaseCorrection'
     'Photoacoustic'
     'RxApertureCurve'
     'RxCurveTop'

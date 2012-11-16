@@ -66,7 +66,7 @@ end
 %rfc_new = zeros(1,1080,128,'int16');
 figure;
 
-for line = 100:128;
+for line = 1:128;
     %for channel = 1
         
         %subplot(8,1,sp);

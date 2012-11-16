@@ -11,6 +11,7 @@ wavespeed = bfmget(options, 'SoundSpeed', 1482);
 pa = bfmget(options, 'Photoacoustic', false);
 alpha = bfmget(options, 'GaussWinAlpha', 1.5);
 channelOmit = bfmget(options, 'ChannelOmit', []);
+phaseCorrection = bfmget(options, 'PhaseCorrection', zeros(1,128));
 mvlength = bfmget(options, 'MVSubarrayLength', 40);
 useApod = bfmget(options, 'GaussApodization', false);
 useMV = bfmget(options, 'MinimumVariance', false);
@@ -95,10 +96,14 @@ for line = 1:numoflines
         % calculate delays (in units of samples)
         receivedelays = sqrt((array(activeChannels)-x).^2 + y^2)./wavespeed/timeres;
         if pa
-            %delays = round(receivedelays);
+            %delays = round(receivedelays);% ORIGINAL
             delays = round(receivedelays + y/wavespeed/timeres);
         else
             delays = round(receivedelays + y/wavespeed/timeres);
+        end
+        
+        if ~all(phaseCorrection == 0)
+            delays = delays - phaseCorrection(activeChannels);
         end
         
         % find active channels that are in the omit channel vector and
