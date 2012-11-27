@@ -7,7 +7,6 @@
 *.mat
 *.dll
 *.bit
-*.mexw32
 *.fig
 *.bmp
 *.png
