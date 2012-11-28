@@ -28,4 +28,8 @@ int nrhs, const mxArray * prhs[]) {
     ray.rxDelay = (int) mxGetField(prhs[1], 1, "rxDelay");
     ray.decimation = (unsigned char) mxGetField(prhs[1], 1, "decimation");
     ray.sampling = (unsigned char) mxGetField(prhs[1], 1, "sampling");
+    
+    // create plhs
+    bool suc = daqRun(seq, ray);
+    plhs[0] = mxCreateLogicalScalar(suc);
 }

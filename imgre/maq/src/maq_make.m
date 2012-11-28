@@ -15,3 +15,6 @@ mex daqIsRunning.cpp daq.lib
 mex daqIsInitialized.cpp daq.lib
 mex daqIsInitializing.cpp daq.lib
 mex daqRun.cpp daq.lib
+mex daqStop.cpp daq.lib
+mex daqStopDownload.cpp daq.lib
+mex daqDownload.cpp daq.lib
