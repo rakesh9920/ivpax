@@ -18,3 +18,4 @@ mex daqRun.cpp daq.lib
 mex daqStop.cpp daq.lib
 mex daqStopDownload.cpp daq.lib
 mex daqDownload.cpp daq.lib
+mex daqShutdown.cpp daq.lib
