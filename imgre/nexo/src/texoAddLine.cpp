@@ -78,7 +78,10 @@ int nrhs, const mxArray * prhs[]) {
     for (int i = 0; i < mxGetNumberOfElements(mxGetProperty(prhs[1], 0, "window")); i++)
         rx.window[i] = (unsigned char) ps[i];
     
+    lineInfo.lineSize = *((int *) mxGetData(mxGetProperty(prhs[2], 0, "lineSize")));
+    lineInfo.lineDuration = *((int *) mxGetData(mxGetProperty(prhs[2], 0, "lineDuration")));
+    
 	// create plhs
-    //int suc = tex->addLine(dataType, *tx, *rx);
-    //plhs[0] = mxCreateLogicalScalar(suc); 
+    int suc = texoAddLine(tx, rx, lineInfo);
+    plhs[0] = mxCreateLogicalScalar(suc); 
 }

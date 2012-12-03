@@ -1,6 +1,10 @@
 tx = texoTransmitParams();
 rx = texoReceiveParams();
 apr = texoCurve();
+info = texoLineInfo();
+
+info.lineSize = 1000;
+info.lineDuration = 100;
 
 tx.centerElement = 645;
 tx.aperture = 64; 
