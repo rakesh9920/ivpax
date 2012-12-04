@@ -4,40 +4,10 @@
   
 void mexFunction(int nlhs, mxArray * plhs[],
 int nrhs, const mxArray * prhs[]) { 
-    
-    _texoTransmitParams tx;
+  
     _texoReceiveParams rx;
-    _texoLineInfo lineInfo;
     _texoCurve rxAprCrv;
     
-    // copy transmit parameters
-    tx.centerElement = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "centerElement")));
-    tx.aperture = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "aperture")));
-    tx.focusDistance = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "focusDistance")));
-    tx.angle = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "angle")));
-    tx.frequency = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "frequency")));
-    
-    mxChar * ps = mxGetChars(mxGetProperty(prhs[0], 0, "pulseShape"));
-    for (int i = 0; i < mxGetNumberOfElements(mxGetProperty(prhs[0], 0, "pulseShape")); i++)
-        tx.pulseShape[i] = (char) ps[i];
-    
-    tx.speedOfSound = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "speedOfSound")));
-    tx.useManualDelays = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "useManualDelays")));
-
-    int * md = (int *) mxGetData(mxGetProperty(prhs[0], 0, "manualDelays"));
-    for (int i = 0; i < mxGetNumberOfElements(mxGetProperty(prhs[0], 0, "manualDelays")); i++)
-        tx.manualDelays[i] = md[i];
-
-    tx.tableIndex = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "tableIndex")));
-    tx.useMask = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "useMask")));
-    
-    int * mask = (int *) mxGetData(mxGetProperty(prhs[0], 0, "mask"));
-    for (int i = 0; i < mxGetNumberOfElements(mxGetProperty(prhs[0], 0, "mask")); i++)
-        tx.mask[i] = mask[i];
-    
-    tx.sync = *((int *) mxGetData(mxGetProperty(prhs[0], 0, "sync")));
-    
-    // copy receive parameters
     rx.centerElement = *((int *) mxGetData(mxGetProperty(prhs[1], 0, "centerElement")));
     rx.aperture = *((int *) mxGetData(mxGetProperty(prhs[1], 0, "aperture")));
     rx.angle = *((int *) mxGetData(mxGetProperty(prhs[1], 0, "angle")));
@@ -78,10 +48,7 @@ int nrhs, const mxArray * prhs[]) {
     for (int i = 0; i < mxGetNumberOfElements(mxGetProperty(prhs[1], 0, "window")); i++)
         rx.window[i] = (unsigned char) win[i];
     
-    lineInfo.lineSize = *((int *) mxGetData(mxGetProperty(prhs[2], 0, "lineSize")));
-    lineInfo.lineDuration = *((int *) mxGetData(mxGetProperty(prhs[2], 0, "lineDuration")));
-    
 	// create plhs
-    int suc = texoAddLine(tx, rx, lineInfo);
+    bool suc = texoAddReceive(rx);
     plhs[0] = mxCreateLogicalScalar(suc); 
 }

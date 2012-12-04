@@ -41,5 +41,5 @@ rx.weightType = 0;
 rx.useCustomWindow = 0;
 rx.window = zeros(1,64);
 
-
-%texoAddLine(tx,rx);
+%%
+texoAddLine(tx, rx, info);
