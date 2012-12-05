@@ -50,8 +50,8 @@ struct _texoLineInfo
 ////////////////////////////////////////////////////////////////////////////////
 struct _texoTransmitParams
 {
-    /// center element in 1/10th of an element
-    int centerElement;
+    /// the fraction is used for virtual elements
+    double centerElement;
     /// aperture size in elements
     int aperture;
     /// focus distance in microns
@@ -84,8 +84,8 @@ struct _texoTransmitParams
 ////////////////////////////////////////////////////////////////////////////////
 struct _texoReceiveParams
 {
-    /// center element in 1/10th of an element
-    int centerElement;
+    /// the fraction is used for virtual elements
+    double centerElement;
     /// aperture size in elements
     int aperture;
     /// angle in 1/1000th of a degree

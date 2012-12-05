@@ -34,7 +34,7 @@ texoL int texoEndSequence();
 
 texoL void texoClearTGCs();
 texoL int texoAddTGCFixed(double percent);
-texoL int texoAddTGC(_texoCurve* tgc, int depth);
+texoL int texoAddTGC(_texoCurve* tgc, int depth, double percent = 0.5);
 texoL int texoAddReceive(_texoReceiveParams rxPrms);
 texoL int texoAddTransmit(_texoTransmitParams txPrms);
 texoL int texoSetPower(int power, int maxPositive, int maxNegative);
