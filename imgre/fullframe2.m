@@ -1,8 +1,18 @@
+%%
 tx = texoTransmitParams();
 rx = texoReceiveParams();
 apr = texoCurve();
 info = texoLineInfo();
 
+%% TEXO INITIALIZATION
+texoInit('./nexo/dat/', 3, 4, 0, 64, 3, 128)
+texoClearTGCs()
+texoAddTGCFixed(0.80)
+%texoSetPower(15,15,15)
+texoSetSyncSignals(1,1,1)
+texoActivateProbeConnector(0)
+
+%%
 info.lineSize = 1000;
 info.lineDuration = 100;
 
@@ -41,13 +51,7 @@ rx.rxAprCrv = apr;
 rx.weightType = 0;
 rx.useCustomWindow = 0;
 rx.window = zeros(1,64);
-%%
-texoInit('./dat/', 3, 4, 0, 64, 3, 128)
-texoClearTGCs()
-texoAddTGCFixed(0.80)
-texoSetPower(15,15,15)
-texoSetSyncSignals(1,0,0)
-texoActivateProbeConnector(0)
+
 %%
 texoBeginSequence()
 texoAddLine(tx, rx, info)
