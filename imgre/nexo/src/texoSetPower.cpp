@@ -10,6 +10,6 @@ int nrhs, const mxArray * prhs[]) {
     int maxNegative =  (int) (mxGetScalar(prhs[2]));
     
 	// create plhs
-    bool suc = texoSetPower(power, maxPositive, maxNegative);
+    int suc = texoSetPower(power, maxPositive, maxNegative);
     plhs[0] = mxCreateLogicalScalar(suc); 
 }

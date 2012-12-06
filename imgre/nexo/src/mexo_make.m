@@ -30,6 +30,9 @@ mex texoAddTransmit.cpp texo.lib -outdir ./mexw32/
 mex texoAddLine.cpp texo.lib -outdir ./mexw32/
 mex texoAddReceive.cpp texo.lib -outdir ./mexw32/
 mex texoAddTGC.cpp texo.lib -outdir ./mexw32/
+mex texoAddTGCFixed.cpp texo.lib -outdir ./mexw32/
+mex texoEnableSyncNotify.cpp texo.lib -outdir ./mexw32/
+mex texoForceConnector.cpp texo.lib -outdir ./mexw32/
 
 
 

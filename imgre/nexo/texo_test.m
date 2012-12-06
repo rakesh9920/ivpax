@@ -44,9 +44,12 @@ rx.window = zeros(1,64);
 %%
 texoInit('./dat/', 3, 4, 0, 64, 3, 128)
 texoClearTGCs()
-texoAddFlatTGC(20)
-texoSetPower(15,15,15)
+texoAddTGCFixed(0.80)
+%texoAddFlatTGC(0.20)
+texoSetPower(10,10,10)
 texoSetSyncSignals(1,0,0)
 texoActivateProbeConnector(0)
 %%
-texoAddLine(tx, rx, info);
+texoBeginSequence()
+texoAddLine(tx, rx, info)
+texoEndSequence()
