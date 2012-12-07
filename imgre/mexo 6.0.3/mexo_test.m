@@ -1,18 +1,16 @@
-%% OBJECT INIT
+%% OBJECTS TEST
 tx = texoTransmitParams();
 rx = texoReceiveParams();
 apr = texoCurve();
 info = texoLineInfo();
-seqprms = daqSequencePrms();
-rlprms = daqRaylinePrms();
 
-info.lineSize = 1607;
-info.lineDuration = 40;
+info.lineSize = 1000;
+info.lineDuration = 100;
 
-tx.centerElement = 640;
+tx.centerElement = 645;
 tx.aperture = 64; 
 tx.angle = 0;
-tx.focusDistance = 15000;
+tx.focusDistance = 25000;
 tx.frequency = 6600000;
 tx.pulseShape = '+-';
 tx.speedOfSound = 1494;
@@ -44,57 +42,31 @@ rx.rxAprCrv = apr;
 rx.weightType = 0;
 rx.useCustomWindow = 0;
 rx.window = zeros(1,64);
-
-seqprms.freeRun = false;
-seqprms.hpfBypass = false;
-seqprms.divisor = 2; % data size = 16GB / 2^divisor
-seqprms.externalTrigger = true;
-seqprms.externalClock = true;
-seqprms.lnaGain = 1; % 16dB, 18dB, 21dB
-seqprms.pgaGain = 1; % 21dB, 24dB, 27dB, 30dB
-seqprms.biasCurrent = 1; % 0,1,2,...,7
-seqprms.fixedTGC = true;
-seqprms.fixedTGCLevel = 30;
-
-rlprms.lineDuration = 40; % line duration in micro seconds
-rlprms.numSamples = 1607; 
-rlprms.channels = [uint32(2^32) uint32(2^32) uint32(2^32) uint32(2^32)];
-rlprms.decimation = uint8(0);
-rlprms.sampling = uint8(40);
-%% DAQ INIT
-if ~daqSetFirmwarePath('./fw/')
-    error('daqSetFirmwarePath failed');
-end
-if ~daqInit(0)
-    error('daqInit failed');
-end
-if ~daqConnect()
-    error('daqConnect failed');
-end
-if ~daqRun()
-    error('daqRun failed');
-end
-%% TEXO INIT
+%% INITIALIZATION TEST
 if ~texoInit('./dat/', 3, 4, 0, 64, 3, 128)
     error('texoInit failed');
 end
 texoClearTGCs();
-if ~texoAddTGCFixed(0.60)
+if ~texoAddTGCFixed(0.80)
     error('texoAddTGCFixed failed');
 end
-if ~texoSetSyncSignals(1,1,3)
+if ~texoSetSyncSignals(1,0,0)
     error('texoSetSyncSignals failed');
 end
 texoActivateProbeConnector(0)
-texoForceConnector(3);
 texoEnableSyncNotify(false)
 %% SEQUENCING TEST
 if ~texoBeginSequence()
     error('texoBeginSequence failed');
 end
-for i = 0:10:1280
-    tx.centerElement = 0;
-    texoAddLine(tx, rx, info);
+if ~texoAddTransmit(tx);
+    error('texoAddTransmit failed');
+end
+if ~texoAddReceive(rx);
+    error('texoAddReceive failed');
+end
+if ~texoAddLine(tx, rx, info)
+    error('texoAddLine failed');
 end
 if ~texoEndSequence()
     error('texoEndSequence failed');
@@ -104,16 +76,11 @@ texoSetPower(15,15,15)
 if ~texoRunImage()
     error('texoRunImage failed');
 end
-pause(5)
+pause(5);
 if ~texoStopImage()
     error('texoStopImage failed');
 end
 texoGetCollectedFrameCount()
-%% DAQ DOWNLOAD
-daqStop()
-daqDownload('./data/')
-
-%% SHUTDOWN
-texoShutdown()
-daqShutdown()
+data = texoGetCine(1024*5);
+plot(data);
 
