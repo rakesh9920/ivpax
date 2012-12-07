@@ -14,7 +14,7 @@ classdef daqRaylinePrms
     methods
         function obj = set.channels(obj, value)
             if size(value,1) == 1 && size(value,2) == 4
-                obj.channels = int32(value)
+                obj.channels = int32(value);
             else
                 error('channels must be a 1-by-4 int array');
             end

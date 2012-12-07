@@ -50,9 +50,7 @@ texoClearTGCs();
 if ~texoAddTGCFixed(0.80)
     error('texoAddTGCFixed failed');
 end
-if ~texoSetSyncSignals(1,0,0)
-    error('texoSetSyncSignals failed');
-end
+texoSetSyncSignals(1,0,0)
 texoActivateProbeConnector(0)
 texoEnableSyncNotify(false)
 %% SEQUENCING TEST

@@ -16,6 +16,7 @@
 /ultrasonix/bin/**/*
 /imgre/rfdata/*
 /imgre/rfdata/**/*
-/imgre/nexo/src/mexw32/*
-/imgre/nexo/dat/*
-/imgre/mexo/src/mexw32/*
+/imgre/maq/fw/*
+/imgre/maq/fw/**/*
+/imgre/mexo_6.0.3/dat/*
+/imgre/mexo_6.0.3/src/mexw32/*

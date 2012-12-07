@@ -18,14 +18,12 @@ rlprms.channels = [uint32(2^32) uint32(2^32) uint32(2^32) uint32(2^32)];
 rlprms.decimation = uint8(0);
 rlprms.sampling = uint8(40);
 
-if ~daqSetFirmwarePath('./fw/')
-    error('daqSetFirmwarePath failed');
-end
+daqSetFirmwarePath('D:\ultrasonix\sdk_6.0.3\daq\fw')
 
 if ~daqInit(0)
     error('daqInit failed');
 end
 
-if ~daqConnect()
-    error('daqCOnnect failed);
-end
+%if ~daqConnect(0)
+ %   error('daqCOnnect failed');
+%end

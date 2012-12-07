@@ -1,3 +1,7 @@
+%%
+addpath './maq/'
+addpath './mexo 6.0.3/'
+addpath './bin/'
 %% OBJECT INIT
 tx = texoTransmitParams();
 rx = texoReceiveParams();
@@ -62,29 +66,22 @@ rlprms.channels = [uint32(2^32) uint32(2^32) uint32(2^32) uint32(2^32)];
 rlprms.decimation = uint8(0);
 rlprms.sampling = uint8(40);
 %% DAQ INIT
-if ~daqSetFirmwarePath('./fw/')
-    error('daqSetFirmwarePath failed');
-end
+daqSetFirmwarePath('./bin/fw/');
 if ~daqInit(0)
     error('daqInit failed');
 end
-if ~daqConnect()
-    error('daqConnect failed');
-end
-if ~daqRun()
+if ~daqRun(seqprms,rlprms)
     error('daqRun failed');
 end
 %% TEXO INIT
-if ~texoInit('./dat/', 3, 4, 0, 64, 3, 128)
+if ~texoInit('./bin/dat/', 3, 4, 0, 64, 3, 128)
     error('texoInit failed');
 end
 texoClearTGCs();
 if ~texoAddTGCFixed(0.60)
     error('texoAddTGCFixed failed');
 end
-if ~texoSetSyncSignals(1,1,3)
-    error('texoSetSyncSignals failed');
-end
+texoSetSyncSignals(1,1,3)
 texoActivateProbeConnector(0)
 texoForceConnector(3);
 texoEnableSyncNotify(false)
