@@ -4,25 +4,26 @@ end
 
 warning off
 
-% initialization functions
-mex daqInit.cpp daq.lib
-mex daqStopInit.cpp daq.lib
-mex daqConnect.cpp daq.lib
-mex daqDisconnect.cpp daq.lib
-mex daqSetFirmwarePath.cpp daq.lib
+mkdir ./mexw32/
 
+% initialization functions
+mex daqInit.cpp daq.lib -outdir ./mexw32/
+mex daqStopInit.cpp daq.lib -outdir ./mexw32/
+mex daqConnect.cpp daq.lib -outdir ./mexw32/
+mex daqDisconnect.cpp daq.lib -outdir ./mexw32/
+mex daqSetFirmwarePath.cpp daq.lib -outdir ./mexw32/
 
 % status functions
-mex daqIsConnected.cpp daq.lib
-mex daqIsDownloading.cpp daq.lib
-mex daqIsRunning.cpp daq.lib
-mex daqIsInitialized.cpp daq.lib
-mex daqIsInitializing.cpp daq.lib
-mex daqGetLastError.cpp daq.lib
+mex daqIsConnected.cpp daq.lib -outdir ./mexw32/
+mex daqIsDownloading.cpp daq.lib -outdir ./mexw32/
+mex daqIsRunning.cpp daq.lib -outdir ./mexw32/
+mex daqIsInitialized.cpp daq.lib -outdir ./mexw32/
+mex daqIsInitializing.cpp daq.lib -outdir ./mexw32/
+mex daqGetLastError.cpp daq.lib -outdir ./mexw32/
 
 % control functions
-mex daqRun.cpp daq.lib
-mex daqStop.cpp daq.lib
-mex daqStopDownload.cpp daq.lib
-mex daqDownload.cpp daq.lib
-mex daqShutdown.cpp daq.lib
+mex daqRun.cpp daq.lib -outdir ./mexw32/
+mex daqStop.cpp daq.lib -outdir ./mexw32/
+mex daqStopDownload.cpp daq.lib -outdir ./mexw32/
+mex daqDownload.cpp daq.lib -outdir ./mexw32/
+mex daqShutdown.cpp daq.lib -outdir ./mexw32/
