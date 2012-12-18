@@ -8,6 +8,10 @@ int nrhs, const mxArray * prhs[]) {
     // read prhs
     int index = (int) mxGetScalar(prhs[0]);
     
+    #ifdef MEX_OUTPUT_CHECK
+        mexPrintf("index = %d\n", index);
+    #endif
+    
 	// create plhs
     bool suc = daqConnect(index);
     plhs[0] = mxCreateLogicalScalar(suc); 

@@ -2,7 +2,7 @@ classdef daqSequencePrms
     
     properties
         freeRun = int32(0)
-        divisor = char(0);
+        divisor = uint8(0);
         hpfBypass = int32(0);
         externalTrigger = int32(0);
         externalClock = int32(0);
@@ -19,7 +19,7 @@ classdef daqSequencePrms
             obj.freeRun = int32(value);
         end
         function obj = set.divisor(obj, value)
-            obj.divisor = char(value);
+            obj.divisor = uint8(value);
         end
         function obj = set.hpfBypass(obj, value)
             obj.hpfBypass = int32(value);
