@@ -1,10 +1,10 @@
 
 numofsamples = 2678;
-numofframes = 25049;
+numofframes = 195;
 numofimages = floor(numofframes/128);
-chunksize = floor(numofimages/16)*128;
+chunksize = 2678*128; %floor(numofimages/16)*128;
 
-rfc = zeros(128, numofsamples, 128, floor(numofimages/16), 'int16');
+rfc = zeros(128, numofsamples, 128, 1, 'int16');
 
 for c = 0:127
     
@@ -22,9 +22,9 @@ for c = 0:127
     rf = int16(fread(fid, inf, 'int16'));
     fclose(fid);
     
-    chunk = int16(rf(7:(6 + numofsamples*chunksize)));
+    chunk = int16(rf(7:(6 + chunksize)));
     
-    rfc(:, :, c + 1, :) = reshape(chunk, 128, numofsamples, floor(numofimages/16));
+    rfc(:, :, c + 1, :) = reshape(chunk, 128, numofsamples, 1);
     
     clear chunk rf
 end
