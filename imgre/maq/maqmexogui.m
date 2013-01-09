@@ -90,10 +90,10 @@ hStatusText = uicontrol(fMain, ...
 movegui(fMain, 'center');
 set(fMain, 'Visible', 'on');
 
-tx = texoTransmitParams();
-rx = texoReceiveParams();
+%tx = texoTransmitParams();
+%rx = texoReceiveParams();
 %apr = texoCurve();
-info = texoLineInfo();
+%info = texoLineInfo();
 seqprms = daqSequencePrms();
 rlprms = daqRaylinePrms();
 
@@ -107,6 +107,49 @@ seqprms.pgaGain = 1;
 seqprms.biasCurrent = 1;
 seqprms.fixedTGC = true;
 seqprms.fixedTGCLevel = 40;
+
+rlprms.lineDuration = 70;
+rlprms.numSamples = 2678; 
+rlprms.gainOffset = 0;
+rlprms.gainDelay = 0;
+rlprms.rxDelay = 0;
+rlprms.channels = [uint32(2^32) uint32(2^32) uint32(2^32) uint32(2^32)];
+rlprms.decimation = 0;
+rlprms.sampling = 40;
+
+    function prms = GetDaqParams(seq, rl)
+        
+        if strcmp(class(seq), 'daqSequencePrms') || strcmp(class(rl), 'daqRaylinePrms')
+            error('incorrect class type');
+        end
+        
+        prms = [struct2cell(struct(seq)); struct2cell(struct(rl))];
+        
+        prms([4 5 16]) = [];
+    end
+
+    function SetDaqParams(seq, rl, prms)
+        
+        if strcmp(class(seq), 'daqSequencePrms') || strcmp(class(rl), 'daqRaylinePrms')
+            error('incorrect class type');
+        end
+        
+        seq.freeRun = prms(1);
+        seq.hpfBypass = prms(2);
+        seq.divisor = prms(3);
+        seq.lnaGain = prms(4);
+        seq.pgaGain = prms(5);
+        seq.fixedTGC = prms(6);
+        seq.fixedTGCLevel = prms(7);
+        
+        rl.lineDuration = prms(8);
+        rl.numSamples = prms(9);
+        rl.gainOffset = prms(10);
+        rl.gainDelay = prms(11);
+        rl.rxDelay = prms(12);
+        rl.decimation = prms(13);
+        rl.sampling = prms(14);
+    end
 
     function MexoSetParamsCallback(hObject, eventdata)
         
@@ -138,7 +181,7 @@ seqprms.fixedTGCLevel = 40;
             'ColumnName', cnames, ...
             'ColumnEditable', [true], ...
             'ColumnWidth', {'auto'}, ...
-            'Data', MaqParams, ...
+            'Data', struct2cell(struct(seqprms)), ...
             'Position', [1 1 200 400]);
         
         

@@ -44,6 +44,6 @@ classdef daqSequencePrms
         end
         function obj = set.biasCurrent(obj, value)
             obj.biasCurrent = int32(value);
-        end 
+        end        
     end 
 end
