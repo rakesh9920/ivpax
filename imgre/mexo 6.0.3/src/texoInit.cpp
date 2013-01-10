@@ -22,6 +22,17 @@ int nrhs, const mxArray * prhs[]) {
     
     texoSetCallback(newImage, 0);
     
+    _vcaInfo vcaInfo;
+    vcaInfo.amplification = 32;
+    vcaInfo.activetermination = 4;
+    vcaInfo.inclamp = 1600;
+    vcaInfo.LPF = 1;
+    vcaInfo.lnaIntegratorEnable = 1;
+    vcaInfo.pgaIntegratorEnable = 1;
+    vcaInfo.hpfDigitalEnable = 0;
+    vcaInfo.hpfDigitalValue = 10;
+    texoSetVCAInfo(vcaInfo);
+    
 	// create plhs
     bool suc = texoInit(firmwarePath, pci, usm, hv, channels, tx, szCine);
     plhs[0] = mxCreateLogicalScalar(suc); 

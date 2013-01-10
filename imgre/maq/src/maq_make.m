@@ -4,7 +4,7 @@ end
 warning off
 
 mkdir ./mexw32/
-options = '-outdir ./mexw32/';
+options = '-outdir ./mexw32/'; %-DMEX_OUTPUT_CHECK;
 
 % initialization functions
 eval(strcat(['mex daqInit.cpp daq.lib' ' ' options]));

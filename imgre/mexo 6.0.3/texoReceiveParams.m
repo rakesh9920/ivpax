@@ -27,7 +27,7 @@ classdef texoReceiveParams
     methods
         % setters
         function obj = set.centerElement(obj, value)
-            obj.centerElement = int32(value);
+            obj.centerElement = double(value);
         end
         function obj = set.aperture(obj, value)
             obj.aperture = int32(value);

@@ -9,6 +9,10 @@ int nrhs, const mxArray * prhs[]) {
     int maxPositive =  (int) (mxGetScalar(prhs[1]));
     int maxNegative =  (int) (mxGetScalar(prhs[2]));
     
+    #ifdef MEX_OUTPUT_CHECK
+        mexPrintf("power = %d\n", power);
+    #endif
+    
 	// create plhs
     int suc = texoSetPower(power, maxPositive, maxNegative);
     plhs[0] = mxCreateLogicalScalar(suc); 

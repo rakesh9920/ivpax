@@ -1,10 +1,10 @@
 classdef texoCurve
    
     properties
-        top = int32(0);
-        mid = int32(0);
-        btm = int32(0);
-        vmid = int32(0);
+        top = int32(100);
+        mid = int32(100);
+        btm = int32(100);
+        vmid = int32(50);
     end
     
     methods
