@@ -94,6 +94,11 @@ tx = texoTransmitParams();
 rx = texoReceiveParams();
 apr = texoCurve();
 
+apr.top = 10;
+apr.mid = 50;
+apr.btm = 100;
+apr.vmid = 50;
+
 tx.centerElement = 64.5;
 tx.aperture = 64; 
 tx.angle = 0;
@@ -153,8 +158,6 @@ rl.rxDelay = 0;
 rl.decimation = 0;
 rl.sampling = 40;
 
-GetTexoParams()
-
     function [txprms rxprms] = GetTexoParams()
         
         txprms = struct2cell(struct(tx));
@@ -162,25 +165,59 @@ GetTexoParams()
         
         cm = rxprms{8};
         crv = rxprms{18};
-
-        insert(rxprms, crv.vmid, 19);
-        insert(rxprms, crv.btm, 19);
-        insert(rxprms, crv.mid, 19);
-        insert(rxprms, crv.top, 19);
-        insert(rxprms, cm(2), 9);
-        insert(rxprms, cm(1), 9);
+        
+        rxprms = insert(rxprms, crv.vmid, 19);
+        rxprms = insert(rxprms, crv.btm, 19);
+        rxprms = insert(rxprms, crv.mid, 19);
+        rxprms = insert(rxprms, crv.top, 19);
+        rxprms = insert(rxprms, cm(2), 9);
+        rxprms = insert(rxprms, cm(1), 9);
         
         txprms([9 12]) = [];
         rxprms([8 13 20 27]) = [];
-        
-        txprms
-        rxprms
     end
 
-    function SetTexoParams(prms)
+    function SetTexoTxParams(txprms)
         
+        tx.centerElement = txprms{1};
+        tx.aperture = txprms{2};
+        tx.focusDistance = txprms{3};
+        tx.angle = txprms{4};
+        tx.frequency = txprms{5};
+        tx.pulseShape = txprms{6}.';
+        tx.speedOfSound = txprms{7};
+        tx.useManualDelays = txprms{8};
+        tx.tableIndex = txprms{9};
+        tx.useMask = txprms{10};
+        tx.sync = txprms{11};
     end
 
+    function SetTexoRxParams(rxprms)
+        
+        rx.centerElement = rxprms{1};
+        rx.aperture = rxprms{2};
+        rx.angle = rxprms{3};
+        rx.maxApertureDepth = rxprms{4};
+        rx.acquisitionDepth = rxprms{5};
+        rx.saveDelay = rxprms{6};
+        rx.speedOfSound = rxprms{7};
+        rx.channelMask(1) = rxprms{8};
+        rx.channelMask(2) = rxprms{9};
+        rx.applyFocus = rxprms{10};
+        rx.useManualDelays = rxprms{11};
+        rx.customLineDuration = rxprms{12};
+        rx.lgcValue = rxprms{13};
+        rx.tgcSel = rxprms{14};
+        rx.tableIndex = rxprms{15};
+        rx.decimation = rxprms{16};
+        rx.numChannels = rxprms{17};
+        rx.rxAprCrv.top = rxprms{18};
+        rx.rxAprCrv.mid = rxprms{19};
+        rx.rxAprCrv.btm = rxprms{20};
+        rx.rxAprCrv.vmid = rxprms{21};
+        rx.weightType = rxprms{22};
+        rx.useCustomWindow = rxprms{23};
+    end
 
     function prms = GetDaqParams()
         
@@ -212,12 +249,54 @@ GetTexoParams()
         fMexoParams = figure( ...
             'Name', 'Mexo Parameters', ...
             'Visible', 'off', ...
-            'Position', [0 0 400 400], ...
+            'Position', [0 0 517 436], ...
             'MenuBar', 'none', ...
             'NumberTitle', 'off');
         
+        [txprms rxprms] = GetTexoParams();
+        
+        cnames1 = {'transmit'};
+        cnames2 = {'receive'};
+        rnames1 = {'centerElement', 'aperture', 'focusDistance', 'angle', ...
+            'frequency', 'pulseShape', 'speedOfSound', 'useManualDelays', ...
+            'tableIndex', 'useMask', 'sync'};
+        rnames2 = {'centerElement', 'aperture', 'angle', 'maxApertureDepth', ...
+            'acquisitionDepth', 'saveDelay', 'speedOfSound', 'channelMask[0]', ...
+            'channelmask[1]', 'applyFocus', 'useManualDelays', ...
+            'customLineDuration', 'lgcValue', 'tgcSel', 'tableIndex', ...
+            'decimation', 'numChannels', 'rxAprCrv.top', 'rxAprCrv.mid', ...
+            'rxAprCrv.btm', 'rxAprCrv.vmid', 'weightType', 'useCustomWindow'};
+        
+        uitable(fMexoParams, ...
+            'RowName', rnames1, ...
+            'CellEditCallback', @MexoTxEditCallback, ...
+            'ColumnName', cnames1, ...
+            'ColumnEditable', true, ...
+            'ColumnWidth', {'auto'}, ...
+            'Data', txprms, ...
+            'Position', [1 1 242 436]);
+        
+        uitable(fMexoParams, ...
+            'RowName', rnames2, ...
+            'CellEditCallback', @MexoRxEditCallback, ...
+            'ColumnName', cnames2, ...
+            'ColumnEditable', true, ...
+            'ColumnWidth', {'auto'}, ...
+            'Data', rxprms, ...
+            'Position', [243 1 275 436]);
+        
         movegui(fMexoParams, 'center');
         set(fMexoParams, 'Visible', 'On');
+        
+        function MexoTxEditCallback(hObject, eventdata)
+            txprms{eventdata.Indices(1)} = eventdata.NewData';
+            SetTexoTxParams(txprms);
+        end
+        
+        function MexoRxEditCallback(hObject, eventdata)
+            rxprms{eventdata.Indices(1)} = eventdata.NewData';
+            SetTexoRxParams(rxprms);
+        end
     end
 
     function MaqSetParamsCallback(hObject, eventdata)
@@ -228,6 +307,7 @@ GetTexoParams()
             'Position', [0 0 220 400], ...
             'MenuBar', 'none', ...
             'NumberTitle', 'off');
+        
         cnames = {'value'};
         rnames = {'freeRun', 'hpfBypass', 'divisor', 'lnaGain', 'pgaGain',...
             'biasCurrent', 'fixedTGC', 'fixedTGCLevel', 'gainDelay', ...
@@ -258,6 +338,5 @@ end
 
 function newvec = insert(oldvec, value, ind)
     
-    newvec = [oldvec(1:ind-1) value oldvec(ind:end)];
-    
+    newvec = {oldvec{1:ind-1} value oldvec{ind:end}}.';
 end
