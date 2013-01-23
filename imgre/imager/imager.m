@@ -1,14 +1,14 @@
-function [img2 ref] = imager(bfrf,varargin)
+function [img2 ref] = imager(bfrf, nXPixels, nYPixels, varargin)
 
 % variable initialization
-[nXPixels, samplesPerLine] = size(bfrf);
-if nXPixels == 128
-    nYPixels = ceil(samplesPerLine*1494*25e-9/300e-6);
-elseif nXPixels == 256
-    nYPixels = ceil(samplesPerLine*1481*25e-9/150e-6);
-end
+% [nXPixels, samplesPerLine] = size(bfrf);
+% if nXPixels == 128
+%    nYPixels = ceil(samplesPerLine*1494*25e-9/300e-6);
+% elseif nXPixels == 256
+%    nYPixels = ceil(samplesPerLine*1481*25e-9/150e-6);
+% end
 
-if nargin > 1
+if nargin > 3
     dyn = varargin{1}; 
 else
     dyn = 200;
@@ -17,7 +17,7 @@ end
 img = double(bfrf.');
 img = medfilt2(img,[2 2]);
 
-if nargin > 2
+if nargin > 4
     ref = varargin{2};
 else
     ref = max(max(img));

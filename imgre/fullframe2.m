@@ -1,16 +1,21 @@
-%%
+%% ADDPATHS
 addpath './maq/'
-addpath './mexo 6.0.3/'
+addpath './mexo/'
 addpath './bin/'
-%% OBJECT INIT
+%% TEXO OBJECT INIT
 tx = texoTransmitParams();
 rx = texoReceiveParams();
 apr = texoCurve();
 
+apr.top = 10;
+apr.mid = 50;
+apr.btm = 100;
+apr.vmid = 50;
+
 tx.centerElement = 64.5;
 tx.aperture = 64; 
 tx.angle = 0;
-tx.focusDistance = 35000;
+tx.focusDistance = 25000;
 tx.frequency = 6600000;
 tx.pulseShape = '+-';
 tx.speedOfSound = 1540;
@@ -42,30 +47,6 @@ rx.rxAprCrv = apr;
 rx.weightType = 1;
 rx.useCustomWindow = false;
 rx.window = zeros(1,64);
-%%
-seqprms = daqSequencePrms();
-rlprms = daqRaylinePrms();
-
-seqprms.freeRun = false;
-seqprms.hpfBypass = false;
-seqprms.divisor = 10; % data size = 16GB / 2^divisor
-seqprms.externalTrigger = true;
-seqprms.externalClock = true;
-seqprms.lnaGain = 2; % 16dB, 18dB, 21dB
-seqprms.pgaGain = 2; % 21dB, 24dB, 27dB, 30dB
-seqprms.biasCurrent = 0; % 0,1,2,...,7
-seqprms.fixedTGC = true;
-seqprms.fixedTGCLevel = 60;
-
-rlprms.lineDuration = 70; % line duration in micro seconds
-rlprms.numSamples = 2678; 
-rlprms.gainOffset = 0;
-rlprms.gainDelay = 0;
-rlprms.rxDelay = 0;
-rlprms.channels = [uint32(2^32) uint32(2^32) uint32(2^32) uint32(2^32)];
-rlprms.decimation = 0;
-rlprms.sampling = 40;
-
 %% TEXO INIT
 if ~texoInit('./bin/dat/', 3, 4, 0, 64, 0, 128)
     error('texoInit failed');
@@ -78,16 +59,7 @@ texoSetSyncSignals(1,1,3);
 texoActivateProbeConnector(0);
 texoForceConnector(3);
 texoEnableSyncNotify(false);
-%% DAQ INIT
-daqSetFirmwarePath('./bin/fw/');
-daqConnect(0);
-if ~daqInit(0)
-    error('daqInit failed');
-end
-if ~daqRun(seqprms,rlprms)
-    error('daqRun failed');
-end
-%% SEQUENCING TEST
+%% TEXO SEQUENCING
 if ~texoBeginSequence()
     error('texoBeginSequence failed');
 end
@@ -102,7 +74,41 @@ lineDuration
 if ~texoEndSequence()
     error('texoEndSequence failed');
 end
-texoSetPower(12,12,12);
+texoSetPower(15,15,15);
+
+%%
+seqprms = daqSequencePrms();
+rlprms = daqRaylinePrms();
+
+seqprms.freeRun = false;
+seqprms.hpfBypass = false;
+seqprms.divisor = 0; % data size = 16GB / 2^divisor
+seqprms.externalTrigger = true;
+seqprms.externalClock = true;
+seqprms.lnaGain = 2; % 16dB, 18dB, 21dB
+seqprms.pgaGain = 2; % 21dB, 24dB, 27dB, 30dB
+seqprms.biasCurrent = 1; % 0,1,2,...,7
+seqprms.fixedTGC = true;
+seqprms.fixedTGCLevel = 60;
+
+rlprms.lineDuration = 70; % line duration in micro seconds
+rlprms.numSamples = ceil(lineSize/2); 
+rlprms.gainOffset = 0;
+rlprms.gainDelay = 0;
+rlprms.rxDelay = 0;
+rlprms.channels = [-1 -1 -1 -1];
+rlprms.decimation = 0;
+rlprms.sampling = 40;
+
+%% DAQ INIT
+daqSetFirmwarePath('./bin/fw/');
+daqConnect(0);
+if ~daqInit(0)
+    error('daqInit failed');
+end
+if ~daqRun(seqprms,rlprms)
+    error('daqRun failed');
+end
 %% RUN TEST
 if ~texoRunImage()
     error('texoRunImage failed');
