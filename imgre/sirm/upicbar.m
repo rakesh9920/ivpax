@@ -6,13 +6,15 @@ else
     init = false;
 end
 
-strlength = 40;
+strlength = 43;
 
 if ~init
     
     bar.title = varargin{1};
     bar.starttime = clock;
-    disp([bar.title repmat(' ', 1, strlength)]);
+    %disp([bar.title repmat(' ', 1, strlength)]);
+    fprintf([bar.title '\n']);
+    disp(repmat(' ', 1, strlength - 1));
     drawnow('update');
 else
     
@@ -66,5 +68,5 @@ sec = sec - m*60;
 s = floor(sec); % Seconds
 
 %timestr = sprintf('%2dd%2dh%2dm%2ds ', d, h, m, s);
-timestr = sprintf('%02d:%02d:%02d:%02d ', d, h, m, s);
+timestr = sprintf('TR %02d:%02d:%02d:%02d ', d, h, m, s);
 end

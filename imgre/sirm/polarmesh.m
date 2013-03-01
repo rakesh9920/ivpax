@@ -1,9 +1,11 @@
-function [mesh] = polarmesh(radii, angles, gridres)
+function [mesh area] = polarmesh(radii, angles, gridres)
 
 rmin = radii(1);
 rmax = radii(2);
 amin = angles(1);
 amax = angles(2);
+
+area = (amax - amin)*(rmax - rmin)^2/2;
 
 %cand = [rmin*amin rmax*amin rmin*amax rmax*amax];
 xcand = [rmin.*cos([amin amax]) rmax.*cos([amin amax])];
