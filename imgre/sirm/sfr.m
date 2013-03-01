@@ -11,12 +11,16 @@ wavenum = omega./soundspeed;
 
 fr = zeros(length(wavenum), numfieldpts);
 
+upicstatus('Calculating pair-wise distances');
 dist = sqrt(sqdistance(srcpts, fieldpts));
+upicstatus(1);
 
-prog = progress(0, 0, 'sfr');
+bar = upicbar('sfr');
+%prog = progress(0,0,'fsr');
 for fld = 1:numfieldpts
     
-    progress(fld/numfieldpts, 0, 'sfr', prog);
+    upicbar(bar, fld/numfieldpts);
+    %progress(fld/numfieldpts,0,'fsr',prog);
 
     r = dist(:, fld);
     
