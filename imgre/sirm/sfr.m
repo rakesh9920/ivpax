@@ -26,7 +26,7 @@ for fld = 1:numfieldpts
     r = dist(:, fld);
     
     greens = ((r.^-1).')*exp(-1i.*r*wavenum);
-    pres = (1i/(2*pi)).*area./numsrcpts.*wavenum.*greens;    
+    pres = (1/(2*pi)).*area./numsrcpts.*greens;    
     fr(:, fld) = pres;
 end
 
