@@ -58,7 +58,11 @@ c = 1500;
 rhoH20 = 1000;
 rhoSi3N4 = 3440;
 t = 50e-6;
+<<<<<<< HEAD
 a = 0.0011;
+=======
+%a = 150e-6;
+>>>>>>> 9ce6ae3f75c45c9ad01c7f85123af52b9fafb7ac
 E = 200e9;
 v = 0.24;
 
@@ -68,6 +72,7 @@ k = omega./c;
 
 Rrad = rhoH20*c*pi*a^2.*(1 - besselj(1, 2.*k.*a)./(k.*a))./2;
 Xrad = rhoH20*c*pi*a^2.*struveh1(2.*abs(k).*a)./(k.*a)./2;
+<<<<<<< HEAD
 Rrad(1) = 0;
 Xrad(1) = 0;
 %meq = 1.84*pi*a^2*t*rhoSi3N4; 
@@ -81,14 +86,36 @@ V2F =  (ceq  -1i.*keq./omega + 1i.*omega.*meq).';
 %VF = ((2*zeta*omega_n + 1i.*(m.*omega - omega_n^2./omega)).^-1).';
 F2V = V2F.^-1;
 XF = (V2F.*(1i.*omega.')).^-1;
+=======
+
+%meq = 1.84*pi*a^2*t*rhoSi3N4; 
+D = E*t^3/(12*(1-v^2));
+%keq = 192*pi*D/a^2;
+keq = 5.9264e7;
+meq = 2.2371e-8;
+a = 0.0011;
+%Rrad - 1i.*Xrad
+V2F =  ( -1i.*keq./omega + 1i.*omega.*meq).';
+%VF = ((2*zeta*omega_n + 1i.*(m.*omega - omega_n^2./omega)).^-1).';
+F2V = V2F.^-1;
+X2F = (V2F.*(1i.*omega.'));
+F2X = X2F.^-1;
+plot(fftshift(f2s),fftshift(abs(F2X)));
+>>>>>>> 9ce6ae3f75c45c9ad01c7f85123af52b9fafb7ac
 
 %%
 rhoH20 = 1000;
 f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
+<<<<<<< HEAD
 %TXSIG = TXSIG./2048;
 RX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HRX1.*F2V);
 RTX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HTX1.*F2V);
 figure; plot(ifft(RX1SIG,'symmetric'));
+=======
+%RX1SIG = (TXSIG.*1i*2*pi*rho.*(f2s.').*HTX1.*HRX1.*F2V);
+RTX1SIG = (TXSIG.*(1i.*(omega.')).*1i*2*pi*rho.*(f2s.').*HTX1.*HTX1.*F2X);
+%figure; plot(ifft(RX1SIG,'symmetric'));
+>>>>>>> 9ce6ae3f75c45c9ad01c7f85123af52b9fafb7ac
 figure; plot(ifft(RTX1SIG,'symmetric'));
 
 
