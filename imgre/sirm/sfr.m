@@ -17,11 +17,10 @@ dist = sqrt(sqdistance(srcpts, fieldpts));
 upicstatus(1);
 
 bar = upicbar('Calculating frequency response ...');
-%prog = progress(0,0,'fsr');
+
 for fld = 1:numfieldpts
     
     upicbar(bar, fld/numfieldpts);
-    %progress(fld/numfieldpts,0,'fsr',prog);
 
     r = dist(:, fld);
     

@@ -18,6 +18,7 @@ plot3(rx4(1,:),rx4(2,:),rx4(3,:),'k.');
 
 [ft f] = qfft2(zeros(1,2048),40e6);
 fldpts = [0; 0; 0.01];
+f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 
 htx1 = sfr(tx1, fldpts, f, 1500, S1);
 hrx1 = sfr(rx1, fldpts, f, 1500, S2);
@@ -33,11 +34,11 @@ HRX3 = [hrx3(1:(end-1))./2; conj(hrx3(end))./2; conj(flipud(hrx3(2:(end-1))))./2
 HRX4 = [hrx4(1:(end-1))./2; conj(hrx4(end))./2; conj(flipud(hrx4(2:(end-1))))./2];
 
 figure;
-plot(fftshift(abs(HTX1)), 'b'); hold on;
-plot(fftshift(abs(HRX1)), 'r:');
-plot(fftshift(abs(HRX2)), 'g:');
-plot(fftshift(abs(HRX3)), 'c:');
-plot(fftshift(abs(HRX4)), 'k:');
+plot(fftshift(f2s.*1e-6).', fftshift(abs(HTX1)), 'b'); hold on;
+plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX1)), 'r:');
+plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX2)), 'g:');
+plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX3)), 'c:');
+plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX4)), 'k:');
 
 %% create pulse time signal and transfer function
 
@@ -51,13 +52,13 @@ TXSIG = fft(txsig).'; %
 figure; plot(txsig);
 figure; plot(fftshift(abs(TXSIG)));
 %% calculate piston impedance transfer function
-zeta = 0.2;
+zeta = 0.5;
 omega_n = 2*pi*10e6;
 c = 1500;
 rhoH20 = 1000;
 rhoSi3N4 = 3440;
 t = 50e-6;
-a = 120e-6;
+a = 0.0011;
 E = 200e9;
 v = 0.24;
 
@@ -67,21 +68,26 @@ k = omega./c;
 
 Rrad = rhoH20*c*pi*a^2.*(1 - besselj(1, 2.*k.*a)./(k.*a))./2;
 Xrad = rhoH20*c*pi*a^2.*struveh1(2.*abs(k).*a)./(k.*a)./2;
-
-meq = 1.84*pi*a^2*t*rhoSi3N4; 
+Rrad(1) = 0;
+Xrad(1) = 0;
+%meq = 1.84*pi*a^2*t*rhoSi3N4; 
 D = E*t^3/(12*(1-v^2));
-keq = 192*pi*D/a^2;
-
-V2F =  (Rrad - 1i.*(Xrad) -1i.*keq./omega + 1i.*omega.*meq).';
+%keq = 192*pi*D/a^2;
+meq = 0.5;
+keq = 3.9478e+015;
+ceq = 2*sqrt(keq*meq)*zeta;
+%Rrad- 1i.*(Xrad)
+V2F =  (ceq  -1i.*keq./omega + 1i.*omega.*meq).';
 %VF = ((2*zeta*omega_n + 1i.*(m.*omega - omega_n^2./omega)).^-1).';
 F2V = V2F.^-1;
-%FX = V2F.*(1i.*omega.');
+XF = (V2F.*(1i.*omega.')).^-1;
 
 %%
-rho = 1000;
+rhoH20 = 1000;
 f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
-RX1SIG = (TXSIG.*1i*2*pi*rho.*(f2s.').*HTX1.*HRX1.*F2V);
-RTX1SIG = (TXSIG.*1i*2*pi*rho.*(f2s.').*HTX1.*HTX1.*F2V);
+%TXSIG = TXSIG./2048;
+RX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HRX1.*F2V);
+RTX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HTX1.*F2V);
 figure; plot(ifft(RX1SIG,'symmetric'));
 figure; plot(ifft(RTX1SIG,'symmetric'));
 
