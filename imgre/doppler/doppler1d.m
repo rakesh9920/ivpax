@@ -24,8 +24,6 @@ samplesPerKernel = kernelWidth*samplingFreq;
 corrmat = zeros(numOfLines, numOfTimeSteps*(samplesPerKernel*numOfKernels*2 - 1), numOfFrames - 1);
 imgmat = zeros(numOfLines, numOfTimeSteps , numOfFrames - 1,'int16');
 
-
-
 for frame = 1:(numOfFrames - 1)
     
     rf1temp = bfm(:, :, frame);

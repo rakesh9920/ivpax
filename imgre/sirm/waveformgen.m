@@ -16,7 +16,7 @@ t = (-timeDelay):(1/sampleFreq):(timeLength-timeDelay);
 switch pulseType
     case 'gaussian'
         %fbw = simget(options, 'GaussFractBandwidth', 0.5);
-        fbw = 0.5;
+        fbw = options.fbw;
         signal = amplitude.*gauspuls(t,freq,fbw);
         
     case 'puretone'

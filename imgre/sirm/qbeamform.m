@@ -1,30 +1,31 @@
 function [bfline] = qbeamform(rxsignals, txpts, rxpts, fldpts)
 
 numfldpts = size(fldpts,2);
-[numsigs siglength] = size(rxsignals);
+[numsigs siglength numinst] = size(rxsignals);
 soundspeed = 1500;
 sampfreq = 40e6;
 
-txdist = sqrt(sqdistances(txpts, fldpts));
-rxdist = sqrt(sqdistances(rxpts, fldpts));
-totaldist = rxdist + repmat(txdist,4,numfldpts);
+txdist = sqrt(sqdistance(txpts, fldpts));
+rxdist = sqrt(sqdistance(rxpts, fldpts));
+totaldist = rxdist + repmat(txdist,4,1);
 
-bfline = zeros(1, numfldpts);
+bfline = zeros(1, numfldpts, numinst);
 
-for fp = 1:numfldpts
-    
-    dist = totaldist(:, fp);
-    
-    delays = round(dist./soundspeed.*sampfreq);
-    
-    sum = 0;
-    for d = 1:length(delays)
-        if delays(d) > size(rxsignals, 2) || delays(d) < 1
-            continue
+for inst = 1:numinst
+    for fp = 1:numfldpts
+        
+        dist = totaldist(:, fp);
+        
+        delays = round(dist./soundspeed.*sampfreq);
+        
+        sum = 0;
+        for d = 1:length(delays)
+            if delays(d) > size(rxsignals, 2) || delays(d) < 1
+                continue
+            end
+            sum = sum + rxsignals(d, delays(d), inst);
         end
-        sum = sum + rxsignals(d, delays(d));
+        
+        bfline(1, fp, inst) = sum;
     end
-
-    bfline(fp) = sum;
 end
-
