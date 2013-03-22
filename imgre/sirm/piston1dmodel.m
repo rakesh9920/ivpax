@@ -18,7 +18,7 @@ plot3(rx4(1,:),rx4(2,:),rx4(3,:),'k.');
 %% calculate spatial frequency responses
 
 [ft f] = qfft2(zeros(1,2048),40e6);
-fldpts = [zeros(1,60); zeros(1,60); linspace(0.01,0.02,60)];
+fldpts = [zeros(1,60); zeros(1,60); linspace(0.025,0.035,60)];
 f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 
 htx1 = sfr(tx1, fldpts, f, 1500, S1);
@@ -27,7 +27,7 @@ hrx2 = sfr(rx2, fldpts, f, 1500, S2);
 hrx3 = sfr(rx3, fldpts, f, 1500, S2);
 hrx4 = sfr(rx4, fldpts, f, 1500, S2);
 
-%% convert to 2-sided DFT
+% convert to 2-sided DFT
 HTX1 = [htx1(1:(end-1),:)./2; conj(htx1(end,:))./2; conj(flipud(htx1(2:(end-1),:)))./2];
 HRX1 = [hrx1(1:(end-1),:)./2; conj(hrx1(end,:))./2; conj(flipud(hrx1(2:(end-1),:)))./2];
 HRX2 = [hrx2(1:(end-1),:)./2; conj(hrx2(end,:))./2; conj(flipud(hrx2(2:(end-1),:)))./2];
@@ -60,18 +60,19 @@ rhoH20 = 1000;
 f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 %RX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HRX1.*F2V);
 %RTX1SIG = (TXSIG.*(1i.*(omega.')).*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HTX1.*F2X);
-TXSIG = repmat(TXSIG,1,size(HTX1,2));
-RX1SIG = (TXSIG.*HTX1.*HRX1);
-RX2SIG = (TXSIG.*HTX1.*HRX2);
-RX3SIG = (TXSIG.*HTX1.*HRX3);
-RX4SIG = (TXSIG.*HTX1.*HRX4);
-%RTX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HTX1.*F2V);
+TXSIG2 = repmat(TXSIG,1,size(HTX1,2));
+RX1SIG = (TXSIG2.*HTX1.*HRX1);
+RX2SIG = (TXSIG2.*HTX1.*HRX2);
+RX3SIG = (TXSIG2.*HTX1.*HRX3);
+RX4SIG = (TXSIG2.*HTX1.*HRX4);
+RTX1SIG = (TXSIG2.*HTX1.*HTX1);
 %figure; plot(ifft(RX1SIG,'symmetric'));
 %figure; plot(ifft(RTX1SIG,'symmetric'));
 rx1sig = ifft(RX1SIG,'symmetric');
 rx2sig = ifft(RX2SIG,'symmetric');
 rx3sig = ifft(RX3SIG,'symmetric');
 rx4sig = ifft(RX4SIG,'symmetric');
+rtx1sig = ifft(RTX1SIG,'symmetric');
 
 %% beamform receive signals
 
@@ -85,7 +86,7 @@ rxpts(:,2) = [0.0012*cos(3*pi/4); 0.0012*sin(3*pi/4); 0];
 rxpts(:,3) = [0.0012*cos(5*pi/4); 0.0012*sin(5*pi/4); 0];
 rxpts(:,4) = [0.0012*cos(7*pi/4); 0.0012*sin(7*pi/4); 0];
 
-fldpts = [zeros(1,2049); zeros(1,2049); 0:3.75e-5:0.0768];
+fldpts = [zeros(1,2049); zeros(1,2049); 0:1.875e-5:0.0384];
 
 bfsig = qbeamform(rxsignals, txpts, rxpts, fldpts);
 

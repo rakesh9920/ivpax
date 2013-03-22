@@ -28,7 +28,7 @@ for frame = 1:(numOfFrames - 1)
     
     rf1temp = bfm(:, :, frame);
     rf2temp = bfm(:, :, frame + 1);
-    parfor line = 1:numOfLines
+    for line = 1:numOfLines %par
         
         rf1 = rf1temp(line, :);
         rf2 = rf2temp(line, :);
@@ -51,6 +51,7 @@ for frame = 1:(numOfFrames - 1)
                 back2 = front2 + corrSize - 1;
                 
                 xc(kernel, :)  = xcorr(rf1(front1:back1), rf2(front1:back1), 'coeff');
+      
             end
             
             if useFilter
@@ -61,6 +62,11 @@ for frame = 1:(numOfFrames - 1)
             else
                 corrtemp(1, front2:back2) = xc;
                 [val ind] = max(xc);
+                
+                if isnan(val)
+                    ind = samplesPerKernel;
+                end
+                
                 imgtemp(1, tstep) = ind - samplesPerKernel;
             end
         end
