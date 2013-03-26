@@ -1,4 +1,5 @@
 function [xcgram] = stxcorr(vect1, vect2, nkern, noverlap)
+% Short-term cross-correlation
 
 nsamples = size(vect1, 2);
 

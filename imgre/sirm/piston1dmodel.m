@@ -1,4 +1,4 @@
-% 1D circular piston model with 1tx, 4 rx 
+%1D circular piston model with 1tx, 4 rx 
 
 %% meshing
 
@@ -90,6 +90,11 @@ fldpts = [zeros(1,2049); zeros(1,2049); 0:1.875e-5:0.0384];
 
 bfsig = qbeamform(rxsignals, txpts, rxpts, fldpts);
 
+%%
+
+dmat = 1500.*25e-9.*stdoppler(bfsig, 50, 5);
+figure; imagesc(squeeze(diff(dmat,1,3).*60),[-0.02 0.02]);
+
 %% ++ GRAVEYARD ++ %%
 % calculate piston impedance transfer function
 % zeta = 0.5;
@@ -100,7 +105,7 @@ bfsig = qbeamform(rxsignals, txpts, rxpts, fldpts);
 % t = 50e-6;
 % a = 0.0011;
 % %a = 150e-6;
-% E = 200e9;
+E = 200e9;
 % v = 0.24;
 % f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 % omega = 2*pi.*f2s;
