@@ -25,5 +25,7 @@ for fr = 1:numframes
     end
 end
 
+sfield(isnan(sfield)) = 0;
+
 end
 

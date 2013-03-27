@@ -54,7 +54,9 @@ clear htx1 hrx1 hrx2 hrx3 hrx4 ft f;
 opt.pulseType = 'gaussian';
 opt.timeDelay = 0.22e-5;
 opt.timeLength = 5.12e-5;
-opt.fbw = 0.10;
+opt.fbw = 0.50;
+opt.sampleFreq = 40e6;
+opt.centerFreq = 1e6;
 txsig = waveformgen(opt);
 txsig(end) = [];
 TXSIG = fft(txsig).'; % 
@@ -101,16 +103,38 @@ fldpts = [zeros(1,2049); zeros(1,2049); 0:1.875e-5:0.0384];
 
 bfsig = qbeamform(rxsignals, txpts, rxpts, fldpts);
 
+figure; plot(bfsig(1,:,1));
 clear rxsignals rxpts;
-%%
+%% short-time cross correlation velocity estimates
 
-[dmat pos] = stdoppler(bfsig, 20, 10);
+[dmat pos] = stdoppler(bfsig, 60, 30);
 vmat = 1.875e-5*60.*diff(dmat,1,3);
 loc = [zeros(2, length(pos)); (pos - 1).*1.875e-5];
 sf = samplefield(vf, speeds, loc, [0.001 0.001 3.75e-4]);
 figure; imagesc(squeeze(vmat),[-0.02 0.02]);
-
+figure; imagesc(squeeze(sf(3,:,:)), [-0.02 0.02]);
+err = abs(vmat - sf(3,:,3:end));
+figure; imagesc(squeeze(err));
 clear dmat pos;
+
+%% instantaneous doppler velocity estimates
+
+vsig = 1500/2/(2*pi*10e6).*instdoppler(bfsig);
+plot(vsig);
+%%
+
+nkern = 40;
+noverlap = 20;
+step = 46;
+
+front = (step - 1)*(nkern - noverlap) + 1;
+back = front + nkern - 1;
+
+figure; plot(squeeze(xcg(1,step,1,:))); title(strcat('cc', num2str(step)));
+figure; plot(hanning(nkern).'.*bfsig(1,front:back,1)); hold on;
+plot(hanning(nkern).'.*bfsig(1,front:back,2),'r');
+title(strcat('win bfsig', num2str(step)));
+
 %% ++ GRAVEYARD ++ %%
 % calculate piston impedance transfer function
 % zeta = 0.5;

@@ -1,4 +1,4 @@
-function [dmat pos] = stdoppler(bfm, nkern, noverlap)
+function [dmat pos xcmat] = stdoppler(bfm, nkern, noverlap)
 % Doppler flow estimate using short-term cross-correlation (windowed cross-
 % correlation).
 
@@ -14,6 +14,7 @@ function [dmat pos] = stdoppler(bfm, nkern, noverlap)
 nsteps = floor((nsamples - noverlap)/(nkern - noverlap));
 
 dmat = zeros(nlines, nsteps, nframes - 1);
+xcmat = zeros(nlines, nsteps, nframes - 1, 1024*2 - 1);
 
 for frame = 1:(nframes - 1)
    
@@ -22,11 +23,13 @@ for frame = 1:(nframes - 1)
         vect1 = bfm(line, :, frame);
         vect2 = bfm(line, :, frame + 1);
         
-        [xcg pos] = stxcorr(vect1, vect2, nkern, noverlap);
+        [xcg pos] = stxcorr(vect1, vect2, nkern, noverlap, 'hanning');
+        
+        xcmat(line, :, frame, :) = reshape(xcg.', 1, nsteps, 1, []);
         
         [val ind] = max(xcg, [], 1);
         
-        dmat(line, :, frame) = ind - nkern;
+        dmat(line, :, frame) = ind - 2047;
     end
 end
 

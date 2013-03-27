@@ -2,10 +2,10 @@ function [signal] = waveformgen(options)
 
 pulseType = options.pulseType;
 amplitude = 1;%simget(options, 'Amplitude', 1);
-sampleFreq = 40e6;%simget(options, 'SampleFreq', 40e6);
+sampleFreq = options.sampleFreq;%simget(options, 'SampleFreq', 40e6);
 timeDelay = options.timeDelay;%simget(options, 'TimeDelay', 0);
 timeLength = options.timeLength;%simget(options, 'TimeLength', 10e-6);
-freq = 10e6;%simget(options, 'Frequency', 1e6);
+freq = options.centerFreq;%simget(options, 'Frequency', 1e6);
 
 if ~ischar(pulseType)
     message(error('waveformgen:Invalid pulse type'));
