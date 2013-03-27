@@ -52,9 +52,9 @@ clear htx1 hrx1 hrx2 hrx3 hrx4 ft f;
 %% create pulse time signal and pulse spectrum
 
 opt.pulseType = 'gaussian';
-opt.timeDelay = 0.04e-5;
+opt.timeDelay = 0.22e-5;
 opt.timeLength = 5.12e-5;
-opt.fbw = 0.80;
+opt.fbw = 0.10;
 txsig = waveformgen(opt);
 txsig(end) = [];
 TXSIG = fft(txsig).'; % 
@@ -106,8 +106,8 @@ clear rxsignals rxpts;
 
 [dmat pos] = stdoppler(bfsig, 20, 10);
 vmat = 1.875e-5*60.*diff(dmat,1,3);
-loc = (pos - 1).*1.875e-5;
-
+loc = [zeros(2, length(pos)); (pos - 1).*1.875e-5];
+sf = samplefield(vf, speeds, loc, [0.001 0.001 3.75e-4]);
 figure; imagesc(squeeze(vmat),[-0.02 0.02]);
 
 clear dmat pos;
