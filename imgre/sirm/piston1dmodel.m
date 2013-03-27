@@ -14,12 +14,19 @@ plot3(rx1(1,:),rx1(2,:),rx1(3,:),'r.');
 plot3(rx2(1,:),rx2(2,:),rx2(3,:),'g.');
 plot3(rx3(1,:),rx3(2,:),rx3(3,:),'c.');
 plot3(rx4(1,:),rx4(2,:),rx4(3,:),'k.');
+%% define velocity field
 
+icoords = [0; 0; 0.025];
+speeds = [0; 0; 0.01];
+vf = vfield(icoords, speeds, 60, 1);
+
+clear icoords;
 %% calculate spatial frequency responses
 
 [ft f] = qfft2(zeros(1,2048),40e6);
-fldpts = [zeros(1,60); zeros(1,60); linspace(0.025,0.035,60)];
 f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
+
+fldpts = reshape(vf, 3, []);
 
 htx1 = sfr(tx1, fldpts, f, 1500, S1);
 hrx1 = sfr(rx1, fldpts, f, 1500, S2);
@@ -41,6 +48,7 @@ plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX2)), 'g:');
 plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX3)), 'c:');
 plot(fftshift(f2s.*1e-6).', fftshift(abs(HRX4)), 'k:');
 
+clear htx1 hrx1 hrx2 hrx3 hrx4 ft f;
 %% create pulse time signal and pulse spectrum
 
 opt.pulseType = 'gaussian';
@@ -54,9 +62,11 @@ TXSIG = fft(txsig).'; %
 figure; plot(txsig);
 figure; plot(fftshift(abs(TXSIG)));
 
+clear opt;
 %% calculate receive signals
 
-rhoH20 = 1000;
+%rhoH20 = 1000;
+[ft f] = qfft2(zeros(1,2048),40e6);
 f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 %RX1SIG = (TXSIG.*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HRX1.*F2V);
 %RTX1SIG = (TXSIG.*(1i.*(omega.')).*1i*2*pi*rhoH20.*(f2s.').*HTX1.*HTX1.*F2X);
@@ -74,6 +84,7 @@ rx3sig = ifft(RX3SIG,'symmetric');
 rx4sig = ifft(RX4SIG,'symmetric');
 rtx1sig = ifft(RTX1SIG,'symmetric');
 
+clear rhoH20;
 %% beamform receive signals
 
 rxsignals = [shiftdim(rx1sig, -1); shiftdim(rx2sig, -1);...
@@ -90,11 +101,16 @@ fldpts = [zeros(1,2049); zeros(1,2049); 0:1.875e-5:0.0384];
 
 bfsig = qbeamform(rxsignals, txpts, rxpts, fldpts);
 
+clear rxsignals rxpts;
 %%
 
-dmat = 1500.*25e-9.*stdoppler(bfsig, 50, 5);
-figure; imagesc(squeeze(diff(dmat,1,3).*60),[-0.02 0.02]);
+[dmat pos] = stdoppler(bfsig, 20, 10);
+vmat = 1.875e-5*60.*diff(dmat,1,3);
+loc = (pos - 1).*1.875e-5;
 
+figure; imagesc(squeeze(vmat),[-0.02 0.02]);
+
+clear dmat pos;
 %% ++ GRAVEYARD ++ %%
 % calculate piston impedance transfer function
 % zeta = 0.5;
@@ -105,7 +121,7 @@ figure; imagesc(squeeze(diff(dmat,1,3).*60),[-0.02 0.02]);
 % t = 50e-6;
 % a = 0.0011;
 % %a = 150e-6;
-E = 200e9;
+% E = 200e9;
 % v = 0.24;
 % f2s = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 % omega = 2*pi.*f2s;

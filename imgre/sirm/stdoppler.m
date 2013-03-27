@@ -1,4 +1,4 @@
-function [img] = stdoppler(bfm, nkern, noverlap)
+function [dmat pos] = stdoppler(bfm, nkern, noverlap)
 % Doppler flow estimate using short-term cross-correlation (windowed cross-
 % correlation).
 
@@ -8,12 +8,12 @@ function [img] = stdoppler(bfm, nkern, noverlap)
 %   noverlap: number of samples overlapping between windows
 %
 % Outputs:
-%   img: delay data (in samples) organized by [line, sample, frame]
+%   dmat: delay data (in samples) organized by [line, sample, frame]
 
 [nlines nsamples nframes] = size(bfm);
 nsteps = floor((nsamples - noverlap)/(nkern - noverlap));
 
-img = zeros(nlines, nsteps, nframes - 1);
+dmat = zeros(nlines, nsteps, nframes - 1);
 
 for frame = 1:(nframes - 1)
    
@@ -22,11 +22,11 @@ for frame = 1:(nframes - 1)
         vect1 = bfm(line, :, frame);
         vect2 = bfm(line, :, frame + 1);
         
-        xcg = stxcorr(vect1, vect2, nkern, noverlap);
+        [xcg pos] = stxcorr(vect1, vect2, nkern, noverlap);
         
         [val ind] = max(xcg, [], 1);
         
-        img(line, :, frame) = ind - nkern;
+        dmat(line, :, frame) = ind - nkern;
     end
 end
 
