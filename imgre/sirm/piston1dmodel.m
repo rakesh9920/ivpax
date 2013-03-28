@@ -101,7 +101,8 @@ rxpts(:,4) = [0.0012*cos(7*pi/4); 0.0012*sin(7*pi/4); 0];
 
 fldpts = [zeros(1,2049); zeros(1,2049); 0:1.875e-5:0.0384];
 
-bfsig = qbeamform(rxsignals, txpts, rxpts, fldpts);
+bfsig = gfbeamform(rxsignals, txpts, rxpts, fldpts);
+%bfisg2 = qbeamform(rxsignals, txpts, rxpts, fldpts);
 
 figure; plot(bfsig(1,:,1));
 clear rxsignals rxpts;
