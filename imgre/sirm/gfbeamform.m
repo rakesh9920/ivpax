@@ -8,7 +8,12 @@ sampfreq = 40e6;
 
 txdist = sqrt(sqdistance(txpts, fldpts));
 rxdist = sqrt(sqdistance(rxpts, fldpts));
-totaldist = rxdist + repmat(txdist,4,1);
+
+if nargout > 1
+    totaldist = rxdist;
+else
+    totaldist = rxdist + repmat(txdist,4,1);
+end
 
 bfline = zeros(1, numfldpts, numinst);
 bfmat = zeros(siglength ,numfldpts, numinst);
@@ -29,7 +34,7 @@ for inst = 1:numinst
     RX = squeeze(RXSIGNALS(:,:,inst));
     for fp = 1:numfldpts
         
-        upicbar(bar, (inst*numfldpts + fp)/(numinst*numfldpts));
+        upicbar(bar, ((inst-1)*numfldpts + fp)/(numinst*numfldpts));
         
         dist = totaldist(:, fp);
         delays = -dist./soundspeed;
