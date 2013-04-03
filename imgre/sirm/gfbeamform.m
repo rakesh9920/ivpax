@@ -1,4 +1,4 @@
-function [bfline] = gfbeamform(rxsignals, txpts, rxpts, fldpts)
+function [bfline bfmat] = gfbeamform(rxsignals, txpts, rxpts, fldpts)
 % General frequency beamformer (for synthetic RF data)
 
 numfldpts = size(fldpts,2);
@@ -11,6 +11,7 @@ rxdist = sqrt(sqdistance(rxpts, fldpts));
 totaldist = rxdist + repmat(txdist,4,1);
 
 bfline = zeros(1, numfldpts, numinst);
+bfmat = zeros(siglength ,numfldpts, numinst);
 
 nfft = 2^nextpow2(3*siglength);
 frontpad = zeros(numsigs, floor((nfft-siglength)/2), numinst);
@@ -43,8 +44,9 @@ for inst = 1:numinst
         bfsig = real(ifft(BFSIG, [], 2));
         %bfsig(delind,:) = [];
         sumsig = sum(bfsig);
-        bfline(1, fp, inst) = sumsig(size(frontpad,2)+1);
-        
+        front = size(frontpad,2)+1;
+        bfline(1, fp, inst) = sumsig(front);
+        bfmat(:, fp, inst) = sumsig(front:(front+siglength-1));
     end
 end
 end
