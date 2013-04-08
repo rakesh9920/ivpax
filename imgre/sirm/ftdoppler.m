@@ -1,91 +1,100 @@
-function [vsig ] = ftdoppler(bfm, nkern, ntsample, txdist)
+function [velocityEstimate] = ftdoppler(BfMatrix, TxDistance, nCompare, nTimeSample)
 % Doppler flow estimate using full cross-correlation
 
-[nsamples npoints nframes] = size(bfm);
+[nSample nPoint nFrame] = size(BfMatrix);
+velocityEstimate = zeros(1, nPoint, nFrame);
 
-%dmat = zeros(nlines, nsteps, nframes - 1);
-%xcmat = zeros(nlines, nsteps, nframes - 1, 1024*2 - 1);
-vsig = zeros(1, npoints, nframes);
-soundspeed = 1500;
-samplefreq = 40e6;
-
-if mod(nkern,2) == 0
-    nkern = nkern + 1;
+% global constants
+global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
+if isempty(SOUND_SPEED)
+    SOUND_SPEED = 1500;
+end
+if isempty(SAMPLE_FREQUENCY)
+    SAMPLE_FREQUENCY = 40e6;
+end
+if isempty(PULSE_REPITITION_RATE)
+    PULSE_REPITITION_RATE = 60;
 end
 
-if mod(ntsample,2) == 0
-    ntsample = ntsample + 1;
+% make comparison and time sample windows odd so that the midpoint is an
+% integer
+if mod(nCompare, 2) == 0
+    nCompare = nCompare + 1;
+end
+if mod(nTimeSample, 2) == 0
+    nTimeSample = nTimeSample + 1;
 end
 
-ntsamplehalf = (ntsample-1)/2;
-nkernhalf = (nkern-1)/2;
+TxSample = round(TxDistance/SOUND_SPEED*SAMPLE_FREQUENCY);
 
-bar = upicbar('Calculating velocity...');
-for frame = 1:(nframes - 1)
-
+progressBar = upicbar('Calculating velocity...');
+for frame = 1:(nFrame - 1)
     
-    for pt = 1430%1:npoints
+    for point1 = 1:nPoint
         
-        upicbar(bar, ((frame-1)*npoints+pt)/((nframes-1)*npoints));
+        upicbar(progressBar, ((frame - 1)*nPoint + point1)/((nFrame - 1)...
+            *nPoint));
         
-        txdelay1 = round(txdist(1, pt)/soundspeed*samplefreq);
+        % calculate windowed time signal for beamformed point 1
+        txDelay1 = TxSample(1,point1);
+        BfSignal1 = windowsignal(BfMatrix(:, point1, frame), ...
+            txDelay1, nTimeSample);
         
-        tfront = txdelay1 - ntsamplehalf;
-        if tfront < 1
-            tfront = 1;
+        %plot(BfSignal1); hold on;
+        
+        % calculate window of beamformed points to compare to
+        compareWinFront = point1 - (nCompare - 1)/2;
+        compareWinBack = point1 + (nCompare - 1)/2;
+        
+        if compareWinFront < 1
+            compareWinFront = point1;
         end
-        tback = txdelay1 + ntsamplehalf;
-        if tback > nsamples
-            tback = nsamples;
-        end
-        
-        win1 = [zeros(tfront-1, 1); rectwin(tback-tfront+1); zeros(nsamples-tback,1)];
-        %vect1 = bfm(tfront:tback, pt, frame);
-        vect1 = win1.*bfm(:, pt, frame);
-        
-        plot(vect1); hold on;
-        
-        
-        dfront = pt - nkernhalf;
-        if dfront < 1
-            dfront = pt;
-        end
-        dback = pt + nkernhalf;
-        if dback > npoints
-            dback = npoints;
+        if compareWinBack > nPoint
+            compareWinBack = nPoint;
         end
         
-        xclist = zeros(1, dfront - dback + 1); ind = 1;
+        XcorrList = zeros(1, compareWinFront - compareWinBack + 1);
         
-        dvect = dfront:dback;
-        for pt2 = dvect
+        for point2 = compareWinFront:compareWinBack
             
-            txdelay2 = round(txdist(1, pt2)/soundspeed*samplefreq);
+            txDelay2 = TxSample(1,point2);
             
-            tfront = txdelay2 - ntsamplehalf;
-            if tfront < 1
-                tfront = 1;
-            end
-            tback = txdelay2 + ntsamplehalf;
-            if tback > nsamples
-                tback = nsamples;
-            end
+            BfSignal2 = windowsignal(BfMatrix(:, point2, frame + 1), ...
+                txDelay2, nTimeSample);
             
-            win2 = [zeros(tfront-1, 1); rectwin(tback-tfront+1); zeros(nsamples-tback,1)];
-            %vect2 = bfm(tfront:tback, pt2, frame + 1);
-            vect2 = win2.*bfm(:, pt2, frame + 1);
-            xclist(ind) = max(xcorr(vect1, vect2));
-            ind = ind + 1;
+            XcorrList(point2-compareWinFront+1) = max(xcorr(BfSignal1, BfSignal2));
             
-            plot(vect2, 'r');
+            %plot(vect2, 'r');
         end
         
-        [val ind] = max(xclist);
-        vsig(1, pt, frame) = (dvect(ind) - pt)*1.875e-5/(1/60);
+        [~, index] = max(XcorrList);
         
-        
+        point2 = compareWinFront + index - 1;
+        delay = TxDistance(1,point2) - TxDistance(1,point1);
+
+        velocityEstimate(1, point1, frame) = delay*PULSE_REPITITION_RATE;
     end
 end
 
+end
+
+function [winSignal] = windowsignal(signal, midpoint, winWidth)
+
+nSample = size(signal, 1);
+
+front = midpoint - (winWidth - 1)/2;
+back = midpoint + (winWidth - 1)/2;
+
+if front < 1
+    front = 1;
+end
+if back > nSample;
+    back = nSample;
+end
+
+win = [zeros(front - 1, 1); hanning(back - front + 1); ...
+    zeros(nSample - back, 1)];
+            
+winSignal = signal.*win;
 
 end

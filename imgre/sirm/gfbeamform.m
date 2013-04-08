@@ -47,7 +47,6 @@ for inst = 1:numinst
         delays(delind) = [];
         BFSIG = exp(-2*pi*1i.*delays*freq).*RX;
         bfsig = real(ifft(BFSIG, [], 2));
-        %bfsig(delind,:) = [];
         sumsig = sum(bfsig);
         front = size(frontpad,2)+1;
         bfline(1, fp, inst) = sumsig(front);
