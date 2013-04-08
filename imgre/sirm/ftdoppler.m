@@ -62,7 +62,7 @@ for frame = 1:(nFrame - 1)
             BfSignal2 = windowsignal(BfMatrix(:, point2, frame + 1), ...
                 txDelay2, nTimeSample);
             
-            XcorrList(point2-compareWinFront+1) = max(xcorr(BfSignal1, BfSignal2));
+            XcorrList(point2-compareWinFront+1) = max(xcorr(BfSignal1, BfSignal2, 'coeff'));
             
             %plot(vect2, 'r');
         end

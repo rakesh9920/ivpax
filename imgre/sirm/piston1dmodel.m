@@ -122,8 +122,15 @@ clear dmat pos;
 
 vsig = 1500/2/(2*pi*10e6).*instdoppler(bfsig);
 plot(vsig);
-%%
+%% full-time cross correlation velocity estimates
 
+TxDist = sqrt(sqdistance(txpts, fldpts));
+
+VelE = ftdoppler(bfmat, TxDist, 20, 200);
+
+
+
+%%
 nkern = 40;
 noverlap = 20;
 step = 46;
