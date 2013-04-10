@@ -9,7 +9,7 @@ SAMPLE_FREQUENCY = 40e6;
 PULSE_REPITITION_RATE = 60;
 
 % define runtime flags
-global VERBOSE
+%global VERBOSE
 
 %% meshing
 
@@ -101,7 +101,6 @@ if (exist('VERBOSE', 'var'))
 end
 
 clear opt;
-
 %% synthesize receive signals
 
 % synthesize scatterer signals
