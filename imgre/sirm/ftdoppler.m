@@ -67,7 +67,12 @@ for frame = 1:(nFrame - 1)
             %plot(vect2, 'r');
         end
         
-        [~, index] = max(XcorrList);
+        [value index] = max(XcorrList);
+        
+        if value < 0.50
+            velocityEstimate(1, point1, frame) = 0;
+            continue
+        end
         
         point2 = compareWinFront + index - 1;
         delay = TxDistance(1,point2) - TxDistance(1,point1);

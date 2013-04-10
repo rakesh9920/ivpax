@@ -1,11 +1,12 @@
-function [grid] = scattergen(density, gridsz, amprange, phaserange)
+function [list coords] = scattergen(density, gridsz, amprange, phaserange)
 
 % density, grid size, amplitude range, phase range
 
 numrows = gridsz(1);
 numcols = gridsz(2);
+numlayers = gridsz(3);
 
-numofcells = numrows*numcols;
+numofcells = numrows*numcols*numlayers;
 numofpoints = round(density*numofcells);
 
 phmin = phaserange(1);
@@ -15,8 +16,9 @@ ampmin = amprange(1);
 ampmax = amprange(2);
 amprange = ampmax - ampmin;
 
-rgrid = zeros(numrows, numcols);
-igrid = zeros(numrows, numcols);
+%grid = zeros(numrows, numcols, numlayers);
+list = zeros(1, numofpoints);
+coords = zeros(3, numofpoints);
 
 for p = 1:numofpoints
     
@@ -28,17 +30,20 @@ for p = 1:numofpoints
     while true
         x = 1 + round(rand*(numrows - 1));
         y = 1 + round(rand*(numcols - 1));
+        z = 1 + round(rand*(numlayers - 1));
         
-        if rgrid(x, y) == 0
+        if ~all([any(coords(1,:) == x) any(coords(2,:) == y) any(coords(3,:) == z)])
            
-            rgrid(x, y) = ramp;
-            igrid(x, y) = iamp;
+            %grid(x,y,z) = ramp + 1i*iamp;
+            list(p) = ramp + 1i*iamp;
+            coords(1,p) = x;
+            coords(2,p) = y;
+            coords(3,p) = z;
             break;
         end
     end
 end
 
-grid = rgrid + 1i.*igrid;
 
 end
 

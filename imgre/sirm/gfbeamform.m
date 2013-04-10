@@ -3,16 +3,22 @@ function [bfline bfmat] = gfbeamform(rxsignals, txpts, rxpts, fldpts)
 
 numfldpts = size(fldpts,2);
 [numsigs siglength numinst] = size(rxsignals);
-soundspeed = 1500;
-sampfreq = 40e6;
 
-txdist = sqrt(sqdistance(txpts, fldpts));
-rxdist = sqrt(sqdistance(rxpts, fldpts));
+global SOUND_SPEED SAMPLE_FREQUENCY
+if isempty(SOUND_SPEED)
+    SOUND_SPEED = 1500;
+end
+if isempty(SAMPLE_FREQUENCY)
+    SAMPLE_FREQUENCY = 40e6;
+end
+
+txdelay = sqrt(sqdistance(txpts, fldpts))./SOUND_SPEED;
+rxdelay = sqrt(sqdistance(rxpts, fldpts))./SOUND_SPEED;
 
 if nargout > 1
-    totaldist = rxdist;
+    totaldelay = rxdelay;
 else
-    totaldist = rxdist + repmat(txdist,4,1);
+    totaldelay = bsxfun(@plus, rxdelay, txdelay); %rxdist + repmat(txdist,4,1);
 end
 
 bfline = zeros(1, numfldpts, numinst);
@@ -25,7 +31,7 @@ padsignals = [frontpad rxsignals backpad];
 
 RXSIGNALS = fft(padsignals, [], 2);
 
-f = sampfreq/2*linspace(0,1,nfft/2+1);
+f = SAMPLE_FREQUENCY/2*linspace(0,1,nfft/2+1);
 freq = [f(1:end-1) -f(end) -fliplr(f(2:(end-1)))];
 
 bar = upicbar('Beamforming ...');
@@ -36,9 +42,8 @@ for inst = 1:numinst
         
         upicbar(bar, ((inst-1)*numfldpts + fp)/(numinst*numfldpts));
         
-        dist = totaldist(:, fp);
-        delays = -dist./soundspeed;
-        delind = (delays > (siglength/sampfreq)) | (delays < -(siglength/sampfreq));
+        delays = -totaldelay(:, fp);
+        delind = (delays > (siglength/SAMPLE_FREQUENCY)) | (delays < -(siglength/SAMPLE_FREQUENCY));
         
         if all(delind)
             continue
@@ -49,7 +54,7 @@ for inst = 1:numinst
         bfsig = real(ifft(BFSIG, [], 2));
         sumsig = sum(bfsig);
         front = size(frontpad,2)+1;
-        bfline(1, fp, inst) = sumsig(front);
+        bfline(1, fp, inst) = sumsig(front + round(txdelay(:,fp).*SAMPLE_FREQUENCY));
         bfmat(:, fp, inst) = sumsig(front:(front+siglength-1));
     end
 end
