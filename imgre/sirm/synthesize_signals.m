@@ -148,7 +148,6 @@ FlowRx3Sig = ifft(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx3Sfr, 'symmetric
 FlowRx4Sig = ifft(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx4Sfr, 'symmetric');
 
 % synthesize speckle signals
-
 SpeckleRx1Sig = ifft(sum(bsxfun(@times, PulseSpect, SpeckleTx1Complex).*SpeckleRx1Sfr, 2), 'symmetric');
 SpeckleRx2Sig = ifft(sum(bsxfun(@times, PulseSpect, SpeckleTx1Complex).*SpeckleRx2Sfr, 2), 'symmetric');
 SpeckleRx3Sig = ifft(sum(bsxfun(@times, PulseSpect, SpeckleTx1Complex).*SpeckleRx3Sfr, 2), 'symmetric');

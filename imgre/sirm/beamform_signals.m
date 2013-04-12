@@ -20,5 +20,5 @@ FieldPos = [zeros(1,54); zeros(1,54); 0.025:1.875e-6:0.0251];
 BfSigMat = gfbeamform2(RxSigMat(:,:,:), TxPos, RxPos, FieldPos, 150);
 
 if (exist('VERBOSE', 'var'))
-    figure; plot(bfsig(1,:,1));
+    figure; plot(BfSigMat(:,1,1));
 end

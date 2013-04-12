@@ -2,7 +2,7 @@ function [VelocityEst] = ftdoppler2(BfSigMat, FieldPos, pointNo)
 % Doppler flow estimate using full cross-correlation
 
 [nSample nPoint nFrame] = size(BfSigMat);
-VelocityEst = zeros(1, 1, nFrame - 1);
+VelocityEst = zeros(1, nFrame - 1);
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -35,9 +35,14 @@ for frame = 1:(nFrame - 1)
         XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
     end
     
-    [~, maxInd] = max(XcorrList);
+    [maxValue, maxInd] = max(XcorrList);
     
-    VelocityEst(1, 1, frame) = TravelSpeed(maxInd);
+    if maxValue < 0.9
+       VelocityEst(frame) = 0; 
+       continue
+    end
+    
+    VelocityEst(frame) = TravelSpeed(maxInd);
 end
 
 end
