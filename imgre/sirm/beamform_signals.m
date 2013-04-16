@@ -22,3 +22,27 @@ BfSigMat = gfbeamform2(RxSigMat(:,:,:), TxPos, RxPos, FieldPos, 150);
 if (exist('VERBOSE', 'var'))
     figure; plot(BfSigMat(:,1,1));
 end
+
+%%
+
+del = FieldPos(:,1) - RxPos(:,1);
+r = sqrt(sum(del.^2));
+theta = acos(del(3)/r);
+phi = atan(del(2)/del(1));
+
+R = -0.01:1.875e-6:0.001;
+x = R.*sin(theta).*cos(phi);
+y = R.*sin(theta).*sin(phi);
+z = R.*cos(theta);
+
+pts = bsxfun(@plus, FieldPos(:,1), [x; y; z]);
+
+figure;
+plot3(Tx1Mesh(1,:), Tx1Mesh(2,:), Tx1Mesh(3,:),'b.'); hold on;
+plot3(Rx1Mesh(1,:),Rx1Mesh(2,:),Rx1Mesh(3,:),'r.');
+plot3(Rx2Mesh(1,:),Rx2Mesh(2,:),Rx2Mesh(3,:),'g.');
+plot3(Rx3Mesh(1,:),Rx3Mesh(2,:),Rx3Mesh(3,:),'c.');
+plot3(Rx4Mesh(1,:),Rx4Mesh(2,:),Rx4Mesh(3,:),'k.');
+plot3(FieldPos(1,1),FieldPos(2,1),FieldPos(3,1),'ro');
+plot3(RxPos(1,1),RxPos(2,1),RxPos(3,1),'go');
+plot3(pts(1,:),pts(2,:),pts(3,:),'o');
