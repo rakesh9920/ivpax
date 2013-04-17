@@ -7,7 +7,7 @@ SAMPLE_FREQUENCY = 40e6; % [Hz]
 PULSE_REPITITION_RATE = 250; % [Hz]
 
 % define runtime flags
-global VERBOSE
+%global VERBOSE
 
 [~, Freq] = qfft2(zeros(1,2048), SAMPLE_FREQUENCY);
 Freq2S = [Freq(1:end-1) -Freq(end) -fliplr(Freq(2:(end-1)))];
@@ -33,8 +33,8 @@ end
 
 simulationTime = 1; % [s]
 
-FlowInitialPos = [0; 0; 0.020];
-FlowVelocity = [0; 0; 0.01];
+FlowInitialPos = [0 -0.001 0.018; 0 0 0.018; 0.020 0.025 0.025];
+FlowVelocity = [0 0.005 -0.02; 0 0 -0.02; 0.01 0 0];
 FlowField = vfield(FlowInitialPos, FlowVelocity, PULSE_REPITITION_RATE, ...
     simulationTime);
 
@@ -64,17 +64,29 @@ end
 %% Plot full geometry
 
 if (exist('VERBOSE', 'var'))
-   figure;
-   plot3(SpecklePos(1,:),SpecklePos(2,:),SpecklePos(3,:),'.');
-   hold on; xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
-   quiver3(FlowInitialPos(1,:), FlowInitialPos(2,:), FlowInitialPos(3,:), ...
-        FlowVelocity(1,:), FlowVelocity(2,:), FlowVelocity(3,:),0,'ro');
+    figure;
+    plot3(SpecklePos(1,:),SpecklePos(2,:),SpecklePos(3,:),'.');
+    hold on; xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
     plot3(Tx1Mesh(1,:), Tx1Mesh(2,:), Tx1Mesh(3,:),'b.');
     plot3(Rx1Mesh(1,:),Rx1Mesh(2,:),Rx1Mesh(3,:),'r.');
     plot3(Rx2Mesh(1,:),Rx2Mesh(2,:),Rx2Mesh(3,:),'g.');
     plot3(Rx3Mesh(1,:),Rx3Mesh(2,:),Rx3Mesh(3,:),'c.');
     plot3(Rx4Mesh(1,:),Rx4Mesh(2,:),Rx4Mesh(3,:),'k.');
+    quiver3(FlowInitialPos(1,:), FlowInitialPos(2,:), FlowInitialPos(3,:), ...
+        FlowVelocity(1,:), FlowVelocity(2,:), FlowVelocity(3,:),'ro');
+
+    figure;
+    plot3(SpecklePos(1,:),SpecklePos(2,:),SpecklePos(3,:),'.');
+    hold on; xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
+    plot3(Tx1Mesh(1,:), Tx1Mesh(2,:), Tx1Mesh(3,:),'b.');
+    plot3(Rx1Mesh(1,:),Rx1Mesh(2,:),Rx1Mesh(3,:),'r.');
+    plot3(Rx2Mesh(1,:),Rx2Mesh(2,:),Rx2Mesh(3,:),'g.');
+    plot3(Rx3Mesh(1,:),Rx3Mesh(2,:),Rx3Mesh(3,:),'c.');
+    plot3(Rx4Mesh(1,:),Rx4Mesh(2,:),Rx4Mesh(3,:),'k.');
+    plot3(squeeze(FlowField(1,:,:)).', squeeze(FlowField(2,:,:)).', ...
+        squeeze(FlowField(3,:,:)).', 'o');
 end
+
 %% Calculate spatial frequency responses for moving scatterers %%
 
 FlowFieldPts = reshape(FlowField, 3, []);
@@ -160,9 +172,9 @@ Rx3Sig = bsxfun(@plus, FlowRx3Sig, SpeckleRx3Sig);
 Rx4Sig = bsxfun(@plus, FlowRx4Sig, SpeckleRx4Sig);
 
 if (exist('VERBOSE', 'var'))
-    figure; plot(Rx1Sig); xlabel('sample'); 
-    figure; plot(Rx2Sig); xlabel('sample'); 
-    figure; plot(Rx3Sig); xlabel('sample'); 
-    figure; plot(Rx4Sig); xlabel('sample'); 
+    figure; plot(Rx1Sig); xlabel('sample');
+    figure; plot(Rx2Sig); xlabel('sample');
+    figure; plot(Rx3Sig); xlabel('sample');
+    figure; plot(Rx4Sig); xlabel('sample');
 end
 
