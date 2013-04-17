@@ -49,7 +49,7 @@ for pos = 1:nFieldPos
         BfPointList(:,front:back) = bsxfun(@plus, FieldPos(:,pos), [X; Y; Z]);
     end
  
-    BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, BfPointList, 50);
+    BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, BfPointList, 150);
     
     for rx = 1:nSig
         

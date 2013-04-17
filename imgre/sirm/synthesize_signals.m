@@ -33,7 +33,7 @@ end
 
 simulationTime = 1; % [s]
 
-FlowInitialPos = [0 -0.001 0.018; 0 0 0.018; 0.020 0.025 0.025];
+FlowInitialPos = [0 -0.0025 0.018; 0 0 0.018; 0.00208 0.00208 0.00208];
 FlowVelocity = [0 0.005 -0.02; 0 0 -0.02; 0.01 0 0];
 FlowField = vfield(FlowInitialPos, FlowVelocity, PULSE_REPITITION_RATE, ...
     simulationTime);
@@ -87,6 +87,24 @@ if (exist('VERBOSE', 'var'))
         squeeze(FlowField(3,:,:)).', 'o');
 end
 
+figure;
+for i = 1:250
+    plot3(SpecklePos(1,:),SpecklePos(2,:),SpecklePos(3,:),'.');
+    hold on; xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]');
+    plot3(Tx1Mesh(1,:), Tx1Mesh(2,:), Tx1Mesh(3,:),'b.');
+    plot3(Rx1Mesh(1,:),Rx1Mesh(2,:),Rx1Mesh(3,:),'r.');
+    plot3(Rx2Mesh(1,:),Rx2Mesh(2,:),Rx2Mesh(3,:),'g.');
+    plot3(Rx3Mesh(1,:),Rx3Mesh(2,:),Rx3Mesh(3,:),'c.');
+    plot3(Rx4Mesh(1,:),Rx4Mesh(2,:),Rx4Mesh(3,:),'k.');
+    plot3(squeeze(FlowField(1,1,i)), squeeze(FlowField(2,1,i)), ...
+        squeeze(FlowField(3,1,i)), 'o');
+    plot3(squeeze(FlowField(1,2,i)), squeeze(FlowField(2,2,i)), ...
+        squeeze(FlowField(3,2,i)), 'ro');
+    plot3(squeeze(FlowField(1,3,i)), squeeze(FlowField(2,3,i)), ...
+        squeeze(FlowField(3,3,i)), 'go');
+    pause(0.01);
+end
+
 %% Calculate spatial frequency responses for moving scatterers %%
 
 FlowFieldPts = reshape(FlowField, 3, []);
@@ -98,16 +116,24 @@ FlowRx2Sfr = convert2sided(sfr(Rx2Mesh, FlowFieldPts, Freq, SOUND_SPEED, Rx1Area
 FlowRx3Sfr = convert2sided(sfr(Rx3Mesh, FlowFieldPts, Freq, SOUND_SPEED, Rx1Area), 1);
 FlowRx4Sfr = convert2sided(sfr(Rx4Mesh, FlowFieldPts, Freq, SOUND_SPEED, Rx1Area), 1);
 
+FlowTx1Sfr = reshape(FlowTx1Sfr, size(Freq2S, 2), [], size(FlowField, 3));
+FlowRx1Sfr = reshape(FlowRx1Sfr, size(Freq2S, 2), [], size(FlowField, 3));
+FlowRx2Sfr = reshape(FlowRx2Sfr, size(Freq2S, 2), [], size(FlowField, 3));
+FlowRx3Sfr = reshape(FlowRx3Sfr, size(Freq2S, 2), [], size(FlowField, 3));
+FlowRx4Sfr = reshape(FlowRx4Sfr, size(Freq2S, 2), [], size(FlowField, 3));
+
 if (exist('VERBOSE', 'var'))
-    figure;
-    plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowTx1Sfr)), 'b');
-    figure;
-    plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx1Sfr)), 'r:');
-    hold on; xlabel('frequency [MHz]');
-    plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx2Sfr)), 'g:');
-    plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx3Sfr)), 'c:');
-    plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx4Sfr)), 'k:');
+%     figure;
+%     plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowTx1Sfr)), 'b');
+%     figure;
+%     plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx1Sfr)), 'r:');
+%     hold on; xlabel('frequency [MHz]');
+%     plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx2Sfr)), 'g:');
+%     plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx3Sfr)), 'c:');
+%     plot(fftshift(Freq2s.*1e-6).', fftshift(abs(FlowRx4Sfr)), 'k:');
 end
+
+
 
 %% Calculate spatial frequency responses for speckle scatterers %%
 
@@ -154,10 +180,10 @@ SpeckleTx1Complex = SpeckleTx1Sfr.*repmat(exp(-1i.*2.*pi.*SpecklePhase).*Speckle
     size(SpeckleTx1Sfr, 1), 1);
 
 % synthesize moving scatterer signals
-FlowRx1Sig = ifft(bsxfun(@times ,PulseSpect, FlowTx1Sfr).*FlowRx1Sfr, 'symmetric');
-FlowRx2Sig = ifft(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx2Sfr, 'symmetric');
-FlowRx3Sig = ifft(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx3Sfr, 'symmetric');
-FlowRx4Sig = ifft(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx4Sfr, 'symmetric');
+FlowRx1Sig = ifft(sum(bsxfun(@times ,PulseSpect, FlowTx1Sfr).*FlowRx1Sfr, 2), 'symmetric');
+FlowRx2Sig = ifft(sum(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx2Sfr, 2), 'symmetric');
+FlowRx3Sig = ifft(sum(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx3Sfr, 2), 'symmetric');
+FlowRx4Sig = ifft(sum(bsxfun(@times, PulseSpect, FlowTx1Sfr).*FlowRx4Sfr, 2), 'symmetric');
 
 % synthesize speckle signals
 SpeckleRx1Sig = ifft(sum(bsxfun(@times, PulseSpect, SpeckleTx1Complex).*SpeckleRx1Sfr, 2), 'symmetric');
@@ -166,15 +192,15 @@ SpeckleRx3Sig = ifft(sum(bsxfun(@times, PulseSpect, SpeckleTx1Complex).*SpeckleR
 SpeckleRx4Sig = ifft(sum(bsxfun(@times, PulseSpect, SpeckleTx1Complex).*SpeckleRx4Sfr, 2), 'symmetric');
 
 % add flow and speckle
-Rx1Sig = bsxfun(@plus, FlowRx1Sig, SpeckleRx1Sig);
-Rx2Sig = bsxfun(@plus, FlowRx2Sig, SpeckleRx2Sig);
-Rx3Sig = bsxfun(@plus, FlowRx3Sig, SpeckleRx3Sig);
-Rx4Sig = bsxfun(@plus, FlowRx4Sig, SpeckleRx4Sig);
+Rx1Sig = squeeze(bsxfun(@plus, FlowRx1Sig, SpeckleRx1Sig));
+Rx2Sig = squeeze(bsxfun(@plus, FlowRx2Sig, SpeckleRx2Sig));
+Rx3Sig = squeeze(bsxfun(@plus, FlowRx3Sig, SpeckleRx3Sig));
+Rx4Sig = squeeze(bsxfun(@plus, FlowRx4Sig, SpeckleRx4Sig));
 
 if (exist('VERBOSE', 'var'))
-    figure; plot(Rx1Sig); xlabel('sample');
-    figure; plot(Rx2Sig); xlabel('sample');
-    figure; plot(Rx3Sig); xlabel('sample');
-    figure; plot(Rx4Sig); xlabel('sample');
+%     figure; plot(Rx1Sig); xlabel('sample');
+%     figure; plot(Rx2Sig); xlabel('sample');
+%     figure; plot(Rx3Sig); xlabel('sample');
+%     figure; plot(Rx4Sig); xlabel('sample');
 end
 
