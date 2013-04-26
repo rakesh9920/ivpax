@@ -1,4 +1,5 @@
-function [BfSigMat] = gfbeamform2(RxSigMat, TxPos, RxPos, FieldPos, nWinSample)
+function [BfSigMat] = gfbeamform2(RxSigMat, TxPos, RxPos, FieldPos, ...
+    nWinSample, varargin)
 % General frequency beamformer (for synthetic RF data)
 
 nFieldPos = size(FieldPos, 2);
@@ -12,7 +13,19 @@ if isempty(SAMPLE_FREQUENCY)
     SAMPLE_FREQUENCY = 40e6;
 end
 
-TxDelay = sqrt(sqdistance(TxPos, FieldPos))./SOUND_SPEED;
+if nargin >= 6
+   if all(lower(varargin{1}) == 'plane')
+       plane = true;
+   else
+       plane = false;
+   end
+end
+
+if plane
+    TxDelay = abs(FieldPos(3,:))./SOUND_SPEED;
+else
+    TxDelay = sqrt(sqdistance(TxPos, FieldPos))./SOUND_SPEED;
+end
 RxDelay = sqrt(sqdistance(RxPos, FieldPos))./SOUND_SPEED;
 TotalDelay = bsxfun(@plus, RxDelay, TxDelay);
 
