@@ -1,14 +1,23 @@
 function [xcgram pos] = stxcorr(vect1, vect2, nkern, noverlap, varargin)
 % Short-term cross-correlation
 
+if nargin > 4
+    params = varargin{1};
+    assert(isa(params, 'containers.Map'));
+    
+    if isKey(params, 'window')
+        window = params('window');
+    end
+end
+
 nsamples = size(vect1, 2);
 
-if nargin > 4
-    switch varargin{1}
-        case 'hanning'
-            win = hanning(nkern).';
-        otherwise
-            win = ones(1,nkern).'; 
+if exist('window', 'var')
+    switch window
+        case 'hanning'   
+            win = hanning(nsamples).';
+        case 'gaussian'
+            win = gausswin(nsamples).';
     end
 end
 

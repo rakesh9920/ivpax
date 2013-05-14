@@ -1,11 +1,7 @@
-function [VectVelEst] = xbeamestimate(RxSigMat, TxPos, RxPos, FieldPos, nCompare, delta)
+function [VectVelEst] = xbeamest(RxSigMat, TxPos, RxPos, FieldPos, nCompare, delta)
 
-[nSig nSample nFrame] = size(RxSigMat);
-nFieldPos = size(FieldPos, 2);
-
-if mod(nCompare, 2) == 0
-    nCompare = nCompare + 1;
-end
+import beamform.gfbeamform2
+import flow.ftdoppler2
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -16,9 +12,15 @@ if isempty(SAMPLE_FREQUENCY)
     SAMPLE_FREQUENCY = 40e6;
 end
 if isempty(PULSE_REPITITION_RATE)
-    PULSE_REPITITION_RATE = 60;
+    PULSE_REPITITION_RATE = 100;
 end
 
+[nSig nSample nFrame] = size(RxSigMat);
+nFieldPos = size(FieldPos, 2);
+
+if mod(nCompare, 2) == 0
+    nCompare = nCompare + 1;
+end
 
 BfPointList = zeros(3, nCompare*nSig);
 deltaR = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
@@ -28,7 +30,6 @@ VelEst = zeros(nSig, nFrame - 1);
 VectVelEst = zeros(3, nFieldPos, nFrame - 1);
 
 for pos = 1:nFieldPos
-    
     for rx = 1:nSig
         
         delPos = FieldPos(:,pos) - RxPos(:,rx);

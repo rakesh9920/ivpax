@@ -1,5 +1,17 @@
-function [velocityEstimate] = ftdoppler(BfMatrix, TxDistance, nCompare, nTimeSample)
+function [velocityEstimate] = ftdoppler(BfMatrix, TxDistance, nCompare,...
+    nTimeSample, varargin)
 % Doppler flow estimate using full cross-correlation
+
+if nargin > 4
+    params = varargin{1};
+    assert(isa(params, 'containers.Map'))
+    
+    if isKey(params, 'progress')
+        progress = params('progress');
+    else
+        progress = false;
+    end
+end
 
 [nSample nPoint nFrame] = size(BfMatrix);
 velocityEstimate = zeros(1, nPoint, nFrame);
@@ -27,20 +39,21 @@ end
 
 TxSample = round(TxDistance/SOUND_SPEED*SAMPLE_FREQUENCY);
 
-progressBar = upicbar('Calculating velocity...');
+if progress
+    progressBar = upicbar('Calculating velocity...');
+end
+
 for frame = 1:(nFrame - 1)
-    
     for point1 = 1:nPoint
-        
-        upicbar(progressBar, ((frame - 1)*nPoint + point1)/((nFrame - 1)...
-            *nPoint));
+        if progress
+            upicbar(progressBar, ((frame - 1)*nPoint + point1)/((nFrame - 1)...
+                *nPoint));
+        end
         
         % calculate windowed time signal for beamformed point 1
         txDelay1 = TxSample(1,point1);
         BfSignal1 = windowsignal(BfMatrix(:, point1, frame), ...
             txDelay1, nTimeSample);
-        
-        %plot(BfSignal1); hold on;
         
         % calculate window of beamformed points to compare to
         compareWinFront = point1 - (nCompare - 1)/2;
@@ -56,15 +69,13 @@ for frame = 1:(nFrame - 1)
         XcorrList = zeros(1, compareWinFront - compareWinBack + 1);
         
         for point2 = compareWinFront:compareWinBack
-            
             txDelay2 = TxSample(1,point2);
             
             BfSignal2 = windowsignal(BfMatrix(:, point2, frame + 1), ...
                 txDelay2, nTimeSample);
             
-            XcorrList(point2-compareWinFront+1) = max(xcorr(BfSignal1, BfSignal2, 'coeff'));
-            
-            %plot(vect2, 'r');
+            XcorrList(point2-compareWinFront+1) = max(xcorr(BfSignal1, ...
+                BfSignal2, 'coeff'));
         end
         
         [value index] = max(XcorrList);

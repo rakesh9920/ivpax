@@ -2,24 +2,42 @@ function [BfSigMat] = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
     nWinSample, varargin)
 % General frequency beamformer (for synthetic RF data)
 
-nFieldPos = size(FieldPos, 2);
-[nSignal nSample nFrame] = size(RxSigMat);
+import tools.sqdistance tools.upicbar 
+import beamform.gtbeamform
+
+% read in optional arguments
+if nargin > 5
+    keys = varargin(1:2:end);
+    values = varargin(2:2:end);
+    
+    map = containers.Map(keys, values);
+    
+    if isKey(map, 'progress')
+        progress = map('progress');
+    end
+    if isKey(map, 'plane')
+        plane = true;
+    end
+end
+
+% set defaults
+if ~exist('progress', 'var')
+    progress = false;
+end
+if ~exist('plane', 'var')
+    plane = false;
+end
 
 global SOUND_SPEED SAMPLE_FREQUENCY
 if isempty(SOUND_SPEED)
-    SOUND_SPEED = 1500;
+    SOUND_SPEED = 1500; 
 end
 if isempty(SAMPLE_FREQUENCY)
     SAMPLE_FREQUENCY = 40e6;
 end
 
-if nargin >= 6
-   if all(lower(varargin{1}) == 'plane')
-       plane = true;
-   else
-       plane = false;
-   end
-end
+nFieldPos = size(FieldPos, 2);
+[nSignal nSample nFrame] = size(RxSigMat);
 
 if plane
     TxDelay = round(abs(FieldPos(3,:))./SOUND_SPEED.*SAMPLE_FREQUENCY);
@@ -37,10 +55,15 @@ nWinSampleHalf = (nWinSample - 1)/2;
 
 BfSigMat = zeros(nWinSample, nFieldPos, nFrame);
 
-bar = upicbar('Beamforming ...');
+if progress
+    bar = upicbar('Beamforming ...');
+end
+
 for point = 1:nFieldPos
     
-    upicbar(bar, point/nFieldPos);
+    if progress
+        upicbar(bar, point/nFieldPos);
+    end
     
     Delays = TotalDelay(:, point);
     delind = ((Delays + nWinSampleHalf) > nSample | (Delays - nWinSampleHalf) < 1);
