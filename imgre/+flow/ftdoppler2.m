@@ -6,20 +6,21 @@ import tools.upicbar tools.sqdistance
 % read in optional arguments
 if nargin > 4
     keys = varargin(1:2:end);
-    values = varargin(2:2:end);
-    
-    map = containers.Map(keys, values);
-    
-    if isKey(map, 'progress')
-        progress = map('progress');
-    else
-        progress = false;
-    end
-    if isKey(map, 'interpolate')
-        interpolate = map('interpolate');
-    else
-        interpolate = 0;
-    end
+    values = varargin(2:2:end);   
+    map = containers.Map(keys, values);    
+else
+    map = containers.Map;
+end
+
+if isKey(map, 'progress')
+    progress = map('progress');
+else
+    progress = false;
+end
+if isKey(map, 'interpolate')
+    interpolate = map('interpolate');
+else
+    interpolate = 0;
 end
 
 % global constants
@@ -37,9 +38,9 @@ end
 [nSample nPoint nFrame] = size(BfSigMat);
 VelocityEst = zeros(1, nFrame - 1);
 
-TravelSpeed = -sqrt(sqdistance(FieldPos(:,pointNo), ...
+TravelSpeed = sqrt(sqdistance(FieldPos(:,pointNo), ...
     FieldPos)).*PULSE_REPITITION_RATE;
-%TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1)); %??
+TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1));
 
 if interpolate > 0
     TravelSpeedInterp = interp(TravelSpeed, interpolate);

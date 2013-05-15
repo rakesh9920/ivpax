@@ -1,4 +1,4 @@
-function [VelEst] = axialest(RxSigMat, TxPos, RxPos, FieldPos, nCompare,...
+function [VelEst, BfSigMat] = axialest(RxSigMat, TxPos, RxPos, FieldPos, nCompare,...
     delta, varargin)
 % velocity estimate along axial direction
 %
@@ -69,14 +69,14 @@ for pos = 1:nFieldPos
     switch beamformType
         case 'time'
             BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, BfPointList, ...
-                150, 'plane', plane, 'progress', progress);
+                200, 'plane', plane, 'progress', progress);
         case 'frequency'
             BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, BfPointList, ...
-                150, 'plane', plane, 'progress', progress);
+                200, 'plane', plane, 'progress', progress);
     end
     
     VelEst(1,pos,:) = ftdoppler2(BfSigMat, BfPointList, (nCompare+1)/2,...
-        'interpolate', interpolate);
+        'interpolate', interpolate, 'progress', progress);
 end
 
 end

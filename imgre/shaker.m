@@ -38,29 +38,29 @@ for i = 1:(nFrame/10)
 end
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-nCompare = 200;
+nCompare = 400;
 delta = 0.1e-6;
 FieldPos = [0; 0; 0.020];
 
-VelEst = axialest(FilteredRfc, [], RxPos, FieldPos, nCompare, delta, ...
-    'progress', true);
+[VelEst, BfSigMat] = axialest(FilteredRfc, [], RxPos, FieldPos, nCompare, delta, ...
+    'progress', true, 'plane', true, 'interpolate', 8);
 
-plot(VelEst,':.');
+plot(squeeze(VelEst),':.');
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 
-nCompare = 400;
+nCompare = 401;
 delta = 0.1e-6;
 deltaR = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
 
 FieldPos = [ones(1, nCompare).*0; zeros(1, nCompare); 0.020 + deltaR];
 
-BfSigMat = gtbeamform(FilteredRfc, [], RxPos, FieldPos, 200, 'plane', true, ...
+BfSigMat2 = gtbeamform(FilteredRfc, [], RxPos, FieldPos, 200, 'plane', true, ...
     'progress', true);
 
-VelEst = ftdoppler2(BfSigMat, FieldPos, 100, 'progress', true);
+VelEst2 = ftdoppler2(BfSigMat2, FieldPos, 200, 'progress', true);
 
-plot(VelEst,':.');
+plot(squeeze(VelEst2),':.');
 %% read in AVG daq data
 [header, ~] = readDAQ('./rfdata/control/', ones(1,128), 1, true);
 

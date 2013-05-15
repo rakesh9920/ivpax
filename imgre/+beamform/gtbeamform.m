@@ -2,35 +2,32 @@ function [BfSigMat] = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
     nWinSample, varargin)
 % General frequency beamformer (for synthetic RF data)
 
-import tools.sqdistance tools.upicbar 
+import tools.sqdistance tools.upicbar
 import beamform.gtbeamform
 
 % read in optional arguments
 if nargin > 5
     keys = varargin(1:2:end);
     values = varargin(2:2:end);
-    
     map = containers.Map(keys, values);
-    
-    if isKey(map, 'progress')
-        progress = map('progress');
-    end
-    if isKey(map, 'plane')
-        plane = true;
-    end
+else
+    map = containers.Map;
 end
 
-% set defaults
-if ~exist('progress', 'var')
+if isKey(map, 'progress')
+    progress = map('progress');
+else
     progress = false;
 end
-if ~exist('plane', 'var')
+if isKey(map, 'plane')
+    plane = map('plane');
+else
     plane = false;
 end
 
 global SOUND_SPEED SAMPLE_FREQUENCY
 if isempty(SOUND_SPEED)
-    SOUND_SPEED = 1500; 
+    SOUND_SPEED = 1500;
 end
 if isempty(SAMPLE_FREQUENCY)
     SAMPLE_FREQUENCY = 40e6;
@@ -75,12 +72,12 @@ for point = 1:nFieldPos
     BfSig = zeros(1, nWinSample, nFrame);
     for sig = 1:nSignal
         
-       if delind(sig)
-           continue
-       end
-       
-       BfSig = bsxfun(@plus, BfSig, RxSigMat(sig,...
-           (Delays(sig)-nWinSampleHalf):(Delays(sig)+nWinSampleHalf),:)); 
+        if delind(sig)
+            continue
+        end
+        
+        BfSig = bsxfun(@plus, BfSig, RxSigMat(sig,...
+            (Delays(sig)-nWinSampleHalf):(Delays(sig)+nWinSampleHalf),:));
     end
     
     BfSigMat(:,point,:) = reshape(BfSig, nWinSample, 1, []);
