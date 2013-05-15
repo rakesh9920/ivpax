@@ -37,13 +37,17 @@ for i = 1:(nFrame/10)
    pause(0.1);
 end
 %%
+global PULSE_REPITITION_RATE;
+PULSE_REPITITION_RATE = 500;
+
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 nCompare = 400;
-delta = 0.1e-6;
+delta = 2e-6;
 FieldPos = [0; 0; 0.020];
 
-[VelEst, BfSigMat] = axialest(FilteredRfc, [], RxPos, FieldPos, nCompare, delta, ...
-    'progress', true, 'plane', true, 'interpolate', 8);
+[VelEst, BfSigMat, BfPointList] = axialest(FilteredRfc, [], RxPos, ...
+    FieldPos, nCompare, delta, 'progress', true, 'plane', true, ...
+    'interpolate', 8, 'window', 'hanning');
 
 plot(squeeze(VelEst),':.');
 %%
@@ -53,9 +57,9 @@ nCompare = 401;
 delta = 0.1e-6;
 deltaR = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
 
-FieldPos = [ones(1, nCompare).*0; zeros(1, nCompare); 0.020 + deltaR];
+FieldPos2 = [ones(1, nCompare).*0; zeros(1, nCompare); 0.020 + deltaR];
 
-BfSigMat2 = gtbeamform(FilteredRfc, [], RxPos, FieldPos, 200, 'plane', true, ...
+BfSigMat2 = gtbeamform(FilteredRfc, [], RxPos, FieldPos2, 200, 'plane', true, ...
     'progress', true);
 
 VelEst2 = ftdoppler2(BfSigMat2, FieldPos, 200, 'progress', true);

@@ -65,7 +65,7 @@ for frame = 1:(nFrame - 1)
     end
     
     if interpolate > 0
-        XcorrListInterp = interp(XcorrList, 4);
+        XcorrListInterp = interp(XcorrList, interpolate);
         [maxValue, maxInd] = max(XcorrListInterp);
         VelocityEst(frame) = TravelSpeedInterp(maxInd);
     else

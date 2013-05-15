@@ -1,4 +1,4 @@
-function [VelEst, BfSigMat] = axialest(RxSigMat, TxPos, RxPos, FieldPos, nCompare,...
+function [VelEst, BfSigMat, BfPointList] = axialest(RxSigMat, TxPos, RxPos, FieldPos, nCompare,...
     delta, varargin)
 % velocity estimate along axial direction
 %
@@ -38,6 +38,11 @@ if isKey(map, 'plane')
 else
     plane = false;
 end
+if isKey(map, 'window')
+    window = map('window');
+else
+    window = 'rectwin';
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -58,6 +63,15 @@ if mod(nCompare, 2) == 0
     nCompare = nCompare + 1;
 end
 
+switch window
+    case 'hanning'
+        win = hanning(201);
+    case 'gaussian'
+        win = gausswin(201);
+    case 'rectwin'
+        win = rectwin(201);       
+end
+
 DeltaZ = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
 
 VelEst = zeros(1, nFieldPos, nFrame - 1);
@@ -74,6 +88,8 @@ for pos = 1:nFieldPos
             BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, BfPointList, ...
                 200, 'plane', plane, 'progress', progress);
     end
+    
+    BfSigMat = bsxfun(@times, BfSigMat, win);
     
     VelEst(1,pos,:) = ftdoppler2(BfSigMat, BfPointList, (nCompare+1)/2,...
         'interpolate', interpolate, 'progress', progress);
