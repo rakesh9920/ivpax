@@ -6,39 +6,39 @@ function [VelEst] = axialest(RxSigMat, TxPos, RxPos, FieldPos, nCompare,...
 %   progress = (true, =false) | show progress bar
 %   beamformType (='time', 'frequency') | choose beamformer type
 
-import beamform.gfbeamform2
+import beamform.gfbeamform2 beamform.gtbeamform
 import flow.ftdoppler2
 
 % read in optional arguments
 if nargin > 6
     keys = varargin(1:2:end);
     values = varargin(2:2:end);
-    
     map = containers.Map(keys, values);
-    
-    if isKey(map, 'progress')
-        progress = map('progress');
-    else
-        progress = false;
-    end
-    if isKey(map, 'beamformType')
-        beamformType = map('beamformType');
-    else
-        beamformType = 'frequency';
-    end
-    if isKey(map, 'interpolate')
-        interpolate = map('interpolate');
-    else
-        interpolate = 0;
-    end   
-    if isKey(map, 'plane')
-        plane = map('plane');
-    else
-        plane = false;
-    end
-
+else
+    map = containers.Map;
 end
     
+if isKey(map, 'progress')
+    progress = map('progress');
+else
+    progress = false;
+end
+if isKey(map, 'beamformType')
+    beamformType = map('beamformType');
+else
+    beamformType = 'time';
+end
+if isKey(map, 'interpolate')
+    interpolate = map('interpolate');
+else
+    interpolate = 0;
+end   
+if isKey(map, 'plane')
+    plane = map('plane');
+else
+    plane = false;
+end
+
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
 if isempty(SOUND_SPEED)

@@ -38,11 +38,12 @@ for i = 1:(nFrame/10)
 end
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-nCompare = 400;
+nCompare = 200;
 delta = 0.1e-6;
 FieldPos = [0; 0; 0.020];
 
-VelEst = axialest(FilteredRfc, TxPos, RxPos, FieldPos, nCompare, delta);
+VelEst = axialest(FilteredRfc, [], RxPos, FieldPos, nCompare, delta, ...
+    'progress', true);
 
 plot(VelEst,':.');
 %%
