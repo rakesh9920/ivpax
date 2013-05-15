@@ -12,12 +12,14 @@ if nargin > 4
     
     if isKey(map, 'progress')
         progress = map('progress');
+    else
+        progress = false;
     end
-end
-
-% set defaults
-if ~exist('progress', 'var')
-    progress = false;
+    if isKey(map, 'interpolate')
+        interpolate = map('interpolate');
+    else
+        interpolate = 0;
+    end
 end
 
 % global constants
@@ -35,8 +37,13 @@ end
 [nSample nPoint nFrame] = size(BfSigMat);
 VelocityEst = zeros(1, nFrame - 1);
 
-TravelSpeed = sqrt(sqdistance(FieldPos(:,pointNo), FieldPos)).*PULSE_REPITITION_RATE;
-TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1));
+TravelSpeed = -sqrt(sqdistance(FieldPos(:,pointNo), ...
+    FieldPos)).*PULSE_REPITITION_RATE;
+%TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1)); %??
+
+if interpolate > 0
+    TravelSpeedInterp = interp(TravelSpeed, interpolate);
+end
 
 XcorrList = zeros(1, nPoint);
 
@@ -56,14 +63,19 @@ for frame = 1:(nFrame - 1)
         XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
     end
     
-    [maxValue, maxInd] = max(XcorrList);
+    if interpolate > 0
+        XcorrListInterp = interp(XcorrList, 4);
+        [maxValue, maxInd] = max(XcorrListInterp);
+        VelocityEst(frame) = TravelSpeedInterp(maxInd);
+    else
+        [maxValue, maxInd] = max(XcorrList);
+        VelocityEst(frame) = TravelSpeed(maxInd);
+    end
     
     if maxValue < 0.9
         VelocityEst(frame) = 0;
         continue
     end
-    
-    VelocityEst(frame) = TravelSpeed(maxInd);
 end
 
 end
