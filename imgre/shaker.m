@@ -36,7 +36,7 @@ for i = 1:(nFrame/10)
    title(num2str(i));
    pause(0.1);
 end
-%%
+%% axial estimate
 global PULSE_REPITITION_RATE;
 PULSE_REPITITION_RATE = 500;
 
@@ -45,11 +45,22 @@ nCompare = 400;
 delta = 2e-6;
 FieldPos = [0; 0; 0.020];
 
-[VelEst, BfSigMat, BfPointList] = axialest(FilteredRfc, [], RxPos, ...
+[VelEst, ~, BfPointList] = axialest(Rfc, [], RxPos, ...
     FieldPos, nCompare, delta, 'progress', true, 'plane', true, ...
     'interpolate', 8, 'window', 'hanning');
 
 plot(squeeze(VelEst),':.');
+%% instantaneous estimate
+global PULSE_REPITITION_RATE;
+PULSE_REPITITION_RATE = 500;
+
+RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
+FieldPos = [0; 0; 0.020];
+
+VelEst = instaxialest(Rfc, [], RxPos, FieldPos, 2, 'progress', true, 'plane', true);
+
+%plot(squeeze(VelEst),':.');
+
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 

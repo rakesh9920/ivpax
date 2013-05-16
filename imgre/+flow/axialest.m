@@ -66,7 +66,7 @@ end
 switch window
     case 'hanning'
         win = hanning(201);
-    case 'gaussian'
+    case 'gausswin'
         win = gausswin(201);
     case 'rectwin'
         win = rectwin(201);       

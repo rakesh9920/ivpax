@@ -77,7 +77,7 @@ for point = 1:nFieldPos
         end
         
         BfSig = bsxfun(@plus, BfSig, RxSigMat(sig,...
-            (Delays(sig)-nWinSampleHalf):(Delays(sig)+nWinSampleHalf),:));
+            (Delays(sig)-nWinSampleHalf):(Delays(sig) + nWinSampleHalf),:));
     end
     
     BfSigMat(:,point,:) = reshape(BfSig, nWinSample, 1, []);
