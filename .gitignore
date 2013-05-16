@@ -17,9 +17,11 @@
 /ultrasonix/bin/**/*
 /imgre/rfdata/*
 /imgre/rfdata/**/*
+/imgre/data/*
+/imgre/data/**/*
 /imgre/bin/*.dll
 /imgre/bin/dat/*
 /imgre/bin/fw/*
 /imgre/bin/fw/**/*
-/imgre/maq/src/mexw32/*
-/imgre/mexo 6.0.3/src/mexw32/*
+/imgre/+maq/src/mexw32/*
+/imgre/+mexo/src/mexw32/*
