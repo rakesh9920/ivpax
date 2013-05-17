@@ -1,5 +1,5 @@
 function [VelEst, BfSigMat, BfPointList] = axialest(RxSigMat, TxPos, RxPos, FieldPos, nCompare,...
-    delta, varargin)
+    delta, nWindowSample, varargin)
 % velocity estimate along axial direction
 %
 % Optional:
@@ -62,14 +62,17 @@ nFieldPos = size(FieldPos, 2);
 if mod(nCompare, 2) == 0
     nCompare = nCompare + 1;
 end
+if mod(nWindowSample, 2) == 0
+    nWindowSample = nWindowSample + 1;
+end
 
 switch window
     case 'hanning'
-        win = hanning(201);
+        win = hanning(nWindowSample);
     case 'gausswin'
-        win = gausswin(201);
+        win = gausswin(nWindowSample);
     case 'rectwin'
-        win = rectwin(201);       
+        win = rectwin(nWindowSample);       
 end
 
 DeltaZ = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
@@ -83,10 +86,10 @@ for pos = 1:nFieldPos
     switch beamformType
         case 'time'
             BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, BfPointList, ...
-                200, 'plane', plane, 'progress', progress);
+                nWindowSample, 'plane', plane, 'progress', progress);
         case 'frequency'
             BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, BfPointList, ...
-                200, 'plane', plane, 'progress', progress);
+                nWindowSample, 'plane', plane, 'progress', progress);
     end
     
     BfSigMat = bsxfun(@times, BfSigMat, win);

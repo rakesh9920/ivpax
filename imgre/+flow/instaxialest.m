@@ -1,5 +1,5 @@
-function [BfSigMat] = instaxialest(RxSigMat, TxPos, RxPos, ...
-    FieldPos, nSum, varargin)
+function [VelEst] = instaxialest(RxSigMat, TxPos, RxPos, ...
+    FieldPos, nSum, nWindowSample, varargin)
 % velocity estimate along axial direction
 %
 % Optional:
@@ -7,7 +7,7 @@ function [BfSigMat] = instaxialest(RxSigMat, TxPos, RxPos, ...
 %   beamformType (='time', 'frequency') | choose beamformer type
 
 import beamform.gfbeamform2 beamform.gtbeamform
-import flow.ftdoppler2
+import flow.instdoppler
 
 % read in optional arguments
 if nargin > 6
@@ -48,22 +48,21 @@ end
 
 [nSig nSample nFrame] = size(RxSigMat);
 nFieldPos = size(FieldPos, 2);
-nEstimate = floor(nFrame/nSum);
+%nEstimate = floor(nFrame/nSum);
 
-VelEst = zeros(1, nFieldPos, nFrame - 1);
+%VelEst = zeros(1, nFieldPos, nFrame - 1);
 
 switch beamformType
     case 'time'
         BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
-            1, 'plane', plane, 'progress', progress);
+            nWindowSample, 'plane', plane, 'progress', progress);
     case 'frequency'
         BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, FieldPos, ...
-            1, 'plane', plane, 'progress', progress);
+            nWindowSample, 'plane', plane, 'progress', progress);
 end
 
-% for est = 1:nEstimate
-%     VelEst() = BfSigMat(
-% end
+
+VelEst = shiftdim(instdoppler(BfSigMat, nSum), -1);
 
 end
 

@@ -1,42 +1,53 @@
-function [VelEst] = instdoppler(BfSigMat, varargin)
+function [VelEst] = instdoppler(BfSigMat, nSum, varargin)
 %
 
-[nSample nFieldPos nFrame] = size(BfSigMat);
-VelEst = zeros(nFieldPos, nFrame - 1);
+% global constants
+global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE CENTER_FREQUENCY
+if isempty(SOUND_SPEED)
+    SOUND_SPEED = 1500;
+end
+if isempty(SAMPLE_FREQUENCY)
+    SAMPLE_FREQUENCY = 40e6;
+end
+if isempty(PULSE_REPITITION_RATE)
+    PULSE_REPITITION_RATE = 100;
+end
+if isempty(CENTER_FREQUENCY)
+    CENTER_FREQUENCY = 6.6e6;
+end
 
+[nSample nFieldPos nFrame] = size(BfSigMat);
+% VelEst = zeros(nFieldPos, nFrame - 1);
+nEstimate = nFrame - nSum;
+VelEst = zeros(nFieldPos, nEstimate);
+
+midSample = round(nSample/2);
 %t = ((0:nFrame-1)./(500)).';
 for pos = 1:nFieldPos
+    AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
+    I = real(AnalyticSig(midSample,:));
+    Q = imag(AnalyticSig(midSample,:));
     
-    for frame = 1:(nFrame - 1)
+    for est = 1:nEstimate
+    %for frame = 1:(nFrame - 1)
         
-        AnalyticSig1 = hilbert(squeeze(BfSigMat(:,pos,frame)));
-        AnalyticSig2 = hilbert(squeeze(BfSigMat(:,pos,frame + 1)));
-        
-        I1 = real(AnalyticSig1);
-        Q1 = imag(AnalyticSig1);
-        I2 = real(AnalyticSig2);
-        Q2 = imag(AnalyticSig2);
-        
-%         VelEst(pos,frame) = atan((Q2(100)*I1(100) - I2(100)*Q1(100))/...
-%             (I2(100)*I1(100) + Q2(100)*Q1(100)));
-
-         VelEst(pos,frame) = angle(AnalyticSig2(100)) - angle(AnalyticSig1(100));
-%         SampledSig = squeeze(BfSigMat(line,sample,:));    
-%         AnalyticSig = hilbert(SampledSig);
-%         AnalyticSig = SampledSig.*exp(-1i*2*pi*6.6e6.*t);
-        
-%         RealPart = real(AnalyticSig);
-%         ComplexPart = imag(AnalyticSig);   
-%         RealPart = SampledSig.*cos(2*pi*6.6e6.*t);
-%         ComplexPart = -SampledSig.*sin(2*pi*6.6e6.*t);
-
-%         n1 = ComplexPart(2:nFrame).*RealPart(1:(nFrame-1));
-%         n2 = RealPart(2:nFrame).*ComplexPart(1:(nFrame-1));
-%         d1 = RealPart(2:nFrame).*RealPart(1:(nFrame-1));
-%         d2 = ComplexPart(2:nFrame).*ComplexPart(1:(nFrame-1));
+%         AnalyticSig1 = hilbert(squeeze(BfSigMat(:,pos,frame)));
+%         AnalyticSig2 = hilbert(squeeze(BfSigMat(:,pos,frame + 1)));
 %         
-%         VelEst(line,sample) = atan(sum(n1 - n2)/sum(d1 + d2));
-        %VelEst(line, sample) = mean(diff(angle(AnalyticSig)));
+%         I1 = real(AnalyticSig1(midSample));
+%         Q1 = imag(AnalyticSig1(midSample));
+%         I2 = real(AnalyticSig2(midSample));
+%         Q2 = imag(AnalyticSig2(midSample));
+%         
+%         deltaPhi = atan((Q2*I1 - I2*Q1)/(I2*I1 + Q2*Q1));
+        ind1 = est:(est + nSum - 1);
+        ind2 = ind1 + 1;
+        numer = sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
+        denom = sum(I(ind2).*I(ind1) + Q(ind2).*Q(ind1));
+        
+        deltaPhi = atan(numer/denom);
+
+        VelEst(pos,est) = deltaPhi*PULSE_REPITITION_RATE*SOUND_SPEED/(4*pi*CENTER_FREQUENCY);
     end
 end
 
