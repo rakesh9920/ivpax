@@ -6,7 +6,7 @@ function [VelEst] = instaxialest(RxSigMat, TxPos, RxPos, ...
 %   progress = (true, =false) | show progress bar
 %   beamformType (='time', 'frequency') | choose beamformer type
 
-import beamform.gfbeamform2 beamform.gtbeamform
+import beamform.gfbeamform3 beamform.gtbeamform
 import flow.instdoppler
 
 % read in optional arguments
@@ -33,6 +33,11 @@ if isKey(map, 'plane')
 else
     plane = false;
 end
+if isKey(map, 'window')
+    window = map('window');
+else
+    window = 'rectwin';
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -48,19 +53,30 @@ end
 
 [nSig nSample nFrame] = size(RxSigMat);
 nFieldPos = size(FieldPos, 2);
-%nEstimate = floor(nFrame/nSum);
 
-%VelEst = zeros(1, nFieldPos, nFrame - 1);
+if mod(nWindowSample, 2) == 0
+    nWindowSample = nWindowSample + 1;
+end
+
+switch window
+    case 'hanning'
+        win = hanning(nWindowSample);
+    case 'gausswin'
+        win = gausswin(nWindowSample);
+    case 'rectwin'
+        win = rectwin(nWindowSample);       
+end
 
 switch beamformType
     case 'time'
         BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
             nWindowSample, 'plane', plane, 'progress', progress);
     case 'frequency'
-        BfSigMat = gfbeamform2(RxSigMat, TxPos, RxPos, FieldPos, ...
+        BfSigMat = gfbeamform3(RxSigMat, TxPos, RxPos, FieldPos, ...
             nWindowSample, 'plane', plane, 'progress', progress);
 end
 
+BfSigMat = bsxfun(@times, BfSigMat, win);
 
 VelEst = shiftdim(instdoppler(BfSigMat, nSum), -1);
 

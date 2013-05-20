@@ -42,7 +42,7 @@ for pos = 1:nFieldPos
 %         deltaPhi = atan((Q2*I1 - I2*Q1)/(I2*I1 + Q2*Q1));
         ind1 = est:(est + nSum - 1);
         ind2 = ind1 + 1;
-        numer = sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
+        numer = -sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
         denom = sum(I(ind2).*I(ind1) + Q(ind2).*Q(ind1));
         
         deltaPhi = atan(numer/denom);

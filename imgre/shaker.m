@@ -42,13 +42,13 @@ PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.020];
-nCompare = 400;
+nCompare = 200;
 delta = 1e-7;
 nWindowSample = 50;
 
 [VelEstZ, ~, BfPointList] = axialest(Rfc, [], RxPos, FieldPos, nCompare, delta, ...
-    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 8, ...
-    'window', 'hanning');
+    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 4, ...
+    'window', 'hanning', 'beamformType', 'frequency');
 
 figure; plot(squeeze(VelEstZ),':.');
 %% instantaneous estimate
@@ -57,11 +57,11 @@ PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.020];
-nWindowSample = 100;
-nSum = 20;
+nWindowSample = 200;
+nSum = 1;
 
 VelEstInst = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
-    'progress', true, 'plane', true);
+    'progress', true, 'plane', true, 'beamformType', 'frequency');
 
 figure; plot(squeeze(VelEstInst),':.');
 %%

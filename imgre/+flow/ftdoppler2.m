@@ -64,7 +64,7 @@ for frame = 1:(nFrame - 1)
         XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
     end
     
-    if interpolate > 0
+    if interpolate >= 1
         XcorrListInterp = interp(XcorrList, interpolate);
         [maxValue, maxInd] = max(XcorrListInterp);
         VelocityEst(frame) = TravelSpeedInterp(maxInd);
