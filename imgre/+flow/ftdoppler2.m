@@ -6,8 +6,8 @@ import tools.upicbar tools.sqdistance
 % read in optional arguments
 if nargin > 4
     keys = varargin(1:2:end);
-    values = varargin(2:2:end);   
-    map = containers.Map(keys, values);    
+    values = varargin(2:2:end);
+    map = containers.Map(keys, values);
 else
     map = containers.Map;
 end
@@ -21,6 +21,11 @@ if isKey(map, 'interpolate')
     interpolate = map('interpolate');
 else
     interpolate = 0;
+end
+if isKey(map, 'threshold')
+    threshold = map('threshold');
+else
+    threshold = 0;
 end
 
 % global constants
@@ -64,8 +69,8 @@ for frame = 1:(nFrame - 1)
         XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
     end
     
-    if interpolate >= 1
-        XcorrListInterp = interp(XcorrList, interpolate);
+    if interpolate > 0
+        XcorrListInterp = spline(TravelSpeed, XcorrList, TravelSpeedInterp);
         [maxValue, maxInd] = max(XcorrListInterp);
         VelocityEst(frame) = TravelSpeedInterp(maxInd);
     else
@@ -73,7 +78,16 @@ for frame = 1:(nFrame - 1)
         VelocityEst(frame) = TravelSpeed(maxInd);
     end
     
-    if maxValue < 0.9
+    %     if interpolate >= 1
+    %         XcorrListInterp = interp(XcorrList, interpolate);
+    %         [maxValue, maxInd] = max(XcorrListInterp);
+    %         VelocityEst(frame) = TravelSpeedInterp(maxInd);
+    %     else
+    %         [maxValue, maxInd] = max(XcorrList);
+    %         VelocityEst(frame) = TravelSpeed(maxInd);
+    %     end
+    
+    if maxValue < threshold
         VelocityEst(frame) = 0;
         continue
     end

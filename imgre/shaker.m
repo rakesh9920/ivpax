@@ -2,8 +2,11 @@ import beamform.*
 import sirm.*
 import ultrasonix.*
 import flow.*
+import tools.*
 %% read in RAW daq data
-[header, ~] = readDAQ('./rfdata/dataset2/tx10hz/', ones(1,128), 1, true);
+dirname = './data/dataset 3/triangle/';
+
+[header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
 nChannel = header(1) + 1;
 nFrame = 100;%header(2);
@@ -12,28 +15,22 @@ nSample = header(3);
 Rfc = zeros(nChannel, nSample, nFrame, 'int16');
 
 for fr = 1:nFrame
-   [~, rf] = readDAQ('./rfdata/dataset2/tx10hz/', ones(1,128), fr, true);
+   [~, rf] = readDAQ(dirname, ones(1,128), fr, true);
    Rfc(:,:,fr) = rf.';
 end
 
-FilteredRfc = bandpass(double(Rfc), 6.6, 0.80, 40);
-%%
+Rfc = bandpass(double(Rfc), 6.6, 0.80, 40);
+%% Plot raw channels
 for i = 1:nFrame
-   imagesc(20.*log10(abs(squeeze(FilteredRfc(:,:,i)))./600).');
+   imagesc(20.*log10(abs(squeeze(Rfc(:,:,i)))./600).');
    title(num2str(i));
    pause(0.1);
 end
-%%
+%% Plot RF data
 for i = 1:nFrame
-   plot(FilteredRfc(64,:,i));
+   plot(Rfc(64,:,i));
    title(num2str(i));
    axis([250 1200 -100 100]);
-   pause(0.1);
-end
-%%
-for i = 1:(nFrame/10)
-   imagesc(20.*log10(abs(squeeze(RfcAvg(:,:,i)))).');
-   title(num2str(i));
    pause(0.1);
 end
 %% axial estimate
@@ -44,26 +41,27 @@ RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.020];
 nCompare = 200;
 delta = 1e-7;
-nWindowSample = 50;
+nWindowSample = 200;
 
 [VelEstZ, ~, BfPointList] = axialest(Rfc, [], RxPos, FieldPos, nCompare, delta, ...
-    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 4, ...
+    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 8, ...
     'window', 'hanning', 'beamformType', 'frequency');
 
 figure; plot(squeeze(VelEstZ),':.');
-%% instantaneous estimate
+%% instantaneous axial estimate
 global PULSE_REPITITION_RATE;
 PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-FieldPos = [0; 0; 0.020];
+%FieldPos = [0; 0; 0.015];
+FieldPos = [zeros(1,10); zeros(1,10); linspace(0.15, 0.25, 10)];
 nWindowSample = 200;
 nSum = 1;
 
 VelEstInst = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
-    'progress', true, 'plane', true, 'beamformType', 'frequency');
+    'progress', true, 'plane', true, 'beamformType', 'time');
 
-figure; plot(squeeze(VelEstInst),':.');
+%figure; plot(squeeze(VelEstInst),':.');
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 
