@@ -29,17 +29,7 @@ for pos = 1:nFieldPos
     Q = imag(AnalyticSig(midSample,:));
     
     for est = 1:nEstimate
-    %for frame = 1:(nFrame - 1)
-        
-%         AnalyticSig1 = hilbert(squeeze(BfSigMat(:,pos,frame)));
-%         AnalyticSig2 = hilbert(squeeze(BfSigMat(:,pos,frame + 1)));
-%         
-%         I1 = real(AnalyticSig1(midSample));
-%         Q1 = imag(AnalyticSig1(midSample));
-%         I2 = real(AnalyticSig2(midSample));
-%         Q2 = imag(AnalyticSig2(midSample));
-%         
-%         deltaPhi = atan((Q2*I1 - I2*Q1)/(I2*I1 + Q2*Q1));
+
         ind1 = est:(est + nSum - 1);
         ind2 = ind1 + 1;
         numer = -sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));

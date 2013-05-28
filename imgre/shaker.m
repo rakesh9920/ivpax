@@ -4,7 +4,7 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/dataset 3/triangle/';
+dirname = './data/dataset 3/toneburst1/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
@@ -43,8 +43,11 @@ nCompare = 200;
 delta = 0.5e-7;
 nWindowSample = 200;
 
+velRes = delta*PULSE_REPITITION_RATE
+velMax = velRes*floor(nCompare/2)
+
 [VelEstZ, ~, BfPointList] = axialest(Rfc, [], RxPos, FieldPos, nCompare, delta, ...
-    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 1, ...
+    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 8, ...
     'window', 'hanning', 'beamformType', 'frequency');
 
 figure; plot(squeeze(VelEstZ),':.');
@@ -53,13 +56,13 @@ figure; plot(squeeze(VelEstZ),':.');
 PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-%FieldPos = [0; 0; 0.015];
-FieldPos = [zeros(1,10); zeros(1,10); linspace(0.015, 0.025, 10)];
+%FieldPos = [0; 0; 0.01];
+FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
 nWindowSample = 200;
 nSum = 1;
 
 VelEstInst = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
-    'progress', true, 'plane', true, 'beamformType', 'time');
+    'progress', true, 'plane', true, 'beamformType', 'frequency');
 
 figure; plot(squeeze(VelEstInst(:,5,:)),':.');
 %%
