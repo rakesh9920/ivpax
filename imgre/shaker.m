@@ -9,7 +9,7 @@ dirname = './data/dataset 3/triangle/';
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
 nChannel = header(1) + 1;
-nFrame = 100;%header(2);
+nFrame = 300;%header(2);
 nSample = header(3);
 
 Rfc = zeros(nChannel, nSample, nFrame, 'int16');
@@ -40,28 +40,28 @@ PULSE_REPITITION_RATE = 500;
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.020];
 nCompare = 200;
-delta = 1e-7;
+delta = 0.5e-7;
 nWindowSample = 200;
 
 [VelEstZ, ~, BfPointList] = axialest(Rfc, [], RxPos, FieldPos, nCompare, delta, ...
-    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 8, ...
+    nWindowSample, 'progress', true, 'plane', true, 'interpolate', 1, ...
     'window', 'hanning', 'beamformType', 'frequency');
 
 figure; plot(squeeze(VelEstZ),':.');
 %% instantaneous axial estimate
-global PULSE_REPITITION_RATE;
+%global PULSE_REPITITION_RATE;
 PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 %FieldPos = [0; 0; 0.015];
-FieldPos = [zeros(1,10); zeros(1,10); linspace(0.15, 0.25, 10)];
+FieldPos = [zeros(1,10); zeros(1,10); linspace(0.015, 0.025, 10)];
 nWindowSample = 200;
 nSum = 1;
 
 VelEstInst = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
     'progress', true, 'plane', true, 'beamformType', 'time');
 
-%figure; plot(squeeze(VelEstInst),':.');
+figure; plot(squeeze(VelEstInst(:,5,:)),':.');
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 

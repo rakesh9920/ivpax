@@ -53,9 +53,9 @@ end
 BfSigMat = zeros(nWinSample, nFieldPos, nFrame);
 
 nFreq = 2^nextpow2(nSample + nWinSample);
-FrontPad = zeros(nSignal, floor((nFreq - nSample)/2), nFrame);
-BackPad = zeros(nSignal, nFreq - nSample - size(FrontPad, 2), nFrame);
-PadSigMat = [FrontPad RxSigMat BackPad];
+FrontPad = zeros(nSignal, floor((nFreq - nSample)/2));
+BackPad = zeros(nSignal, nFreq - nSample - size(FrontPad, 2));
+%PadSigMat = [FrontPad RxSigMat BackPad];
 
 Freq = SAMPLE_FREQUENCY/2*linspace(0, 1, nFreq/2+1);
 Freq2S = [Freq(1:end-1) -Freq(end) -fliplr(Freq(2:(end-1)))];
@@ -78,23 +78,21 @@ for point = 1:nFieldPos
     Delays(delind) = [];
     
     Phase = exp(-2*pi*1i.*Delays*Freq2S);
-    
-    BfSigSpect = zeros(length(Delays), nFreq, nFrame);
-    
+
     for frame = 1:nFrame
         if progress
             upicbar(bar, ((point - 1)*nFrame + frame)/(nFrame*nFieldPos));
         end
         
-        RxSigMatSpect = fft(PadSigMat(:,:,frame), [], 2);
-        BfSigSpect(:,:,frame) = bsxfun(@times, Phase, RxSigMatSpect(~delind,:,1));
+        PadSigMat = [FrontPad RxSigMat(~delind,:,frame) BackPad];
+        RxSigMatSpect = fft(PadSigMat, [], 2);
+        BfSigSpect = bsxfun(@times, Phase, RxSigMatSpect);
+        
+        BfSig = real(ifft(sum(BfSigSpect), [], 2));
+        WinBfSig = BfSig(1,winFront:winBack,:);
+        
+        BfSigMat(:,point,frame) = reshape(WinBfSig, nWinSample, 1, []);
     end
-    
-    BfSig = real(ifft(sum(BfSigSpect), [], 2));
-    %     BfSig = sum(real(ifft(BfSigSpect, [], 2)));
-    WinBfSig = BfSig(1,winFront:winBack,:);
-    
-    BfSigMat(:,point,:) = reshape(WinBfSig, nWinSample, 1, []);
 end
 
 end
