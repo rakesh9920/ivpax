@@ -4,13 +4,13 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/dataset 3/toneburst1/';
+dirname = './data/dataset 3/triangle/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
 nChannel = header(1) + 1;
-nFrame = 300;%header(2);
-nSample = header(3);
+nFrame = 500;%header(2);
+nSample = header(3); 
 
 Rfc = zeros(nChannel, nSample, nFrame, 'int16');
 
@@ -57,12 +57,15 @@ PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 %FieldPos = [0; 0; 0.01];
-FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
+%FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
+FieldPos = [0 0.0005 -0.0005 0 0 ; 0 0 0 0 0 ; 0.020 0.020 0.020 0.0205 0.0195];
 nWindowSample = 200;
 nSum = 1;
+interleave = 0;
 
 VelEstInst = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
-    'progress', true, 'plane', true, 'beamformType', 'frequency');
+    'progress', true, 'plane', true, 'beamformType', 'frequency', ...
+    'interleave', interleave);
 
 figure; plot(squeeze(VelEstInst(:,5,:)),':.');
 %%

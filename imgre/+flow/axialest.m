@@ -43,6 +43,10 @@ if isKey(map, 'window')
 else
     window = 'rectwin';
 end
+if isKey(map, 'bfsigmat')
+    BfSigMat = map('bfsigmat');
+    beamformType = 'bypass';
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -90,11 +94,12 @@ for pos = 1:nFieldPos
         case 'frequency'
             BfSigMat = gfbeamform3(RxSigMat, TxPos, RxPos, BfPointList, ...
                 nWindowSample, 'plane', plane, 'progress', progress);
+        case 'bypass'
     end
     
-    BfSigMat = bsxfun(@times, BfSigMat, win);
+    BfSigMatWin = bsxfun(@times, BfSigMat, win);
     
-    VelEst(1,pos,:) = ftdoppler2(BfSigMat, BfPointList, (nCompare+1)/2,...
+    VelEst(1,pos,:) = ftdoppler2(BfSigMatWin, BfPointList, (nCompare+1)/2,...
         'interpolate', interpolate, 'progress', progress);
 end
 

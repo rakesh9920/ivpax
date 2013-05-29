@@ -38,6 +38,11 @@ if isKey(map, 'window')
 else
     window = 'rectwin';
 end
+if isKey(map, 'interleave')
+    interleave = map('interleave');
+else
+    interleave = 0;
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -78,7 +83,7 @@ end
 
 BfSigMat = bsxfun(@times, BfSigMat, win);
 
-VelEst = shiftdim(instdoppler(BfSigMat, nSum), -1);
+VelEst = shiftdim(instdoppler(BfSigMat, nSum, 'interleave', interleave), -1);
 
 end
 

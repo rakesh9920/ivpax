@@ -1,6 +1,26 @@
 function [VelEst] = instdoppler(BfSigMat, nSum, varargin)
 %
 
+if nargin > 2
+    keys = varargin(1:2:end);
+    values = varargin(2:2:end);
+    map = containers.Map(keys, values);
+else
+    map = containers.Map;
+end
+
+if isKey(map, 'progress')
+    progress = map('progress');
+else
+    progress = false;
+end
+if isKey(map, 'interleave')
+    interleave = map('interleave');
+else
+    interleave = 0;
+end
+
+
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE CENTER_FREQUENCY
 if isempty(SOUND_SPEED)
@@ -17,12 +37,11 @@ if isempty(CENTER_FREQUENCY)
 end
 
 [nSample nFieldPos nFrame] = size(BfSigMat);
-% VelEst = zeros(nFieldPos, nFrame - 1);
-nEstimate = nFrame - nSum;
-VelEst = zeros(nFieldPos, nEstimate);
 
+nEstimate = nFrame - nSum - interleave;
+VelEst = zeros(nFieldPos, nEstimate);
 midSample = round(nSample/2);
-%t = ((0:nFrame-1)./(500)).';
+
 for pos = 1:nFieldPos
     AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
     I = real(AnalyticSig(midSample,:));
@@ -31,13 +50,14 @@ for pos = 1:nFieldPos
     for est = 1:nEstimate
 
         ind1 = est:(est + nSum - 1);
-        ind2 = ind1 + 1;
+        ind2 = ind1 + interleave + 1;
         numer = -sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
         denom = sum(I(ind2).*I(ind1) + Q(ind2).*Q(ind1));
         
         deltaPhi = atan(numer/denom);
 
-        VelEst(pos,est) = deltaPhi*PULSE_REPITITION_RATE*SOUND_SPEED/(4*pi*CENTER_FREQUENCY);
+        VelEst(pos,est) = deltaPhi/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
+            (4*pi*CENTER_FREQUENCY);
     end
 end
 
