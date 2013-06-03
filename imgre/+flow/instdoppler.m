@@ -20,7 +20,6 @@ else
     interleave = 0;
 end
 
-
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE CENTER_FREQUENCY
 if isempty(SOUND_SPEED)

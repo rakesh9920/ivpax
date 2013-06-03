@@ -1,4 +1,4 @@
-function [VelEst] = instaxialest(RxSigMat, TxPos, RxPos, ...
+function [VelEst, BfSigMat] = instaxialest(RxSigMat, TxPos, RxPos, ...
     FieldPos, nSum, nWindowSample, varargin)
 % velocity estimate along axial direction
 %
@@ -43,6 +43,15 @@ if isKey(map, 'interleave')
 else
     interleave = 0;
 end
+if isKey(map, 'bfsigmat')
+    BfSigMat = map('bfsigmat');
+    beamformType = 'bypass';
+end
+if isKey(map, 'averaging')
+    averaging = map('averaging');
+else
+    averaging = 0;
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -69,7 +78,7 @@ switch window
     case 'gausswin'
         win = gausswin(nWindowSample);
     case 'rectwin'
-        win = rectwin(nWindowSample);       
+        win = rectwin(nWindowSample);
 end
 
 switch beamformType
@@ -79,11 +88,25 @@ switch beamformType
     case 'frequency'
         BfSigMat = gfbeamform3(RxSigMat, TxPos, RxPos, FieldPos, ...
             nWindowSample, 'plane', plane, 'progress', progress);
+    case 'bypass'
 end
 
-BfSigMat = bsxfun(@times, BfSigMat, win);
+BfSigMatWin = bsxfun(@times, BfSigMat, win);
 
-VelEst = shiftdim(instdoppler(BfSigMat, nSum, 'interleave', interleave), -1);
+if averaging > 0
+    BfSigMatAvg = zeros(nWindowSample, nFieldPos, nFrame - averaging + 1);
+    
+    for frame = 1:(nFrame - averaging + 1)
+        BfSigMatAvg(:,:,frame) = sum(BfSigMatWin(:,:,frame:(frame+averaging-1)),3);
+    end
+    
+    VelEst = shiftdim(instdoppler(BfSigMatAvg, nSum, 'interleave', interleave), -1);
+else
+    VelEst = shiftdim(instdoppler(BfSigMatWin, nSum, 'interleave', interleave), -1);
+end
+
+
+
 
 end
 
