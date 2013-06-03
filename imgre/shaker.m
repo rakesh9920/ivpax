@@ -4,7 +4,7 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/dataset 3/triangle/';
+dirname = './data/dataset 2/tx10hz/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
@@ -58,16 +58,18 @@ PULSE_REPITITION_RATE = 500;
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 %FieldPos = [0; 0; 0.01];
 %FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
-FieldPos = [0 0.0005 -0.0005 0 0 ; 0 0 0 0 0 ; 0.020 0.020 0.020 0.0205 0.0195];
+%FieldPos = [0 0.0005 -0.0005 0 0 ; 0 0 0 0 0 ; 0.020 0.020 0.020 0.0205 0.0195];
+[X, Z] = meshgrid(linspace(0.015, 0.025, 11), linspace(0.015, 0.025, 11));
+FieldPos = [X(:).'; zeros(1,11*11); Z(:).'];
 nWindowSample = 200;
-nSum = 1;
-interleave = 0;
+nSum = 3;
+interleave = 2;
 
 VelEstInst = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
     'progress', true, 'plane', true, 'beamformType', 'frequency', ...
     'interleave', interleave);
 
-figure; plot(squeeze(VelEstInst(:,5,:)),':.');
+figure; plot(squeeze(VelEstInst(:,1,:)),':.');
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 
