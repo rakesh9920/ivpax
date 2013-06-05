@@ -6,7 +6,7 @@ function [VelEst, BfSigMat, BfPointList] = axialest(RxSigMat, TxPos, RxPos, Fiel
 %   progress = (true, =false) | show progress bar
 %   beamformType (='time', 'frequency') | choose beamformer type
 
-import beamform.gfbeamform3 beamform.gtbeamform
+import beamform.gfbeamform4 beamform.gtbeamform
 import flow.ftdoppler2
 
 % read in optional arguments
@@ -92,7 +92,7 @@ for pos = 1:nFieldPos
             BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, BfPointList, ...
                 nWindowSample, 'plane', plane, 'progress', progress);
         case 'frequency'
-            BfSigMat = gfbeamform3(RxSigMat, TxPos, RxPos, BfPointList, ...
+            BfSigMat = gfbeamform4(RxSigMat, TxPos, RxPos, BfPointList, ...
                 nWindowSample, 'plane', plane, 'progress', progress);
         case 'bypass'
     end

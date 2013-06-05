@@ -6,7 +6,7 @@ function [VelEst, BfSigMat] = instaxialest(RxSigMat, TxPos, RxPos, ...
 %   progress = (true, =false) | show progress bar
 %   beamformType (='time', 'frequency') | choose beamformer type
 
-import beamform.gfbeamform3 beamform.gtbeamform
+import beamform.gfbeamform4 beamform.gtbeamform
 import flow.instdoppler
 
 % read in optional arguments
@@ -86,7 +86,7 @@ switch beamformType
         BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
             nWindowSample, 'plane', plane, 'progress', progress);
     case 'frequency'
-        BfSigMat = gfbeamform3(RxSigMat, TxPos, RxPos, FieldPos, ...
+        BfSigMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, ...
             nWindowSample, 'plane', plane, 'progress', progress);
     case 'bypass'
 end

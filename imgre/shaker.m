@@ -56,7 +56,7 @@ figure; plot(squeeze(VelEstZ),':.');
 PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-%FieldPos = [0; 0; 0.01];
+%FieldPos = [0; 0; 0.02];
 FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
 %FieldPos = [0 0.0005 -0.0005 0 0 ; 0 0 0 0 0 ; 0.020 0.020 0.020 0.0205 0.0195];
 %[X, Z] = meshgrid(linspace(0.015, 0.025, 11), linspace(0.015, 0.025, 11));
@@ -67,10 +67,10 @@ interleave = 0;
 averaging = 4;
 
 [VelEstInst, BfSigMat] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
-    'progress', true, 'plane', true, 'beamformType', 'time', ...
+    'progress', true, 'plane', true, 'beamformType', 'frequency', ...
     'interleave', interleave, 'averaging', averaging);
 
-figure; plot(squeeze(VelEstInst(:,6,:)),':.');
+figure; plot(squeeze(VelEstInst(:,1,:)),':.');
 %%
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 
