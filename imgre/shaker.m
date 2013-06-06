@@ -4,22 +4,22 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/dataset 2/tx10hz/';
+dirname = './data/dataset 3/toneburst1/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
 nChannel = header(1) + 1;
-nFrame = 500;%header(2);
+nFrame = 300;%header(2);
 nSample = header(3); 
 
-Rfc = zeros(nChannel, nSample, nFrame, 'int16');
+Rfc = zeros(nChannel, nSample, nFrame, 'double');
 
 for fr = 1:nFrame
    [~, rf] = readDAQ(dirname, ones(1,128), fr, true);
-   Rfc(:,:,fr) = rf.';
+   Rfc(:,:,fr) = double(rf.');
 end
 
-Rfc = bandpass(double(Rfc), 6.6, 0.80, 40);
+Rfc = bandpass(Rfc, 6.6, 0.80, 40);
 %% Plot raw channels
 for i = 1:nFrame
    imagesc(20.*log10(abs(squeeze(Rfc(:,:,i)))./600).');
@@ -56,17 +56,20 @@ figure; plot(squeeze(VelEstZ),':.');
 PULSE_REPITITION_RATE = 500;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-%FieldPos = [0; 0; 0.02];
-FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
+FieldPos = [0; 0; 0.02];
+%FieldPos = [zeros(1,11); zeros(1,11); linspace(0.015, 0.025, 11)];
 %FieldPos = [0 0.0005 -0.0005 0 0 ; 0 0 0 0 0 ; 0.020 0.020 0.020 0.0205 0.0195];
 %[X, Z] = meshgrid(linspace(0.015, 0.025, 11), linspace(0.015, 0.025, 11));
 %FieldPos = [X(:).'; zeros(1,11*11); Z(:).'];
 nWindowSample = 200;
-nSum = 1;
-interleave = 0;
-averaging = 4;
+nSum = 4; % smoothing after velocity estimates
+averaging = 8; % smoothing before velocity estimates
+interleave = 2; % frame interleaving
 
-[VelEstInst, BfSigMat] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
+% [VelEstInst, ~] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
+%     'progress', true, 'plane', true, 'beamformType', 'frequency', ...
+%     'interleave', interleave, 'averaging', averaging, 'bfsigmat', BfSigMat);
+[VelEstInst, ~] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
     'progress', true, 'plane', true, 'beamformType', 'frequency', ...
     'interleave', interleave, 'averaging', averaging);
 
