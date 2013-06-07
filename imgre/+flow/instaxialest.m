@@ -65,7 +65,7 @@ if isempty(PULSE_REPITITION_RATE)
     PULSE_REPITITION_RATE = 100;
 end
 
-[nSig nSample nFrame] = size(RxSigMat);
+[nSig, nSample, nFrame] = size(RxSigMat);
 nFieldPos = size(FieldPos, 2);
 
 if mod(nWindowSample, 2) == 0
@@ -89,6 +89,7 @@ switch beamformType
         BfSigMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, ...
             nWindowSample, 'plane', plane, 'progress', progress);
     case 'bypass'
+        nFrame = size(BfSigMat, 3);
 end
 
 BfSigMatWin = bsxfun(@times, BfSigMat, win);

@@ -4,34 +4,39 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/dataset 3/toneburst1/';
+dirname = './data/dataset 2/tx10hz/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
 nChannel = header(1) + 1;
-nFrame = 300;%header(2);
-nSample = header(3); 
+nFrame = 500;%header(2);
+frameStart = 501;
+nSample = header(3);
 
 Rfc = zeros(nChannel, nSample, nFrame, 'double');
 
+prog = upicbar('Reading DAQ data ...');
+
 for fr = 1:nFrame
-   [~, rf] = readDAQ(dirname, ones(1,128), fr, true);
-   Rfc(:,:,fr) = double(rf.');
+    upicbar(prog, fr/nFrame);
+    [~, rf] = readDAQ(dirname, ones(1,128), frameStart + fr - 1, true);
+    Rfc(:,:,fr) = double(rf.');
 end
 
 Rfc = bandpass(Rfc, 6.6, 0.80, 40);
+%save rfc5 Rfc;
 %% Plot raw channels
 for i = 1:nFrame
-   imagesc(20.*log10(abs(squeeze(Rfc(:,:,i)))./600).');
-   title(num2str(i));
-   pause(0.1);
+    imagesc(20.*log10(abs(squeeze(Rfc(:,:,i)))./600).');
+    title(num2str(i));
+    pause(0.1);
 end
 %% Plot RF data
 for i = 1:nFrame
-   plot(Rfc(64,:,i));
-   title(num2str(i));
-   axis([250 1200 -100 100]);
-   pause(0.1);
+    plot(Rfc(64,:,i));
+    title(num2str(i));
+    axis([250 1200 -100 100]);
+    pause(0.1);
 end
 %% axial estimate
 global PULSE_REPITITION_RATE;
@@ -63,8 +68,8 @@ FieldPos = [0; 0; 0.02];
 %FieldPos = [X(:).'; zeros(1,11*11); Z(:).'];
 nWindowSample = 200;
 nSum = 4; % smoothing after velocity estimates
-averaging = 8; % smoothing before velocity estimates
-interleave = 2; % frame interleaving
+averaging = 4; % smoothing before velocity estimates
+interleave = 0; % frame interleaving
 
 % [VelEstInst, ~] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
 %     'progress', true, 'plane', true, 'beamformType', 'frequency', ...
@@ -74,45 +79,61 @@ interleave = 2; % frame interleaving
     'interleave', interleave, 'averaging', averaging);
 
 figure; plot(squeeze(VelEstInst(:,1,:)),':.');
-%%
+%% beamforming over sets
+PULSE_REPITITION_RATE = 500;
+
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
+FieldPos = [0; 0; 0.02];
+nWindowSample = 200;
+nSum = 4; % smoothing after velocity estimates
+averaging = 8; % smoothing before velocity estimates
+interleave = 0; % frame interleaving
+Bfc = zeros(201, 1, 500, 6);
 
-nCompare = 401;
-delta = 0.1e-6;
-deltaR = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
-
-FieldPos2 = [ones(1, nCompare).*0; zeros(1, nCompare); 0.020 + deltaR];
-
-BfSigMat2 = gtbeamform(FilteredRfc, [], RxPos, FieldPos2, 200, 'plane', true, ...
-    'progress', true);
-
-VelEst2 = ftdoppler2(BfSigMat2, FieldPos, 200, 'progress', true);
-
-plot(squeeze(VelEst2),':.');
-%% read in AVG daq data
-[header, ~] = readDAQ('./rfdata/control/', ones(1,128), 1, true);
-
-nChannel = header(1) + 1;
-nFrame = 100;%header(2);
-nSample = header(3);
-
-Rfc = zeros(nChannel, nSample, nFrame, 'int16');
-
-for fr = 1:nFrame
-   [~, rf] = readDAQ('./rfdata/control/', ones(1,128), fr, true);
-   Rfc(:,:,fr) = rf.';
+for set = 1:6
+    loadstr = ['load rfc' num2str(set)];
+    eval(loadstr);
+    [VelEstInst, BfSigMat] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
+        'progress', true, 'plane', true, 'beamformType', 'frequency', ...
+        'interleave', interleave, 'averaging', averaging);
+    Bfc(:,:,:,set) = BfSigMat;
+    clear Rfc;
 end
-%%
-RfcAvg = zeros(nChannel, nSample, nFrame/10);
-for i = 1:(nFrame/10)
-   
-    RfcAvg(:,:,i) = mean(FilteredRfc(:,:,i:(i+9)),3);
+
+%% velocity estimate over sets
+PULSE_REPITITION_RATE = 500;
+
+RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
+FieldPos = [0; 0; 0.02];
+nWindowSample = 200;
+nSum = 1; % smoothing after velocity estimates (none = 1)
+averaging = 1; % smoothing before velocity estimates (none = 0 or 1)
+interleave = 0; % frame interleaving (none = 0)
+VelEst = zeros(500 - averaging - nSum + 1, 6, 64);
+sd = zeros(1,64);
+err = zeros((500 - averaging - nSum + 1)*6,64);
+
+for averaging = 1:64
+    for set = 1:6
+        [VelEstInst, ~] = instaxialest([], [], RxPos, FieldPos, nSum, nWindowSample, ...
+            'progress', true, 'plane', true, 'beamformType', 'frequency', ...
+            'interleave', interleave, 'averaging', averaging, ...
+            'bfsigmat', Bfc(:,:,:,set));
+        VelEst(1:(500 - averaging - nSum + 1),set,averaging) = ...
+            reshape(VelEstInst,[],1);
+    end
+    
+    err1 = bsxfun(@minus, VelEst(:,:,averaging), mean(VelEst(:,:,averaging),2));
+    err1 = err1;%./VelEst(:,:,averaging);
+    err2 = err1(140:410,:);
+    err(1:size(err2(:),1),averaging) = err2(:);
+    sd(1,averaging) = std(err2(:));
 end
-%%
-for i = 1:(nFrame/10)
-   plot(RfcAvg(64,:,i));
-   title(num2str(i));
-   pause(0.1);
-end
+
+figure; plot(VelEst(:,:,4), ':.');
+
+
+
+
 
 
