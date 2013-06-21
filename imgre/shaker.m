@@ -4,7 +4,7 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/dataset 2/tx10hz/';
+dirname = './data/smallset 1/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
