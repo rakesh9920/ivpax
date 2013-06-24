@@ -10,9 +10,9 @@ for idx=1:num_ch
     data(:,idx)=temp(idx2);
 end
 n_ch = [1 2];
-data(:,n_ch) = 125*data(:,n_ch); % 125 is the scaling factor for LDV sensor.
+data(:,n_ch) = data(:,n_ch);
 
- scan = data;
+scan = data;
 time=1/fs:1/fs:(length(scan))/fs;
 
 N=length(data);Ts=1/fs;freq=[0:N-1]/N/Ts;

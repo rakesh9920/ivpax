@@ -96,8 +96,9 @@ for point = 1:nFieldPos
             blockBack = nFrame;
         end
         
-        PadSigMat = [FrontPad(~delind,:,:) RxSigMat(~delind,:,blockFront:blockBack)...
-            BackPad(~delind,:,:)];
+        PadSigMat = [FrontPad(~delind,:,1:(blockBack-blockFront+1)) ...
+            RxSigMat(~delind,:,blockFront:blockBack)...
+            BackPad(~delind,:,1:(blockBack-blockFront+1))];
         RxSigMatSpect = fft(PadSigMat, [], 2);
         BfSigSpect = bsxfun(@times, Phase, RxSigMatSpect);
         

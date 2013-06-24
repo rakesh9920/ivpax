@@ -4,13 +4,13 @@ import ultrasonix.*
 import flow.*
 import tools.*
 %% read in RAW daq data
-dirname = './data/smallset 1/';
+dirname = './data/tx_2000/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
 nChannel = header(1) + 1;
-nFrame = 500;%header(2);
-frameStart = 501;
+nFrame = 1000;%header(2);
+frameStart = 1;
 nSample = header(3);
 
 Rfc = zeros(nChannel, nSample, nFrame, 'double');
@@ -23,7 +23,7 @@ for fr = 1:nFrame
     Rfc(:,:,fr) = double(rf.');
 end
 
-Rfc = bandpass(Rfc, 6.6, 0.80, 40);
+%Rfc = bandpass(Rfc, 6.6, 0.80, 40);
 %save rfc5 Rfc;
 %% Plot raw channels
 for i = 1:nFrame
@@ -68,7 +68,7 @@ FieldPos = [0; 0; 0.02];
 %FieldPos = [X(:).'; zeros(1,11*11); Z(:).'];
 nWindowSample = 200;
 nSum = 4; % smoothing after velocity estimates
-averaging = 4; % smoothing before velocity estimates
+averaging = 16; % smoothing before velocity estimates
 interleave = 0; % frame interleaving
 
 % [VelEstInst, ~] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
