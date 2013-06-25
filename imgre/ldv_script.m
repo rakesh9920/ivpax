@@ -5,7 +5,7 @@ import flow.*
 import tools.*
 
 global PULSE_REPITITION_RATE;
-PULSE_REPITITION_RATE = 500;
+PULSE_REPITITION_RATE = 2000;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.02];
@@ -54,8 +54,8 @@ nSum = 16;
 averaging = 16; 
 interleave = 0; 
 
-[VelEstInst, ~] = instaxialest(Rfc, [], RxPos, FieldPos, nSum, nWindowSample, ...
+[VelEstInst, ~] = instaxialest([], [], RxPos, FieldPos, nSum, nWindowSample, ...
         'progress', true, 'plane', true, 'beamformType', 'frequency', ...
-        'interleave', interleave, 'averaging', averaging, 'bfsigmat', Bfm);
+        'interleave', interleave, 'averaging', averaging, 'bfsigmat', Bfmt);
     
 figure; plot(squeeze(VelEstInst(:,1,:)),':.');
