@@ -14,7 +14,7 @@ nSum = 4; % smoothing after velocity estimates
 averaging = 16; % smoothing before velocity estimates
 interleave = 0; % frame interleaving
 
-dirname = './data/tx_2000/';
+dirname = './data/short set 2/tx_2000/';
 
 [header, ~] = readDAQ(dirname, ones(1,128), 1, true);
 
@@ -23,10 +23,10 @@ nFrame = 100;
 nSample = header(3);
 
 %%
-Bfm = zeros(nWindowSample, 1, 4000);
+Bfm = zeros(nWindowSample, 1, 2000);
 averaging = 0;
 
-for fs = 4000:nFrame:8000
+for fs = 2001:nFrame:4000
 
     frEnd = nFrame;
     Rfc = zeros(nChannel, nSample, frEnd, 'double');
@@ -43,19 +43,19 @@ for fs = 4000:nFrame:8000
         'progress', true, 'plane', true, 'beamformType', 'frequency', ...
         'interleave', interleave, 'averaging', 0);
     
-    Bfm(:,:,fs:(fs+frEnd-1)) = BfSigMat;
+    Bfm(:,:,(fs-2000):((fs+frEnd-1)-2000)) = BfSigMat;
 end
 
 %%
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.02];
-nSum = 16; 
+nSum = 1; 
 averaging = 16; 
 interleave = 0; 
 
 [VelEstInst, ~] = instaxialest([], [], RxPos, FieldPos, nSum, nWindowSample, ...
         'progress', true, 'plane', true, 'beamformType', 'frequency', ...
-        'interleave', interleave, 'averaging', averaging, 'bfsigmat', Bfmt);
+        'interleave', interleave, 'averaging', averaging, 'bfsigmat', Bfm);
     
 figure; plot(squeeze(VelEstInst(:,1,:)),':.');
