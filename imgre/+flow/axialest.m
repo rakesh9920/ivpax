@@ -17,7 +17,7 @@ if nargin > 6
 else
     map = containers.Map;
 end
-    
+
 if isKey(map, 'progress')
     progress = map('progress');
 else
@@ -32,7 +32,7 @@ if isKey(map, 'interpolate')
     interpolate = map('interpolate');
 else
     interpolate = 0;
-end   
+end
 if isKey(map, 'plane')
     plane = map('plane');
 else
@@ -46,6 +46,11 @@ end
 if isKey(map, 'bfsigmat')
     BfSigMat = map('bfsigmat');
     beamformType = 'bypass';
+end
+if isKey(map, 'averaging')
+    averaging = map('averaging');
+else
+    averaging = 0;
 end
 
 % global constants
@@ -76,12 +81,16 @@ switch window
     case 'gausswin'
         win = gausswin(nWindowSample);
     case 'rectwin'
-        win = rectwin(nWindowSample);       
+        win = rectwin(nWindowSample);
 end
 
 DeltaZ = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
 
-VelEst = zeros(1, nFieldPos, nFrame - 1);
+if averaging > 0
+    VelEst = zeros(1, nFieldPos, nFrame - averaging);
+else
+    VelEst = zeros(1, nFieldPos, nFrame - 1);
+end
 
 for pos = 1:nFieldPos
     BfPointList = bsxfun(@plus, FieldPos(:,pos), [zeros(1, nCompare); ...
@@ -99,8 +108,22 @@ for pos = 1:nFieldPos
     
     BfSigMatWin = bsxfun(@times, BfSigMat, win);
     
-    VelEst(1,pos,:) = ftdoppler2(BfSigMatWin, BfPointList, (nCompare+1)/2,...
-        'interpolate', interpolate, 'progress', progress);
+    if averaging > 0
+        BfSigMatAvg = zeros(nWindowSample, nCompare, nFrame - averaging + 1);
+        
+        for frame = 1:(nFrame - averaging + 1)
+            BfSigMatAvg(:,:,frame) = sum(BfSigMatWin(:,:,frame:(frame+averaging-1)),3);
+        end
+        
+        VelEst(1,pos,:) = ftdoppler2(BfSigMatAvg, BfPointList, (nCompare+1)/2,...
+            'interpolate', interpolate, 'progress', progress);
+    else
+        
+        VelEst(1,pos,:) = ftdoppler2(BfSigMatWin, BfPointList, (nCompare+1)/2,...
+            'interpolate', interpolate, 'progress', progress);
+    end
+    
+    
 end
 
 end
