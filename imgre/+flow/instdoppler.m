@@ -43,23 +43,23 @@ midSample = round(nSample/2);
 
 for pos = 1:nFieldPos
     AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
-    %     I = real(AnalyticSig(midSample,:));
-    %     Q = imag(AnalyticSig(midSample,:));
+    I = real(AnalyticSig(midSample,:));
+    Q = imag(AnalyticSig(midSample,:));
     
-    I = real(AnalyticSig(midSample-15:midSample+16,:));
-    Q = imag(AnalyticSig(midSample-15:midSample+16,:));
+    %I = real(AnalyticSig(midSample-15:midSample+16,:));
+    %Q = imag(AnalyticSig(midSample-15:midSample+16,:));
     
     for est = 1:nEstimate
         
         ind1 = est:(est + nSum - 1);
         ind2 = ind1 + interleave + 1;
         
-%         numer = 0;
-%         denom = 0;
-%         for s = 1:32
-%             numer = numer + Q(s,ind2).*I(s,ind1) - I(s,ind2).*Q(s,ind1);
-%             denom = denom + I(s,ind2).*I(s,ind1) + Q(s,ind2).*Q(s,ind1);
-%         end
+        %         numer = 0;
+        %         denom = 0;
+        %         for s = 1:32
+        %             numer = numer + Q(s,ind2).*I(s,ind1) - I(s,ind2).*Q(s,ind1);
+        %             denom = denom + I(s,ind2).*I(s,ind1) + Q(s,ind2).*Q(s,ind1);
+        %         end
         numer = -sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
         denom = sum(I(ind2).*I(ind1) + Q(ind2).*Q(ind1));
         

@@ -27,6 +27,11 @@ if isKey(map, 'threshold')
 else
     threshold = 0;
 end
+if isKey(map, 'interleave')
+    interleave = map('interleave');
+else
+    interleave = 0;
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -57,7 +62,7 @@ if progress
     progressBar = upicbar('Calculating velocity...');
 end
 
-for frame = 1:(nFrame - 1)
+for frame = 1:(nFrame - interleave - 1)
     if progress
         upicbar(progressBar, frame/(nFrame - 1));
     end
@@ -65,7 +70,7 @@ for frame = 1:(nFrame - 1)
     Signal1 = BfSigMat(:,pointNo,frame);
     
     for point = 1:nPoint
-        Signal2 = BfSigMat(:,point,frame+1);
+        Signal2 = BfSigMat(:,point,frame + interleave +1);
         XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
     end
     
@@ -77,16 +82,7 @@ for frame = 1:(nFrame - 1)
         [maxValue, maxInd] = max(XcorrList);
         VelocityEst(frame) = TravelSpeed(maxInd);
     end
-    
-    %     if interpolate >= 1
-    %         XcorrListInterp = interp(XcorrList, interpolate);
-    %         [maxValue, maxInd] = max(XcorrListInterp);
-    %         VelocityEst(frame) = TravelSpeedInterp(maxInd);
-    %     else
-    %         [maxValue, maxInd] = max(XcorrList);
-    %         VelocityEst(frame) = TravelSpeed(maxInd);
-    %     end
-    
+
     if maxValue < threshold
         VelocityEst(frame) = 0;
         continue

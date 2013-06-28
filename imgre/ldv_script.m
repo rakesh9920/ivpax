@@ -47,12 +47,14 @@ for fs = 1:nFrame:2000
     Bfm(:,:,(fs-0*2000):((fs+frEnd-1)-0*2000)) = BfSigMat;
 end
 %% instantaneous estimate
+global PULSE_REPITITION_RATE;
+PULSE_REPITITION_RATE = 2000;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.02];
-nSum = 1; 
+nSum = 16; 
 averaging = 16; 
-interleave = 0; 
+interleave = 6; 
 
 [VelEstInst, ~] = instaxialest([], [], RxPos, FieldPos, nSum, nWindowSample, ...
         'progress', true, 'plane', true, 'beamformType', 'frequency', ...
@@ -100,12 +102,20 @@ nCompare = 51;
 delta = 0.5e-6;
 nWindowSample = 201;
 averaging = 16;
+interleave = 1;
 
 velRes = delta*PULSE_REPITITION_RATE
 velMax = velRes*floor(nCompare/2)
 
-[VelEstZ, ~, BfPointList] = axialest(Rfc, [], RxPos, FieldPos, nCompare, delta, ...
+[VelEstZ, ~, BfPointList] = axialest([], [], RxPos, FieldPos, nCompare, delta, ...
     nWindowSample, 'progress', true, 'plane', true, 'interpolate', 64, ...
-    'window', 'hanning', 'beamformType', 'frequency','averaging', averaging);
+    'window', 'hanning', 'beamformType', 'frequency','averaging', averaging,...
+    'bfsigmat', Bfm, 'interleave', interleave);
 
-figure; plot(squeeze(VelEstZ),':.');
+VelEstZ = squeeze(VelEstZ);
+VelEstSmooth = zeros(1,size(VelEstZ,1)-16);
+for i = 1:(size(VelEstZ,1)-16)
+    VelEstSmooth(i) = mean(VelEstZ(i:(i+16-1)));
+end
+
+figure; plot(squeeze(VelEstSmooth));

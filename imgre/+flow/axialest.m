@@ -52,6 +52,11 @@ if isKey(map, 'averaging')
 else
     averaging = 0;
 end
+if isKey(map, 'interleave')
+    interleave = map('interleave');
+else
+    interleave = 0;
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -66,6 +71,9 @@ if isempty(PULSE_REPITITION_RATE)
 end
 
 [nSig nSample nFrame] = size(RxSigMat);
+if strcmp(beamformType,'bypass')
+   nFrame = size(BfSigMat, 3); 
+end
 nFieldPos = size(FieldPos, 2);
 
 if mod(nCompare, 2) == 0
@@ -116,11 +124,11 @@ for pos = 1:nFieldPos
         end
         
         VelEst(1,pos,:) = ftdoppler2(BfSigMatAvg, BfPointList, (nCompare+1)/2,...
-            'interpolate', interpolate, 'progress', progress);
+            'interpolate', interpolate, 'progress', progress, 'interleave', interleave);
     else
         
         VelEst(1,pos,:) = ftdoppler2(BfSigMatWin, BfPointList, (nCompare+1)/2,...
-            'interpolate', interpolate, 'progress', progress);
+            'interpolate', interpolate, 'progress', progress, 'interleave', interleave);
     end
     
     
