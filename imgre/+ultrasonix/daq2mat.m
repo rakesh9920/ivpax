@@ -41,7 +41,7 @@ if inDir(end) ~= '/'
 end
 
 if outDir(end) ~= '/'
-    outDir = strcat(inDir, '/');
+    outDir = strcat(outDir, '/');
 end
 
 if reroute
