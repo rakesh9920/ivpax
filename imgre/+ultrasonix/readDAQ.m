@@ -9,7 +9,7 @@ function [hdr, RFframe] = readDAQ(path, chanls, frameN, reRoute)
 % Example:
 %       Reading single frame
 %       [header, RFframe] = readRFframe('c:\foldername\', ones(1,128), 2, true);
-%       will return the second frame as a 2D matrix in RFframe
+%       will return the second frame as a 2D matrix in RFfram
 % Example:
 %       use inside a for loop in order to read several frames
 %       for i:1:10

@@ -6,24 +6,23 @@ import tools.sqdistance tools.upicbar
 
 % read in optional arguments
 if nargin > 5
-    keys = varargin(1:2:end);
-    values = varargin(2:2:end);
-    
-    map = containers.Map(keys, values);
-    
-    if isKey(map, 'progress')
-        progress = map('progress');
-    end
-    if isKey(map, 'plane')
-        plane = true;
+    if isa(varargin{1}, 'containers.Map')
+        map = varargin{1};
+    else
+        keys = varargin(1:2:end);
+        values = varargin(2:2:end);
+        map = containers.Map(keys, values);
     end
 end
 
-% set defaults
-if ~exist('progress', 'var')
+if isKey(map, 'progress')
+    progress = map('progress');
+else
     progress = false;
 end
-if ~exist('plane', 'var')
+if isKey(map, 'plane')
+    plane = map('plane');
+else
     plane = false;
 end
 

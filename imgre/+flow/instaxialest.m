@@ -11,37 +11,26 @@ import flow.instdoppler
 
 % read in optional arguments
 if nargin > 6
-    keys = varargin(1:2:end);
-    values = varargin(2:2:end);
-    map = containers.Map(keys, values);
+    if isa(varargin{1}, 'containers.Map')
+        map = varargin{1};
+    else
+        keys = varargin(1:2:end);
+        values = varargin(2:2:end);
+        map = containers.Map(keys, values);
+    end
 else
     map = containers.Map;
 end
 
-if isKey(map, 'progress')
-    progress = map('progress');
-else
-    progress = false;
-end
 if isKey(map, 'beamformType')
     beamformType = map('beamformType');
 else
     beamformType = 'time';
 end
-if isKey(map, 'plane')
-    plane = map('plane');
-else
-    plane = false;
-end
 if isKey(map, 'window')
     window = map('window');
 else
     window = 'rectwin';
-end
-if isKey(map, 'interleave')
-    interleave = map('interleave');
-else
-    interleave = 0;
 end
 if isKey(map, 'bfsigmat')
     BfSigMat = map('bfsigmat');
@@ -84,10 +73,10 @@ end
 switch beamformType
     case 'time'
         BfSigMat = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
-            nWindowSample, 'plane', plane, 'progress', progress);
+            nWindowSample, map);
     case 'frequency'
         BfSigMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, ...
-            nWindowSample, 'plane', plane, 'progress', progress);
+            nWindowSample, map);
     case 'bypass'
         nFrame = size(BfSigMat, 3);
 end
@@ -101,9 +90,9 @@ if averaging > 0
         BfSigMatAvg(:,:,frame) = sum(BfSigMatWin(:,:,frame:(frame+averaging-1)),3);
     end
     
-    VelEst = shiftdim(instdoppler(BfSigMatAvg, nSum, 'interleave', interleave), -1);
+    VelEst = shiftdim(instdoppler(BfSigMatAvg, nSum, map), -1);
 else
-    VelEst = shiftdim(instdoppler(BfSigMatWin, nSum, 'interleave', interleave), -1);
+    VelEst = shiftdim(instdoppler(BfSigMatWin, nSum, map), -1);
 end
 
 
