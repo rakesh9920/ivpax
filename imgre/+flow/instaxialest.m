@@ -4,7 +4,7 @@ function [VelEst, BfSigMat] = instaxialest(RxSigMat, TxPos, RxPos, ...
 %
 % Optional:
 %   progress = (true, =false) | show progress bar
-%   beamformType (='time', 'frequency') | choose beamformer type
+%   bfmethod (='time', 'frequency') | choose beamformer type
 
 import beamform.gfbeamform4 beamform.gtbeamform
 import flow.instdoppler

@@ -7,9 +7,13 @@ import beamform.gtbeamform
 
 % read in optional arguments
 if nargin > 5
-    keys = varargin(1:2:end);
-    values = varargin(2:2:end);
-    map = containers.Map(keys, values);
+    if isa(varargin{1}, 'containers.Map')
+        map = varargin{1};
+    else
+        keys = varargin(1:2:end);
+        values = varargin(2:2:end);
+        map = containers.Map(keys, values);
+    end
 else
     map = containers.Map;
 end
@@ -19,10 +23,10 @@ if isKey(map, 'progress')
 else
     progress = false;
 end
-if isKey(map, 'plane')
-    plane = map('plane');
+if isKey(map, 'planetx')
+    planetx = map('planetx');
 else
-    plane = false;
+    planetx = false;
 end
 
 global SOUND_SPEED SAMPLE_FREQUENCY
@@ -36,7 +40,9 @@ end
 nFieldPos = size(FieldPos, 2);
 [nSignal nSample nFrame] = size(RxSigMat);
 
-if plane
+RxSigMat = double(RxSigMat);
+
+if planetx
     TxDelay = round(abs(FieldPos(3,:))./SOUND_SPEED.*SAMPLE_FREQUENCY);
 else
     TxDelay = round(sqrt(sqdistance(TxPos, FieldPos))./SOUND_SPEED.*SAMPLE_FREQUENCY);

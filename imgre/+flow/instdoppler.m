@@ -1,6 +1,10 @@
-function [VelEst] = instdoppler(BfSigMat, nSum, varargin)
+function [VelEst] = instdoppler(BfSigMat, varargin)
 %
+% interleave, nsum, progress
 
+import tools.upicbar
+
+% read in optional arguments
 if nargin > 2
     if isa(varargin{1}, 'containers.Map')
         map = varargin{1};
@@ -15,6 +19,7 @@ end
 
 if isKey(map, 'progress')
     progress = map('progress');
+    map('progress') = false;
 else
     progress = false;
 end
@@ -23,14 +28,16 @@ if isKey(map, 'interleave')
 else
     interleave = 0;
 end
+if isKey(map, 'nsum')
+    nSum = map('nsum');
+else
+    nSum = 1;
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE CENTER_FREQUENCY
 if isempty(SOUND_SPEED)
     SOUND_SPEED = 1500;
-end
-if isempty(SAMPLE_FREQUENCY)
-    SAMPLE_FREQUENCY = 40e6;
 end
 if isempty(PULSE_REPITITION_RATE)
     PULSE_REPITITION_RATE = 100;

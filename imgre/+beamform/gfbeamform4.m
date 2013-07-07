@@ -13,6 +13,8 @@ if nargin > 5
         values = varargin(2:2:end);
         map = containers.Map(keys, values);
     end
+else
+    map = containers.Map;
 end
 
 if isKey(map, 'progress')
@@ -20,10 +22,10 @@ if isKey(map, 'progress')
 else
     progress = false;
 end
-if isKey(map, 'plane')
-    plane = map('plane');
+if isKey(map, 'planetx')
+    planetx = map('planetx');
 else
-    plane = false;
+    planetx = false;
 end
 
 global SOUND_SPEED SAMPLE_FREQUENCY
@@ -37,7 +39,9 @@ end
 nFieldPos = size(FieldPos, 2);
 [nSignal nSample nFrame] = size(RxSigMat);
 
-if plane
+RxSigMat = double(RxSigMat);
+
+if planetx
     TxDelay = abs(FieldPos(3,:))./SOUND_SPEED;
 else
     TxDelay = sqrt(sqdistance(TxPos, FieldPos))./SOUND_SPEED;
