@@ -50,7 +50,7 @@ end
 
 nEstimate = nFrame - nSum - interleave;
 VelEst = zeros(nFieldPos, nEstimate);
-midSample = round(nSample/2);
+midSample = 5; %round(nSample/2);
 
 for pos = 1:nFieldPos
     AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
