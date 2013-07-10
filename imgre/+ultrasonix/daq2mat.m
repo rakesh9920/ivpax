@@ -109,9 +109,9 @@ for chunk = 1:nChunk
     
     if filter
         RfMatF = bandpass(double(RfMat), 2, fc, bw, SAMPLE_FREQUENCY);
-        save(strcat(outDir, sprintf('RFF%0.4d',chunk)), 'RfMatF');
+        save(strcat(outDir, sprintf('RFF%0.4d', chunk)), 'RfMatF');
     else
-        save(strcat(outDir, sprintf('RF%0.4d',chunk)), 'RfMat');
+        save(strcat(outDir, sprintf('RF%0.4d', chunk)), 'RfMat');
     end
     
     if progress

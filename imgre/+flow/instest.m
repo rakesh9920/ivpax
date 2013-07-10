@@ -1,4 +1,4 @@
-function [VelEstOut] = instest(inFile, varargin)
+function [VelEstOut BfSigMatAvg] = instest(inFile, varargin)
 %
 % window, averaging, progress
 
