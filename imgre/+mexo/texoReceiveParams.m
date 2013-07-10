@@ -86,7 +86,7 @@ classdef texoReceiveParams
             obj.numChannels = int32(value);
         end
         function obj = set.rxAprCrv(obj, value)
-            if isa(value, 'texoCurve')
+            if isa(value, 'mexo.texoCurve')
                 obj.rxAprCrv = value;
             else
                 error('rxAprCrv must be a texoCurve object');
