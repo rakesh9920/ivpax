@@ -5,7 +5,7 @@ function [VelEst] = instdoppler(BfSigMat, varargin)
 import tools.upicbar
 
 % read in optional arguments
-if nargin > 2
+if nargin > 1
     if isa(varargin{1}, 'containers.Map')
         map = varargin{1};
     else
@@ -50,7 +50,7 @@ end
 
 nEstimate = nFrame - nSum - interleave;
 VelEst = zeros(nFieldPos, nEstimate);
-midSample = 5; %round(nSample/2);
+midSample = round(nSample/2);
 
 for pos = 1:nFieldPos
     AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));

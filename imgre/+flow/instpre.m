@@ -71,7 +71,6 @@ end
 
 if progress
     prog = upicbar('Preprocessing...');
-    upicbar(prog, 0);
 end
 
 for file = 1:nFile
