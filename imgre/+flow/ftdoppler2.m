@@ -1,17 +1,26 @@
-function [VelocityEst] = ftdoppler2(BfSigMat, FieldPos, pointNo, varargin)
+function [VelocityEst] = ftdoppler2(BfSigMat, delta, pointNo, varargin)
 % Doppler flow estimate using full cross-correlation
+% progress, interpolate, threshold, interleave
 
-import tools.upicbar tools.sqdistance
+import tools.upicbar 
 
 % read in optional arguments
-if nargin > 4
-    keys = varargin(1:2:end);
-    values = varargin(2:2:end);
-    map = containers.Map(keys, values);
+if nargin > 3
+    if isa(varargin{1}, 'containers.Map')
+        map = varargin{1};
+    else
+        keys = varargin(1:2:end);
+        values = varargin(2:2:end);
+        map = containers.Map(keys, values);
+    end
 else
     map = containers.Map;
 end
 
+% make deep copy of map for passing to other functions
+mapOut = [map; containers.Map()] ;
+
+% pull needed map values
 if isKey(map, 'progress')
     progress = map('progress');
 else
@@ -34,58 +43,56 @@ else
 end
 
 % global constants
-global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
-if isempty(SOUND_SPEED)
-    SOUND_SPEED = 1500;
-end
-if isempty(SAMPLE_FREQUENCY)
-    SAMPLE_FREQUENCY = 40e6;
-end
+global PULSE_REPITITION_RATE
 if isempty(PULSE_REPITITION_RATE)
     PULSE_REPITITION_RATE = 100;
 end
 
-[nSample nPoint nFrame] = size(BfSigMat);
-VelocityEst = zeros(1, nFrame - 1);
+[nWindowSample, nCompare, nFrame, nFieldPos] = size(BfSigMat);
 
-TravelSpeed = sqrt(sqdistance(FieldPos(:,pointNo), ...
-    FieldPos)).*PULSE_REPITITION_RATE;
-TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1));
+VelocityEst = zeros(nFrame - 1, nFieldPos);
+XcorrList = zeros(1, nCompare);
+
+TravelSpeed = ((1:nCompare) - pointNo).*delta.*PULSE_REPITITION_RATE;
+% TravelSpeed = sqrt(sqdistance(FieldPos(:,pointNo), ...
+%     FieldPos)).*PULSE_REPITITION_RATE;
+% TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1));
 
 if interpolate > 0
     TravelSpeedInterp = interp(TravelSpeed, interpolate);
 end
 
-XcorrList = zeros(1, nPoint);
-
 if progress
-    progressBar = upicbar('Calculating velocity...');
+    prog = upicbar('Calculating velocity...');
 end
 
-for frame = 1:(nFrame - interleave - 1)
+for pos = 1:nFieldPos
+    for frame = 1:(nFrame - interleave - 1)
+        
+        Signal1 = BfSigMat(:,pointNo,frame,pos);
+        
+        for point = 1:nCompare
+            Signal2 = BfSigMat(:,point,frame + interleave + 1,pos);
+            XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
+        end
+        
+        if interpolate > 0
+            XcorrListInterp = spline(TravelSpeed, XcorrList, TravelSpeedInterp);
+            [maxValue, maxInd] = max(XcorrListInterp);
+            VelocityEst(frame,pos) = TravelSpeedInterp(maxInd);
+        else
+            [maxValue, maxInd] = max(XcorrList);
+            VelocityEst(frame,pos) = TravelSpeed(maxInd);
+        end
+        
+        if maxValue < threshold
+            VelocityEst(frame,pos) = 0;
+            continue
+        end
+    end
+    
     if progress
-        upicbar(progressBar, frame/(nFrame - 1));
-    end
-    
-    Signal1 = BfSigMat(:,pointNo,frame);
-    
-    for point = 1:nPoint
-        Signal2 = BfSigMat(:,point,frame + interleave +1);
-        XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
-    end
-    
-    if interpolate > 0
-        XcorrListInterp = spline(TravelSpeed, XcorrList, TravelSpeedInterp);
-        [maxValue, maxInd] = max(XcorrListInterp);
-        VelocityEst(frame) = TravelSpeedInterp(maxInd);
-    else
-        [maxValue, maxInd] = max(XcorrList);
-        VelocityEst(frame) = TravelSpeed(maxInd);
-    end
-
-    if maxValue < threshold
-        VelocityEst(frame) = 0;
-        continue
+        upicbar(prog, pos/nFieldPos);
     end
 end
 

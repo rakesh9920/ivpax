@@ -1,4 +1,4 @@
-function [VelEstOut BfSigMatAvg] = instest(inFile, varargin)
+function [VelEstOut, BfSigMatAvg] = instest(inFile, varargin)
 %
 % window, averaging, progress
 
@@ -38,7 +38,6 @@ if isKey(map, 'progress')
 else
     progress = false;
 end
-
 
 % select input files and put into cell array
 if isempty(inFile)

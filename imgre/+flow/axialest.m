@@ -18,8 +18,13 @@ else
     map = containers.Map;
 end
 
+% make deep copy of map for passing to other functions
+mapOut = [map; containers.Map()] ;
+
+% pull needed map values
 if isKey(map, 'progress')
     progress = map('progress');
+    mapOut('progress') = false;
 else
     progress = false;
 end
