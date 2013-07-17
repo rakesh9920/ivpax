@@ -15,8 +15,8 @@ prms('averaging') = 16;
 prms('nsum') = 16;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-RxPosL = RxPos(:,1:64);
-RxPosR = RxPos(:,65:128);
+RxPosL = RxPos(:,1:16);
+RxPosR = RxPos(:,113:128);
 FieldPos = [0; 0; 0.02];
 %% filter DAQ data
 daq2mat([], [], prms);
@@ -27,14 +27,24 @@ instpre([], [], [], RxPosL, FieldPos, 801, prms);
 %% preprocessing for R aperture
 instpre([], [], [], RxPosR, FieldPos, 801, prms);
 %% velocity estimate
-[VelEst, BfSigMatAvg] = instest([], prms);
+[VelEstR, BfAvgR] = instest([], prms);
 %% split RF data into L/R groups
-dirname = 'data/15hz/tx2000/matf/';
+dirname = 'data/transverse/15hz/matf/';
 for i = 21:40
    filename = strcat('RFF00', num2str(i), '.mat');
    load(strcat(dirname, filename));
-   RfMatFL = RfMatF(1:64,:,:);
-   RfMatFR = RfMatF(65:128,:,:);
-   save(strcat(dirname, 'L/', filename), 'RfMatFL');
+   %RfMatFL = RfMatF(1:16,:,:);
+   RfMatFR = RfMatF(113:128,:,:);
+   %save(strcat(dirname, 'L/', filename), 'RfMatFL');
    save(strcat(dirname, 'R/', filename), 'RfMatFR');
 end
+%% construct component velocity
+
+theta = atan(2/1.7);
+P = [-cos(theta) sin(theta); 
+    cos(theta) sin(theta)];
+
+ProjVel = [VelEstL; VelEstR];
+CompVel = inv(P)\ProjVel;
+
+
