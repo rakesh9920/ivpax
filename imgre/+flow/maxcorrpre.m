@@ -76,6 +76,10 @@ nFieldPos = size(FieldPos, 2);
 
 DeltaZ = -(nCompare - 1)/2*delta:delta:(nCompare - 1)/2*delta;
 
+if progress
+    prog = upicbar('Preprocessing...');
+end
+
 for file = 1:nFile
     
     filename = inFile{file};

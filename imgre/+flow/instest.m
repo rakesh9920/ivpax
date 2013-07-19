@@ -51,7 +51,7 @@ nFile = length(inFile);
 VelEst = cell(nFile);
 
 if progress
-    prog = upicbar('Preprocessing...');
+    prog = upicbar('Estimating velocity...');
 end
 
 % iterate over each file

@@ -53,7 +53,7 @@ VelEst = cell(nFile);
 pointNo = (nCompare + 1)/2;
 
 if progress
-    prog = upicbar('Preprocessing...');
+    prog = upicbar('Estimating  velocity...');
 end
 
 % iterate over each file
@@ -81,7 +81,7 @@ for file = 1:nFile
         
     % apply running average and then perform velocity estimation
     if averaging > 1
-        BfMatAvg = zeros(nWindowSample, nFieldPos, nFrame - averaging + 1);
+        BfMatAvg = zeros(nWindowSample, nCompare, nFrame - averaging + 1, nFieldPos);
         
         for frame = 1:(nFrame - averaging + 1)
             BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
