@@ -1,4 +1,4 @@
-function [VelEst] = instdoppler(BfSigMat, varargin)
+function [VelEst] = instdoppler2(BfSigMat, varargin)
 %
 % interleave, nsum, progress
 
@@ -50,39 +50,25 @@ end
 
 nEstimate = nFrame - nSum - interleave;
 VelEst = zeros(nFieldPos, nEstimate);
-midSample = round(nSample/2);
+%midSample = round(nSample/2);
 
 for pos = 1:nFieldPos
     AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
-    %I = real(AnalyticSig(midSample,:));
-    %Q = imag(AnalyticSig(midSample,:));
+%     I = real(AnalyticSig);
+%     Q = imag(AnalyticSig);
     
-    [hI, hQ] = tools.iqdemod(squeeze(BfSigMat(:,pos,:)), 6.6e6, 5.2e6, 40e6);
+    ind1 = 1:(nFrame-1);
+    ind2 = ind1 + 1;
     
-    I = hI(midSample, :);
-    Q = hQ(midSample, :);
+    z1 = AnalyticSig(:,ind1).*conj(AnalyticSig(:,ind2));
     
-    for est = 1:nEstimate
+    for est = 1:(nFrame - 1)
         
-        ind1 = est:(est + nSum - 1);
-        ind2 = ind1 + interleave + 1;
+        R = sum(z1(:,est));
+
+        deltaPhi = angle(R);
         
-        numer = sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
-        denom = sum(I(ind2).*I(ind1) + Q(ind2).*Q(ind1));
-        
-        z = I + 1i.*Q;
-        z1 = z(ind1).*z(ind2);
-        rx = real(sum(z1));
-        ry = imag(sum(z1));
-        
-        phi(est) = atan(ry/rx);
-        deltaPhi(est) = atan(numer/denom);
-        
-        
-        r0 = sum(I(ind1).^2 + Q(ind1).^2);
-        stddev(est) = (1 - abs(sum(z1))/r0)*PULSE_REPITITION_RATE^2;
-        
-        VelEst(pos,est) = deltaPhi(est)/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
+        VelEst(pos,est) = deltaPhi/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
             (4*pi*CENTER_FREQUENCY);
     end
 end

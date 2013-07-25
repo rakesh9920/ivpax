@@ -1,23 +1,51 @@
-function [temp] = lowpass(rfcube, fc, fs)
+function [FiltDataOut] = lowpass(RfData, dim, fh, fs, varargin)
 
-f1 = fc/(fs/2);
-[z,p,k] = butter(12,f1,'low'); % bandpass filter
+import tools.upicbar
 
-[sos,g] = zp2sos(z,p,k);
-hd = dfilt.df2sos(sos, g);
+if nargin > 4
+    if isa(varargin{1}, 'containers.Map')
+        map = varargin{1};
+    else
+        keys = varargin(1:2:end);
+        values = varargin(2:2:end);
+        map = containers.Map(keys, values);
+    end
+else
+    map = containers.Map;
+end
 
-[numOfLines numOfSamples numOfChannels] = size(rfcube);
-temp = zeros(numOfLines, numOfSamples, numOfChannels,class(rfcube));
+if isKey(map, 'progress')
+    progress = map('progress');
+    map('progress') = false;
+else
+    progress = false;
+end
 
-prog = progress(0,0,'Filtering');
-for x = 1:numOfLines
+% design chebyshev type 2 lowpass filter
+[b, a] = cheby2(18, 120, fh/(fs/2)); % 60dB attenuation, 12th order
+%[b, a] = butter(18, fh/(fs/2));
+
+CellData = num2cell(RfData, dim);
+cellSize = size(CellData);
+FiltData = cell(cellSize);
+nInd = numel(CellData);
+
+if progress
+    upic = upicbar('Filtering...');
+end
+
+for ind = 1:nInd
     
-    progress(x/numOfLines,0,'Filtering',prog);
+    sub = cell(1,3);
+    [sub{:}] = ind2sub(cellSize, ind);
     
-    for y = 1:numOfChannels
-        temp(x,:,y) =  filter(hd, double(rfcube(x,:,y)));
+    FiltData{ind} = filtfilt(b, a, double(CellData{ind})); 
+    
+    if progress
+        upicbar(upic, ind/nInd);
     end
 end
 
-end
+FiltDataOut = cell2mat(FiltData);
+
 
