@@ -11,14 +11,14 @@ prms('fc') = 6.6e6;
 prms('progress') = true;
 prms('recombine') = true;
 prms('averaging') = 16;
-prms('nsum') = 16;
+prms('nsum') = 32;
 
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-FieldPos = [0; 0; 0.02];
+FieldPos = [0; 0; 0.025];
 
 %%
 daq2mat([], [], prms);
 %%
-instpre([], [], [], RxPos, FieldPos, 201, prms);
+instpre([], [], [], RxPos, FieldPos, 801, prms);
 %%
 VelEst = instest([], prms);
