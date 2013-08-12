@@ -1,4 +1,4 @@
-function [VelEstOut, BfMatAvg] = maxcorrest(inFile, nCompare, delta, varargin)
+function [VelEstOut, BfMatAvg, XcorrMat] = maxcorrest(inFile, nCompare, delta, varargin)
 %
 % window, averaging, progress
 
@@ -87,9 +87,9 @@ for file = 1:nFile
             BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
         end
         
-        VelEst{file} = ftdoppler2(BfMatAvg, delta, pointNo, mapOut);
+        [VelEst{file}, XcorrMat] = ftdoppler2(BfMatAvg, delta, pointNo, mapOut);
     else
-        VelEst{file} = ftdoppler2(BfMatWin, delta, pointNo, mapOut);
+        [VelEst{file}, XcorrMat] = ftdoppler2(BfMatWin, delta, pointNo, mapOut);
     end
     
     if progress

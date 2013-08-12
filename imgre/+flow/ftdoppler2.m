@@ -1,4 +1,4 @@
-function [VelocityEst] = ftdoppler2(BfSigMat, delta, pointNo, varargin)
+function [VelocityEst, XcorrMat] = ftdoppler2(BfSigMat, delta, pointNo, varargin)
 % Doppler flow estimate using full cross-correlation
 % progress, interpolate, threshold, interleave
 
@@ -52,6 +52,7 @@ end
 
 VelocityEst = zeros(nFrame - 1, nFieldPos);
 XcorrList = zeros(1, nCompare);
+XcorrMat = zeros(nCompare, nFieldPos, nFrame);
 
 TravelSpeed = ((1:nCompare) - pointNo).*delta.*PULSE_REPITITION_RATE;
 % TravelSpeed = sqrt(sqdistance(FieldPos(:,pointNo), ...
@@ -75,6 +76,8 @@ for pos = 1:nFieldPos
             Signal2 = BfSigMat(:,point,frame + interleave + 1,pos);
             XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
         end
+        
+        XcorrMat(:, pos, frame) = XcorrList;
         
         if interpolate > 0
             XcorrListInterp = spline(TravelSpeed, XcorrList, TravelSpeedInterp);
