@@ -2,7 +2,7 @@ function [VelEstOut, BfSigMatAvg] = instest(inFile, varargin)
 %
 % window, averaging, progress
 
-import flow.instdoppler
+import flow.instdoppler2
 import tools.uigetfile_n_dir tools.upicbar
 
 % read in optional arguments
@@ -85,9 +85,9 @@ for file = 1:nFile
             BfSigMatAvg(:,:,frame) = sum(BfSigMatWin(:,:,frame:(frame+averaging-1)),3);
         end
         
-        VelEst{file} = instdoppler(BfSigMatAvg, mapOut);
+        VelEst{file} = instdoppler2(BfSigMatAvg, mapOut);
     else
-        VelEst{file} = instdoppler(BfSigMatWin, mapOut);
+        VelEst{file} = instdoppler2(BfSigMatWin, mapOut);
     end
     
     if progress

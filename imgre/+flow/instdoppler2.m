@@ -28,10 +28,15 @@ if isKey(map, 'interleave')
 else
     interleave = 0;
 end
-if isKey(map, 'nsum')
-    nSum = map('nsum');
+if isKey(map, 'ensemble')
+    ensemble = map('ensemble');
 else
-    nSum = 1;
+    ensemble = 1;
+end
+if isKey(map, 'range gate')
+    rangeGate = map('range gate');
+else
+    rangeGate = 1;
 end
 
 % global constants
@@ -48,27 +53,34 @@ end
 
 [nSample nFieldPos nFrame] = size(BfSigMat);
 
-nEstimate = nFrame - nSum - interleave;
+nEstimate = nFrame - ensemble - interleave;
 VelEst = zeros(nFieldPos, nEstimate);
-%midSample = round(nSample/2);
+midSample = round(nSample/2);
+deltaPhi = zeros(rangeGate, nEstimate);
 
 for pos = 1:nFieldPos
-    AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
-%     I = real(AnalyticSig);
-%     Q = imag(AnalyticSig);
     
-    ind1 = 1:(nFrame-1);
-    ind2 = ind1 + 1;
+    [hI, hQ] = tools.iqdemod(squeeze(BfSigMat(:,pos,:)), 6.6e6, 5.2e6, 40e6);
     
-    z1 = AnalyticSig(:,ind1).*conj(AnalyticSig(:,ind2));
+    rangeStart = midSample - floor(rangeGate/2) + 2;
+    rangeStop = rangeStart + rangeGate - 1;
+    I = hI(rangeStart:rangeStop, :);
+    Q = hQ(rangeStart:rangeStop, :);
     
-    for est = 1:(nFrame - 1)
+    for est = 1:nEstimate
         
-        R = sum(z1(:,est));
-
-        deltaPhi = angle(R);
+        for gate = 1:rangeGate
+            
+            ind1 = est:(est + ensemble - 1);
+            ind2 = ind1 + interleave + 1;
+            
+            numer = sum(Q(gate,ind2).*I(gate,ind1) - I(gate,ind2).*Q(gate,ind1));
+            denom = sum(I(gate,ind2).*I(gate,ind1) + Q(gate,ind2).*Q(gate,ind1));
+            
+            deltaPhi(gate,est) = atan(numer/denom);
+        end
         
-        VelEst(pos,est) = deltaPhi/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
+        VelEst(pos,est) = mean(deltaPhi(:,est))/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
             (4*pi*CENTER_FREQUENCY);
     end
 end

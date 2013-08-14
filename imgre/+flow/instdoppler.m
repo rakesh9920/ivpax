@@ -53,9 +53,9 @@ VelEst = zeros(nFieldPos, nEstimate);
 midSample = round(nSample/2);
 
 for pos = 1:nFieldPos
-    AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
-    %I = real(AnalyticSig(midSample,:));
-    %Q = imag(AnalyticSig(midSample,:));
+%     AnalyticSig = hilbert(squeeze(BfSigMat(:,pos,:)));
+%     I = real(AnalyticSig(midSample,:));
+%     Q = imag(AnalyticSig(midSample,:));
     
     [hI, hQ] = tools.iqdemod(squeeze(BfSigMat(:,pos,:)), 6.6e6, 5.2e6, 40e6);
     
@@ -70,17 +70,17 @@ for pos = 1:nFieldPos
         numer = sum(Q(ind2).*I(ind1) - I(ind2).*Q(ind1));
         denom = sum(I(ind2).*I(ind1) + Q(ind2).*Q(ind1));
         
-        z = I + 1i.*Q;
-        z1 = z(ind1).*z(ind2);
-        rx = real(sum(z1));
-        ry = imag(sum(z1));
-        
-        phi(est) = atan(ry/rx);
+%         z = I + 1i.*Q;
+%         z1 = z(ind1).*z(ind2);
+%         rx = real(sum(z1));
+%         ry = imag(sum(z1));
+%         
+%         phi(est) = atan(ry/rx);
         deltaPhi(est) = atan(numer/denom);
         
         
-        r0 = sum(I(ind1).^2 + Q(ind1).^2);
-        stddev(est) = (1 - abs(sum(z1))/r0)*PULSE_REPITITION_RATE^2;
+%         r0 = sum(I(ind1).^2 + Q(ind1).^2);
+%         stddev(est) = (1 - abs(sum(z1))/r0)*PULSE_REPITITION_RATE^2;
         
         VelEst(pos,est) = deltaPhi(est)/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
             (4*pi*CENTER_FREQUENCY);
