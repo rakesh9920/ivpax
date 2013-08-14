@@ -12,12 +12,12 @@ apr.mid = 50;
 apr.btm = 100;
 apr.vmid = 50;
 
-tx.centerElement = 64.5;
-tx.aperture = 128; 
+tx.centerElement = 16.5;
+tx.aperture = 32; 
 tx.angle = 0;
 tx.focusDistance = 300000;
-tx.frequency = 6600000;
-tx.pulseShape = '+-';
+tx.frequency = 5000000;
+tx.pulseShape = '+-+-';
 tx.speedOfSound = 1500;
 tx.tableIndex = -1;
 tx.useManualDelays = false;
@@ -26,8 +26,8 @@ tx.useMask = false;
 tx.mask = zeros(1,128);
 tx.sync = 1;
 
-rx.centerElement = 64.5;
-rx.aperture = 64; 
+rx.centerElement = 16.5;
+rx.aperture = 32; 
 rx.angle = 0; 
 rx.maxApertureDepth = 50000; 
 rx.acquisitionDepth = 50000;
@@ -52,7 +52,7 @@ if ~texoInit('./bin/dat/', 3, 4, 0, 64, 0, 128)
     error('texoInit failed');
 end
 texoClearTGCs();
-if ~texoAddTGCFixed(0.60)
+if ~texoAddTGCFixed(0.80)
     error('texoAddTGCFixed failed');
 end
 texoSetSyncSignals(1,1,3);
@@ -60,12 +60,28 @@ texoActivateProbeConnector(0);
 texoForceConnector(3);
 texoEnableSyncNotify(false);
 %% TEXO SEQUENCING
+
+pulseShape = '+-+-';
+power = 15;
+centerElement = 16.5;
+txChannel = 1;
+rxChannel = 1;
+
 if ~texoBeginSequence()
     error('texoBeginSequence failed');
 end
 
-tx.centerElement = 64.5;
-rx.centerElement = 64.5;
+txMask = zeros(1,128);
+txMask(txChannel) = 1;
+tx.pulseShape = pulseShape;
+tx.centerElement = centerElement;
+
+
+
+rx.centerElement = centerElement;
+
+tx.mask = txMask;
+
 [success, lineSize, lineDuration] = texoAddLine(tx, rx);
 
 lineSize
@@ -73,7 +89,7 @@ lineDuration
 if ~texoEndSequence()
     error('texoEndSequence failed');
 end
-texoSetPower(15,15,15);
+texoSetPower(power, power, power);
 
 %% RUN TEST
 if ~texoRunImage()
