@@ -74,7 +74,7 @@ for pos = 1:nFieldPos
         
         for point = 1:nCompare
             Signal2 = BfSigMat(:,point,frame + interleave + 1,pos);
-            XcorrList(point) = max(xcorr(Signal1, Signal2, 'coeff'));
+            XcorrList(point) = max(abs(xcorr(Signal1, Signal2, 'coeff')));
         end
         
         XcorrMat(:, pos, frame) = XcorrList;
