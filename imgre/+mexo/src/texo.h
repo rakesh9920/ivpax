@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-texoL int texoInit(const char* firmwarePath, int pci, int usm, int hv, int channels, int cw = 0, int szCine = 128);
+texoL int texoInit(const char* firmwarePath, int pci, int usm, int hv, int channels, int cw = 0, int szCine = 128, bool fineDelay = true);
 texoL void texoShutdown();
 texoL int texoIsInitialized();
 texoL int texoIsImaging();
