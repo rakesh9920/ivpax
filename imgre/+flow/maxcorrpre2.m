@@ -1,13 +1,13 @@
-function [BfMatOut] = instpre(inFile, outDir, TxPos, RxPos, FieldPos, ...
-    nWindowSample, varargin)
-%
+function [BfMatOut] = maxcorrpre2(inFile, outDir, TxPos, RxPos, FieldPos, ...
+    nCompare, delta, nWindowSample, varargin)
+% velocity estimate along axial direction
 % bfmethod, recombine, progress
 
 import beamform.gfbeamform4 beamform.gtbeamform
 import tools.uigetfile_n_dir tools.upicbar
 
 % read in optional arguments
-if nargin > 5
+if nargin > 8
     if isa(varargin{1}, 'containers.Map')
         map = varargin{1};
     else
@@ -23,30 +23,33 @@ end
 mapOut = [map; containers.Map()] ;
 
 % pull needed map values
-if isKey(map, 'bfmethod')
-    bfmethod = map('bfmethod');
-else
-    bfmethod = 'time';
-end
-if isKey(map, 'recombine')
-    recombine = map('recombine');
-else
-    recombine = false;
-end
 if isKey(map, 'progress')
     progress = map('progress');
     mapOut('progress') = false;
 else
     progress = false;
 end
-if isKey(map, 'filename')
-    outFilename = map('filename');
+if isKey(map, 'recombine')
+    recombine = map('recombine');
 else
-    outFilename = 'PRE';
+    recombine = false;
+end
+if isKey(map, 'bfmethod')
+    bfmethod = map('bfmethod');
+else
+    bfmethod = 'time';
+end
+
+global SAMPLE_FREQUENCY;
+if isempty(SAMPLE_FREQUENCY)
+    SAMPLE_FREQUENCY = 40e6;
 end
 
 if mod(nWindowSample, 2) == 0
     nWindowSample = nWindowSample + 1;
+end
+if mod(nCompare, 2) == 0
+    nCompare = nCompare + 1;
 end
 
 if isempty(inFile)
@@ -55,11 +58,9 @@ end
 
 if nargout > 0
     argout = true;
-else 
+elseif isempty(outDir)
     argout = false;
-    if isempty(outDir)
-        outDir = uigetdir('','Select output directory');
-    end
+    outDir = uigetdir('','Select output directory');
 end
 
 if outDir(end) ~= '/'
@@ -76,6 +77,13 @@ if argout || recombine
     BfMatOut = cell(nFile);
 end
 
+nFieldPos = size(FieldPos, 2);
+
+nDeltaSample = round(delta.*SAMPLE_FREQUENCY);
+nSample = (nCompare - 1)*nDeltaSample + nWindowSample;
+pointNo = (nCompare + 1)/2;
+centerSample = (nSample + 1)/2;
+
 if progress
     prog = upicbar('Preprocessing...');
 end
@@ -87,19 +95,35 @@ for file = 1:nFile
     fields = fieldnames(Mat);
     RxSigMat = Mat.(fields{1});
     
+    BfMatPos = cell(nFieldPos);
+    
     switch bfmethod
         case 'time'
             BfMat = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
-                nWindowSample, mapOut);
+                nSample, mapOut);
         case 'frequency'
             BfMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, ...
-                nWindowSample, mapOut);
+                nSample, mapOut);
+    end
+    
+    BfMat = permute(shiftdim(BfMat, -1), [2 1 4 3]);
+    
+    nFrame = size(BfMat, 3);
+    BfMatWin = zeros(nWindowSample, nCompare, nFrame, nFieldPos);
+    
+    for point = 1:nCompare
+        
+        center = (point - pointNo)*nDeltaSample + centerSample;
+        startSample = center - (nWindowSample - 1)/2;
+        endSample = center + (nWindowSample - 1)/2;
+        
+        BfMatWin(:,point,:,:) = BfMat(startSample:endSample,:,:,:);
     end
     
     if argout || recombine
-        BfMatOut{file} = BfMat;
+        BfMatOut{file} = BfMatWin;
     else
-        save(strcat(outDir, outFilename, sprintf('%0.4d', file)), 'BfMat');
+        save(strcat(outDir, sprintf('PRE%0.4d', file)), 'BfMat');
     end
     
     if progress
@@ -109,6 +133,6 @@ end
 
 if recombine
     BfMat = cat(3, BfMatOut{:});
-    save(strcat(outDir, outFilename), 'BfMat');
+    save(strcat(outDir, 'PRE1'), 'BfMat');
 end
 
