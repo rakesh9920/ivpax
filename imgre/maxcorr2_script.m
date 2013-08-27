@@ -2,47 +2,53 @@ import tools.*
 import ultrasonix.*
 import flow.*
 
-global PULSE_REPITITION_RATE SAMPLE_FREQUENCY;
+global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED;
+SOUND_SPEED = 1500;
 PULSE_REPITITION_RATE = 2000;
 SAMPLE_FREQUENCY = 40e6;
 
 prms = containers.Map();
+
 % beamforming & preprocessing
 prms('bfmethod') = 'frequency';
 prms('planetx') = true;
 prms('recombine') = true;
 prms('averaging') = 16;
-prms('window') = 'hanning';
+prms('window') = 'rectwin';
+
 % filtering
 prms('filter') = true;
 prms('bw') = 5.2e6;
 prms('fc') = 6.6e6;
+
 % instantaneous estimate
 prms('nsum') = 16;
+prms('ensemble') = 16;
+prms('range gate') = 64;
+
 % maxcorr estimate
 prms('interpolate') = 16;
 prms('threshold') = 0;
 % misc
 prms('progress') = true;
-% testing
-prms('ensemble') = 16;
-prms('range gate') = 64;
+prms('interleave') = 2;
 
-FieldPos = [0; 0; 0.02];
+FieldPos = [0; 0; 0.014];
 
-delta = 0.75e-7; % in seconds
-window = 1.5e-6; % in seconds
-nCompare = 3;
-nWindowSample = round(window.*SAMPLE_FREQUENCY);
+deltaTime = 0.3125e-7; % in seconds
+deltaSpace = round(deltaTime*SAMPLE_FREQUENCY)/SAMPLE_FREQUENCY*SOUND_SPEED/2;
+window = 2*2.5e-7; % in seconds
+nCompare = 201;
+nWindowSample = round(window*SAMPLE_FREQUENCY);
 
 %% RF filtering and conversion
 daq2mat([], [], prms);
 
 %% preprocessing (instantaneous estimate)
-maxcorrpre2([], [], [], RxPos, FieldPos, nCompare, 0.75e-6, nWindowSample, prms);
+maxcorrpre2([], [], [], RxPos, FieldPos, nCompare, deltaTime, nWindowSample, prms);
 
 %% velocity estimate (max correlation estimate)
-[VelEst, BfAvg, XCMat] = maxcorrest([], nPoint, nDeltaSample, prms);
+[VelEst, BfAvg, XCMat] = maxcorrest([], nCompare, deltaSpace, prms);
 
 
 

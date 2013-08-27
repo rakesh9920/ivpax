@@ -54,7 +54,7 @@ VelocityEst = zeros(nFrame - 1, nFieldPos);
 XcorrList = zeros(1, nCompare);
 XcorrMat = zeros(nCompare, nFieldPos, nFrame);
 
-TravelSpeed = ((1:nCompare) - pointNo).*delta.*PULSE_REPITITION_RATE;
+TravelSpeed = ((1:nCompare) - pointNo).*delta.*PULSE_REPITITION_RATE./(interleave + 1);
 % TravelSpeed = sqrt(sqdistance(FieldPos(:,pointNo), ...
 %     FieldPos)).*PULSE_REPITITION_RATE;
 % TravelSpeed(1:(pointNo-1)) = -TravelSpeed(1:(pointNo-1));
@@ -74,7 +74,7 @@ for pos = 1:nFieldPos
         
         for point = 1:nCompare
             Signal2 = BfSigMat(:,point,frame + interleave + 1,pos);
-            XcorrList(point) = max(abs(xcorr(Signal1, Signal2, 'coeff')));
+            XcorrList(point) = max(xcorr(Signal1, Signal2));
         end
         
         XcorrMat(:, pos, frame) = XcorrList;
