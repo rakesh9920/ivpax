@@ -123,7 +123,7 @@ for file = 1:nFile
     if argout || recombine
         BfMatOut{file} = BfMatWin;
     else
-        save(strcat(outDir, sprintf('PRE%0.4d', file)), 'BfMat');
+        save(strcat(outDir, sprintf('PRE%0.4d', file)), 'BfMatWin');
     end
     
     if progress

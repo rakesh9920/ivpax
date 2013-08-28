@@ -67,6 +67,8 @@ if progress
     prog = upicbar('Calculating velocity...');
 end
 
+Points = zeros(1, nFrame); %%
+
 for pos = 1:nFieldPos
     for frame = 1:(nFrame - interleave - 1)
         
@@ -82,10 +84,18 @@ for pos = 1:nFieldPos
         if interpolate > 0
             XcorrListInterp = spline(TravelSpeed, XcorrList, TravelSpeedInterp);
             [maxValue, maxInd] = max(XcorrListInterp);
-            VelocityEst(frame,pos) = TravelSpeedInterp(maxInd);
+            
+            %VelocityEst(frame,pos) = TravelSpeedInterp(maxInd) - TravelSpeedInterp(pointNo*interpolate);
+            
+            VelocityEst(frame,pos) = (maxInd - (pointNo - 1)*interpolate)*...
+                delta/interpolate*PULSE_REPITITION_RATE;
+            
+            [~, maxInd2] = max(XcorrList); %%
+            pointNo = maxInd2; %%
+            Points(frame) = maxInd;%pointNo; %%
         else
             [maxValue, maxInd] = max(XcorrList);
-            VelocityEst(frame,pos) = TravelSpeed(maxInd);
+            VelocityEst(frame,pos) = TravelSpeed(maxInd) - TravelSpeed(pointNo);
         end
         
         if maxValue < threshold
@@ -99,4 +109,5 @@ for pos = 1:nFieldPos
     end
 end
 
+save Points Points;
 end
