@@ -1,5 +1,5 @@
 function [BfMatOut] = maxcorrpre2(inFile, outDir, TxPos, RxPos, FieldPos, ...
-    nCompare, delta, nWindowSample, varargin)
+    nCompare, deltaSample, nWindowSample, varargin)
 % velocity estimate along axial direction
 % bfmethod, recombine, progress
 
@@ -39,10 +39,10 @@ if isKey(map, 'bfmethod')
 else
     bfmethod = 'time';
 end
-
-global SAMPLE_FREQUENCY;
-if isempty(SAMPLE_FREQUENCY)
-    SAMPLE_FREQUENCY = 40e6;
+if isKey(map, 'resample')
+    resample = map('resample');
+else
+    resample = 1;
 end
 
 if mod(nWindowSample, 2) == 0
@@ -79,8 +79,7 @@ end
 
 nFieldPos = size(FieldPos, 2);
 
-nDeltaSample = round(delta.*SAMPLE_FREQUENCY);
-nSample = (nCompare - 1)*nDeltaSample + nWindowSample;
+nSample = (nCompare - 1)*deltaSample + nWindowSample;
 pointNo = (nCompare + 1)/2;
 centerSample = (nSample + 1)/2;
 
@@ -109,11 +108,18 @@ for file = 1:nFile
     BfMat = permute(shiftdim(BfMat, -1), [2 1 4 3]);
     
     nFrame = size(BfMat, 3);
+    
+    if resample > 1
+        
+        BfMatInterp = interp(BfMat(:), resample);
+        BfMat = reshape(BfMatInterp, [], 1, nFrame, nFieldPos);
+    end
+    
     BfMatWin = zeros(nWindowSample, nCompare, nFrame, nFieldPos);
     
     for point = 1:nCompare
         
-        center = (point - pointNo)*nDeltaSample + centerSample;
+        center = (point - pointNo)*deltaSample + centerSample;
         startSample = center - (nWindowSample - 1)/2;
         endSample = center + (nWindowSample - 1)/2;
         
@@ -133,6 +139,6 @@ end
 
 if recombine
     BfMat = cat(3, BfMatOut{:});
-    save(strcat(outDir, 'PRE1'), 'BfMat');
+    save(strcat(outDir, 'PRE1'), 'BfMat', '-v7.3');
 end
 

@@ -13,7 +13,7 @@ prms = containers.Map();
 prms('bfmethod') = 'frequency';
 prms('planetx') = true;
 prms('recombine') = true;
-prms('averaging') = 16;
+prms('averaging') = 1;
 prms('window') = 'rectwin';
 
 % filtering
@@ -27,7 +27,8 @@ prms('ensemble') = 16;
 prms('range gate') = 64;
 
 % maxcorr estimate
-prms('interpolate') = 100;
+prms('interpolate') = 16;
+prms('resample') = 10;
 prms('threshold') = 0;
 
 % misc
@@ -37,20 +38,22 @@ prms('interleave') = 0;
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.014];
 
-deltaTime = 0.25e-7; % in seconds
-deltaSpace = round(deltaTime*SAMPLE_FREQUENCY)/SAMPLE_FREQUENCY*SOUND_SPEED/2;
-window = 10*2.5e-7; % in seconds
-nCompare = 101;
-nWindowSample = round(window*SAMPLE_FREQUENCY);
+deltaSample = 1;
 
+deltaTime = deltaSample/SAMPLE_FREQUENCY;
+deltaSpace = deltaSample/SAMPLE_FREQUENCY*SOUND_SPEED/2;
+
+nWindowSample = 101*5;
+nCompare = 101*2;
 %% RF filtering and conversion
 daq2mat([], [], prms);
 
 %% preprocessing (instantaneous estimate)
-maxcorrpre2([], [], [], RxPos, FieldPos, nCompare, deltaTime, nWindowSample, prms);
+maxcorrpre2([], [], [], RxPos, FieldPos, nCompare, deltaSample, nWindowSample, prms);
 
 %% velocity estimate (max correlation estimate)
-[VelEst, BfAvg, XCMat] = maxcorrest([], nCompare, deltaSpace, prms);
+SAMPLE_FREQUENCY = 40e6*10;
+[VelEst, ~, XCMat] = maxcorrest([], nCompare, deltaSample, prms);
 
 
 

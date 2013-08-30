@@ -50,6 +50,11 @@ nFile = length(inFile);
 
 VelEst = cell(nFile);
 
+if mod(nCompare, 2) == 0
+    nCompare = nCompare + 1;
+end
+
+
 pointNo = (nCompare + 1)/2;
 
 if progress
@@ -89,6 +94,8 @@ for file = 1:nFile
         
         [VelEst{file}, XcorrMat] = ftdoppler2(BfMatAvg, delta, pointNo, mapOut);
     else
+        
+        BfMatAvg = [];
         [VelEst{file}, XcorrMat] = ftdoppler2(BfMatWin, delta, pointNo, mapOut);
     end
     
