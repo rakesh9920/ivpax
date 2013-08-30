@@ -39,12 +39,23 @@ if isKey(map, 'bfmethod')
 else
     bfmethod = 'time';
 end
+if isKey(map, 'filename')
+    outFilename = map('filename');
+else
+    outFilename = 'PRE';
+end
 if isKey(map, 'resample')
     resample = map('resample');
 else
     resample = 1;
 end
+if isKey(map, 'averaging')
+    averaging = map('averaging');
+else
+    averaging = 0;
+end
 
+% set window and number of compare points to be odd
 if mod(nWindowSample, 2) == 0
     nWindowSample = nWindowSample + 1;
 end
@@ -87,6 +98,7 @@ if progress
     prog = upicbar('Preprocessing...');
 end
 
+% iterate over files
 for file = 1:nFile
     
     filename = inFile{file};
@@ -94,8 +106,7 @@ for file = 1:nFile
     fields = fieldnames(Mat);
     RxSigMat = Mat.(fields{1});
     
-    BfMatPos = cell(nFieldPos);
-    
+    % beamform
     switch bfmethod
         case 'time'
             BfMat = gtbeamform(RxSigMat, TxPos, RxPos, FieldPos, ...
@@ -109,12 +120,36 @@ for file = 1:nFile
     
     nFrame = size(BfMat, 3);
     
-    if resample > 1
+    % apply sliding average
+    
+    if averaging > 1
+        BfMatAvg = zeros(nSample, 1, nFrame - averaging + 1, nFieldPos);
         
-        BfMatInterp = interp(BfMat(:), resample);
-        BfMat = reshape(BfMatInterp, [], 1, nFrame, nFieldPos);
+        for frame = 1:(nFrame - averaging + 1)
+            BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
+        end
+        
+        BfMat = BfMatAvg;
     end
     
+    % resample BF data if desired
+    if resample > 1
+        
+        %         BfMatInterp = interp(BfMat(:), resample);
+        %         BfMat = reshape(BfMatInterp, [], 1, nFrame, nFieldPos);
+        
+        BfMatInterp = zeros(nSample*upsample, 1, nFrame, nFieldPos);
+        
+        for pos = 1:nFieldPos
+            for frame = 1:nFrame
+                BfMatInterp(:,1,frame,pos) = interp(BfMat(:,1,frame,pos), resample);
+            end
+        end
+        
+        BfMat = BfMatInterp;
+    end
+    
+    % divide BF data into windowed segments
     BfMatWin = zeros(nWindowSample, nCompare, nFrame, nFieldPos);
     
     for point = 1:nCompare
@@ -129,7 +164,7 @@ for file = 1:nFile
     if argout || recombine
         BfMatOut{file} = BfMatWin;
     else
-        save(strcat(outDir, sprintf('PRE%0.4d', file)), 'BfMatWin');
+        save(strcat(outDir, outFilename, sprintf('%0.4d', file)), 'BfMatWin');
     end
     
     if progress
@@ -139,6 +174,6 @@ end
 
 if recombine
     BfMat = cat(3, BfMatOut{:});
-    save(strcat(outDir, 'PRE1'), 'BfMat', '-v7.3');
+    save(strcat(outDir, outFilename), 'BfMat', '-v7.3');
 end
 

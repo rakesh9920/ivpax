@@ -1,8 +1,8 @@
-function [VelEstOut, BfMatAvg, XcorrMat] = maxcorrest(inFile, nCompare, delta, varargin)
+function [VelEstOut, XcorrMat] = maxcorrest(inFile, nCompare, delta, varargin)
 %
 % window, averaging, progress
 
-import flow.ftdoppler2
+import flow.ftdoppler
 import tools.uigetfile_n_dir tools.upicbar
 
 % read in optional arguments
@@ -28,11 +28,6 @@ if isKey(map, 'progress')
 else
     progress = false;
 end
-if isKey(map, 'averaging')
-    averaging = map('averaging');
-else
-    averaging = 0;
-end
 if isKey(map, 'window')
     window = map('window');
 else
@@ -53,7 +48,6 @@ VelEst = cell(nFile);
 if mod(nCompare, 2) == 0
     nCompare = nCompare + 1;
 end
-
 
 pointNo = (nCompare + 1)/2;
 
@@ -83,21 +77,21 @@ for file = 1:nFile
     
     % apply window to RF data
     BfMatWin = bsxfun(@times, BfSigMat, win);
-        
+    
     % apply running average and then perform velocity estimation
-    if averaging > 1
-        BfMatAvg = zeros(nWindowSample, nCompare, nFrame - averaging + 1, nFieldPos);
-        
-        for frame = 1:(nFrame - averaging + 1)
-            BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
-        end
-        
-        [VelEst{file}, XcorrMat] = ftdoppler2(BfMatAvg, delta, pointNo, mapOut);
-    else
-        
-        BfMatAvg = [];
-        [VelEst{file}, XcorrMat] = ftdoppler2(BfMatWin, delta, pointNo, mapOut);
-    end
+    %     if averaging > 1
+    %         BfMatAvg = zeros(nWindowSample, nCompare, nFrame - averaging + 1, nFieldPos);
+    %
+    %         for frame = 1:(nFrame - averaging + 1)
+    %             BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
+    %         end
+    %
+    %         [VelEst{file}, XcorrMat] = ftdoppler(BfMatAvg, delta, pointNo, mapOut);
+    %     else
+    
+    %         BfMatAvg = [];
+    [VelEst{file}, XcorrMat] = ftdoppler(BfMatWin, delta, pointNo, mapOut);
+    %     end
     
     if progress
         upicbar(prog, file/nFile);

@@ -1,22 +1,37 @@
-%% This segment reads the prompts the user to select the binary file
-[filename, FPATH]=uigetfile({'*.dat;*.bin;*.dbl*.lvm','Binary Files (*.dat,*.bin,*.dbl)';...
-'*.*','All Files (*.*)'},'Please Select Binary File');
-fid=fopen([FPATH filename ],'r');
-temp=fread(fid,inf,'double');
-fs=temp(1); %Hz
-num_ch=temp(2); 
-for idx=1:num_ch
-        idx2=idx+2:num_ch:length(temp);
-    data(:,idx)=temp(idx2);
+function [LdvData, ChData, sampleFreq] = readldv(varargin)
+%
+%
+
+if nargin > 0
+    scale = varargin{1};
+else
+    scale = 4;
 end
-n_ch = [1 2];
-data(:,n_ch) = data(:,n_ch);
 
-scan = data;
-time=1/fs:1/fs:(length(scan))/fs;
 
-N=length(data);Ts=1/fs;freq=[0:N-1]/N/Ts;
+[filename, FPATH] = uigetfile({'*.dat;*.bin;*.dbl*.lvm','Binary Files (*.dat,*.bin,*.dbl)';...
+    '*.*','All Files (*.*)'},'Please Select Binary File');
 
-FT = abs(fft(scan));
-plot(time,data), figure(2)
-plot(freq,FT),
+
+fid = fopen([FPATH filename], 'r');
+stream = fread(fid, inf, 'double');
+fclose(fid);
+
+sampleFreq = stream(1); %Hz
+nChannel = stream(2);
+nSample = (length(stream) - 2)/nChannel;
+raw = zeros(nSample, nChannel);
+
+for ch = 1:nChannel
+    idx = ch + 2:nChannel:length(stream);
+    raw(:,ch) = stream(idx);
+end
+
+
+LdvData = raw(:,1).'.*scale/4;
+ChData = raw(:,2:end).';
+
+%n_ch = [1 2];
+%raw(:,n_ch) = raw(:,n_ch);
+
+
