@@ -85,7 +85,7 @@ end
 nFile = length(inFile);
 
 if argout || recombine
-    BfMatOut = cell(nFile);
+    BfMatOut = cell(1, nFile);
 end
 
 nFieldPos = size(FieldPos, 2);
@@ -138,7 +138,7 @@ for file = 1:nFile
         %         BfMatInterp = interp(BfMat(:), resample);
         %         BfMat = reshape(BfMatInterp, [], 1, nFrame, nFieldPos);
         
-        BfMatInterp = zeros(nSample*upsample, 1, nFrame, nFieldPos);
+        BfMatInterp = zeros(nSample*resample, 1, nFrame, nFieldPos);
         
         for pos = 1:nFieldPos
             for frame = 1:nFrame
@@ -164,7 +164,8 @@ for file = 1:nFile
     if argout || recombine
         BfMatOut{file} = BfMatWin;
     else
-        save(strcat(outDir, outFilename, sprintf('%0.4d', file)), 'BfMatWin');
+        BfMat = BfMatWin;
+        save(strcat(outDir, outFilename, sprintf('%0.4d', file)), 'BfMat');
     end
     
     if progress

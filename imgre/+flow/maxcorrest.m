@@ -43,7 +43,7 @@ if ~isa(inFile, 'cell')
 end
 nFile = length(inFile);
 
-VelEst = cell(nFile);
+VelEst = cell(1,nFile);
 
 if mod(nCompare, 2) == 0
     nCompare = nCompare + 1;
@@ -64,7 +64,8 @@ for file = 1:nFile
     fields = fieldnames(Mat);
     BfSigMat = Mat.(fields{1});
     
-    [nWindowSample, nCompare, nFrame, nFieldPos] = size(BfSigMat);
+    %[nWindowSample, nCompare, nFrame, nFieldPos] = size(BfSigMat);
+    nWindowSample = size(BfSigMat, 1);
     
     switch window
         case 'hanning'
@@ -78,6 +79,21 @@ for file = 1:nFile
     % apply window to RF data
     BfMatWin = bsxfun(@times, BfSigMat, win);
     
+    % cat remaining frames from previous file onto current file
+    if file > 1
+        BfMatWin = cat(3, BfSigMatRem, BfMatWin);
+    end
+    
+    % calculate estimates for current file
+    [VelEst{file}, XcorrMat] = ftdoppler(BfMatWin, delta, pointNo, mapOut);
+    
+    % save remainder frames for use in next file
+    if file < nFile
+        
+        nFrameRem = size(BfMatWin, 3) - size(VelEst{file}, 1);
+        BfSigMatRem = BfMatWin(:,:,(end - nFrameRem + 1):end ,:);
+    end
+    
     % apply running average and then perform velocity estimation
     %     if averaging > 1
     %         BfMatAvg = zeros(nWindowSample, nCompare, nFrame - averaging + 1, nFieldPos);
@@ -88,9 +104,7 @@ for file = 1:nFile
     %
     %         [VelEst{file}, XcorrMat] = ftdoppler(BfMatAvg, delta, pointNo, mapOut);
     %     else
-    
     %         BfMatAvg = [];
-    [VelEst{file}, XcorrMat] = ftdoppler(BfMatWin, delta, pointNo, mapOut);
     %     end
     
     if progress
@@ -98,5 +112,4 @@ for file = 1:nFile
     end
 end
 
-VelEstOut = cat(2, VelEst);
-VelEstOut = VelEstOut{:};
+VelEstOut = cat(1, VelEst{:});

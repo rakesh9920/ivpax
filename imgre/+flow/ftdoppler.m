@@ -61,7 +61,7 @@ end
 
 [nWindowSample, nCompare, nFrame, nFieldPos] = size(BfSigMat);
 
-VelocityEst = zeros(nFrame - 1, nFieldPos);
+VelocityEst = zeros(nFrame - interleave - 1, nFieldPos);
 XcorrList = zeros(1, nCompare);
 XcorrMat = zeros(nCompare, nFieldPos, nFrame);
 
