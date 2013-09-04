@@ -33,6 +33,11 @@ if isKey(map, 'window')
 else
     window = 'rectwin';
 end
+if isKey(map, 'averaging')
+    averaging = map('averaging');
+else
+    averaging = 0;
+end
 
 % select input files and put into cell array
 if isempty(inFile)
@@ -64,9 +69,15 @@ for file = 1:nFile
     fields = fieldnames(Mat);
     BfSigMat = Mat.(fields{1});
     
-    %[nWindowSample, nCompare, nFrame, nFieldPos] = size(BfSigMat);
-    nWindowSample = size(BfSigMat, 1);
+    [nWindowSample, nCompare, ~, nFieldPos] = size(BfSigMat);
+    %nWindowSample = size(BfSigMat, 1);
     
+    % cat remaining frames from previous file onto current file
+    if file > 1
+        BfSigMat = cat(3, BfSigMatRem, BfSigMat);
+    end
+    
+    % apply window to RF data
     switch window
         case 'hanning'
             win = hanning(nWindowSample);
@@ -76,12 +87,20 @@ for file = 1:nFile
             win = rectwin(nWindowSample);
     end
     
-    % apply window to RF data
     BfMatWin = bsxfun(@times, BfSigMat, win);
     
-    % cat remaining frames from previous file onto current file
-    if file > 1
-        BfMatWin = cat(3, BfSigMatRem, BfMatWin);
+    nFrame = size(BfSigMat, 3);
+    
+    % apply sliding average
+    if averaging > 1
+        
+        BfMatAvg = zeros(nWindowSample, nCompare, nFrame - averaging + 1, nFieldPos);
+        
+        for frame = 1:(nFrame - averaging + 1)
+            BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
+        end
+        
+        BfMatWin = BfMatAvg;
     end
     
     % calculate estimates for current file
@@ -91,7 +110,7 @@ for file = 1:nFile
     if file < nFile
         
         nFrameRem = size(BfMatWin, 3) - size(VelEst{file}, 1);
-        BfSigMatRem = BfMatWin(:,:,(end - nFrameRem + 1):end ,:);
+        BfSigMatRem = BfSigMat(:,:,(end - nFrameRem + 1):end ,:);
     end
     
     % apply running average and then perform velocity estimation

@@ -21,8 +21,9 @@ prms('planetx') = true;
 prms('recombine') = true;
 prms('resample') = 1;
 
-% correlation lag estimate
-prms('interpolate') = 100;
+% instantaneous phase estimate
+prms('ensemble') = 1;
+prms('range gate') = 64;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
@@ -48,5 +49,4 @@ daq2mat([], [], prms);
 instpre([], [], [], RxPos, FieldPos, nWindowSample, prms);
 
 %% velocity estimate (instantaneous estimate)
-[VelEst, ~] = corrlagest([], prms);
-
+[VelEst, ~] = instest([], prms);

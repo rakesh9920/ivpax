@@ -78,10 +78,12 @@ for pos = 1:nFieldPos
             denom = sum(I(gate,ind2).*I(gate,ind1) + Q(gate,ind2).*Q(gate,ind1));
             
             deltaPhi(gate,est) = atan(numer/denom);
+%             deltaPhi(gate,est) = mean(angle(I(gate,ind2) + 1i*Q(gate,ind2)) - ...
+%                 angle(I(gate,ind1) + 1i*Q(gate,ind1)));
         end
         
-        VelEst(pos,est) = mean(deltaPhi(:,est))/(interleave+1)*PULSE_REPITITION_RATE*SOUND_SPEED/...
-            (4*pi*CENTER_FREQUENCY);
+        VelEst(pos,est) = -mean(deltaPhi(:,est))/(interleave+1)*...
+            PULSE_REPITITION_RATE*SOUND_SPEED/(4*pi*CENTER_FREQUENCY);
     end
 end
 

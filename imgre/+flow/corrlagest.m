@@ -87,6 +87,8 @@ for file = 1:nFile
         
         VelEst{file} = lagdoppler(BfSigMatAvg, mapOut);
     else
+        
+        BfSigMatAvg = [];
         VelEst{file} = lagdoppler(BfSigMatWin, mapOut);
     end
     

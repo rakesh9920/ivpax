@@ -33,18 +33,21 @@ if isKey(map, 'interpolate')
 else
     interpolate = 0;
 end
+if isKey(map, 'resample')
+    resample = map('resample');
+else
+    resample = 1;
+end
 
 % global constants
-global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE CENTER_FREQUENCY
+global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
 if isempty(SOUND_SPEED)
     SOUND_SPEED = 1500;
 end
 if isempty(PULSE_REPITITION_RATE)
     PULSE_REPITITION_RATE = 100;
 end
-if isempty(CENTER_FREQUENCY)
-    CENTER_FREQUENCY = 6.6e6;
-end
+
 
 [nSample, nFieldPos, nFrame] = size(BfSigMat);
 
@@ -72,13 +75,14 @@ for pos = 1:nFieldPos
             CrossCorrInterp = spline(Lag, CrossCorr, LagInterp);
             [~, maxInd] = max(CrossCorrInterp);
             
-            VelEst(pos,est) = (maxInd - (nSample - 1)*interpolate)/SAMPLE_FREQUENCY/interpolate/2*...
-                SOUND_SPEED*PULSE_REPITITION_RATE/(interleave+1);
+            VelEst(pos,est) = -(maxInd - (nSample - 1)*interpolate)/...
+                SAMPLE_FREQUENCY/resample/interpolate/2*SOUND_SPEED*...
+                PULSE_REPITITION_RATE/(interleave+1);
         else
             
             [~, maxInd] = max(CrossCorr);
-            VelEst(pos,est) = (maxInd - nSample)/SAMPLE_FREQUENCY/2*SOUND_SPEED*...
-                PULSE_REPITITION_RATE/(interleave+1);
+            VelEst(pos,est) = -(maxInd - nSample)/SAMPLE_FREQUENCY/resample/2*...
+                SOUND_SPEED*PULSE_REPITITION_RATE/(interleave+1);
         end
     end
 end

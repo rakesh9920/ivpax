@@ -49,11 +49,6 @@ if isKey(map, 'resample')
 else
     resample = 1;
 end
-if isKey(map, 'averaging')
-    averaging = map('averaging');
-else
-    averaging = 0;
-end
 
 % set window and number of compare points to be odd
 if mod(nWindowSample, 2) == 0
@@ -89,10 +84,19 @@ if argout || recombine
 end
 
 nFieldPos = size(FieldPos, 2);
-
 nSample = (nCompare - 1)*deltaSample + nWindowSample;
-pointNo = (nCompare + 1)/2;
 centerSample = (nSample + 1)/2;
+pointNo = (nCompare + 1)/2;
+
+if resample > 1
+
+    nSample = ceil((nSample + (resample - 1))/resample);
+    if mod(nSample, 2) == 0
+        nSample = nSample + 1;
+    end
+    
+    centerSample = (nSample + 1)/2*resample - (resample - 1);
+end
 
 if progress
     prog = upicbar('Preprocessing...');
@@ -120,16 +124,9 @@ for file = 1:nFile
     
     nFrame = size(BfMat, 3);
     
-    % apply sliding average
-    
-    if averaging > 1
-        BfMatAvg = zeros(nSample, 1, nFrame - averaging + 1, nFieldPos);
-        
-        for frame = 1:(nFrame - averaging + 1)
-            BfMatAvg(:,:,frame,:) = sum(BfMatWin(:,:,frame:(frame+averaging-1),:),3);
-        end
-        
-        BfMat = BfMatAvg;
+    % add noise (experimental)
+    for frame = 1:nFrame
+       BfMat(:,1,frame,1) = BfMat(:,1,frame,1) + wgn(nSample, 1, 79.8); 
     end
     
     % resample BF data if desired

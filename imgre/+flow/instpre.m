@@ -44,6 +44,11 @@ if isKey(map, 'filename')
 else
     outFilename = 'PRE';
 end
+if isKey(map, 'resample')
+    resample = map('resample');
+else
+    resample = 1;
+end
 
 if mod(nWindowSample, 2) == 0
     nWindowSample = nWindowSample + 1;
@@ -94,6 +99,21 @@ for file = 1:nFile
         case 'frequency'
             BfMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, ...
                 nWindowSample, mapOut);
+    end
+    
+    [nSample, nFieldPos, nFrame] = size(BfMat);
+    
+    if resample > 1
+       
+        BfMatInterp = zeros(nSample*resample, nFieldPos, nFrame);
+       
+       for pos = 1:nFieldPos
+           for frame = 1:nFrame
+               BfMatInterp(:,pos,frame) = interp(BfMat(:,pos,frame), resample);
+           end
+       end
+       
+       BfMat = BfMatInterp;
     end
     
     if argout || recombine

@@ -20,7 +20,7 @@ prms('fc') = 6.6e6;
 prms('bfmethod') = 'frequency';
 prms('planetx') = true;
 prms('recombine') = false;
-prms('resample') = 20;
+prms('resample') = 100;
 
 % max correlation estimate
 prms('threshold') = 0;
@@ -28,6 +28,8 @@ prms('interpolate') = 100;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
+
+% misc
 prms('progress') = true;
 
 % DEFINE GEOMETRY
@@ -35,8 +37,8 @@ RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 FieldPos = [0; 0; 0.014];
 
 % SET OTHER PARAMETER
-deltaSample = 2;
-nWindowSample = 101*5*2;
+deltaSample = 10;
+nWindowSample = 101*5*5;
 nCompare = 55;
 
 % CALCULATE MISC. VALUES
