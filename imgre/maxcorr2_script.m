@@ -28,6 +28,7 @@ prms('interpolate') = 100;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
+prms('add wgn') = 5;
 
 % misc
 prms('progress') = true;

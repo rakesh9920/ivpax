@@ -1,8 +1,8 @@
-function [VelEst] = instdoppler2(BfSigMat, varargin)
+function [VelEst] = instdoppler(BfSigMat, varargin)
 %
 % interleave, nsum, progress
 
-import tools.upicbar
+import tools.upicbar tools.iqdemod
 
 % read in optional arguments
 if nargin > 1
@@ -60,7 +60,7 @@ deltaPhi = zeros(rangeGate, nEstimate);
 
 for pos = 1:nFieldPos
     
-    [hI, hQ] = tools.iqdemod(squeeze(BfSigMat(:,pos,:)), 6.6e6, 5.2e6, 40e6);
+    [hI, hQ] = iqdemod(squeeze(BfSigMat(:,pos,:)), 6.6e6, 5.2e6, 40e6);
     
     rangeStart = midSample - floor(rangeGate/2) + 2;
     rangeStop = rangeStart + rangeGate - 1;
@@ -77,9 +77,7 @@ for pos = 1:nFieldPos
             numer = sum(Q(gate,ind2).*I(gate,ind1) - I(gate,ind2).*Q(gate,ind1));
             denom = sum(I(gate,ind2).*I(gate,ind1) + Q(gate,ind2).*Q(gate,ind1));
             
-            deltaPhi(gate,est) = atan(numer/denom);
-%             deltaPhi(gate,est) = mean(angle(I(gate,ind2) + 1i*Q(gate,ind2)) - ...
-%                 angle(I(gate,ind1) + 1i*Q(gate,ind1)));
+            deltaPhi(gate,est) = mean(atan2(numer, denom));
         end
         
         VelEst(pos,est) = -mean(deltaPhi(:,est))/(interleave+1)*...

@@ -37,8 +37,8 @@ end
 
 for ind = 1:nInd
     
-    sub = cell(1,3);
-    [sub{:}] = ind2sub(cellSize, ind);
+    %sub = cell(1,3);
+    %[sub{:}] = ind2sub(cellSize, ind);
     
     FiltData{ind} = filtfilt(b, a, double(CellData{ind})); 
     

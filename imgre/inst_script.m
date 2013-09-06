@@ -23,13 +23,14 @@ prms('resample') = 1;
 
 % instantaneous phase estimate
 prms('ensemble') = 1;
-prms('range gate') = 64;
+prms('range gate') = 32;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
 
 % misc
 prms('progress') = true;
+startPath = './data/styro/';
 
 % DEFINE GEOMETRY
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
@@ -42,11 +43,25 @@ nWindowSample = 101;
 windowTime = nWindowSample/SAMPLE_FREQUENCY/prms('resample')
 windowSpace = windowTime*SOUND_SPEED/2
 
+%% choose MAT/MATF file(s)
+[filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
+if isa(filename, 'cell')
+    MatFiles = cat(2, repmat(pathname, numel(filename), 1), cat(1, filename{:}));
+else
+    MatFiles = cat(2, pathname, filename);
+end
+%% choose PRE file(s)
+[filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
+if isa(filename, 'cell')
+    PreFiles = cat(2, repmat(pathname, numel(filename), 1), cat(1, filename{:}));
+else
+    PreFiles = cat(2, pathname, filename);
+end
 %% RF filtering and conversion
 daq2mat([], [], prms);
 
 %% preprocessing (instantaneous estimate)
-instpre([], [], [], RxPos, FieldPos, nWindowSample, prms);
+instpre(MatFiles, [], [], RxPos, FieldPos, nWindowSample, prms);
 
 %% velocity estimate (instantaneous estimate)
-[VelEst, ~] = instest([], prms);
+[VelEst, ~] = instest(PreFiles, prms);

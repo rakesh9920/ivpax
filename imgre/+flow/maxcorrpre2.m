@@ -4,7 +4,7 @@ function [BfMatOut] = maxcorrpre2(inFile, outDir, TxPos, RxPos, FieldPos, ...
 % bfmethod, recombine, progress
 
 import beamform.gfbeamform4 beamform.gtbeamform
-import tools.uigetfile_n_dir tools.upicbar
+import tools.uigetfile_n_dir tools.upicbar tools.addwgn
 
 % read in optional arguments
 if nargin > 8
@@ -48,6 +48,11 @@ if isKey(map, 'resample')
     resample = map('resample');
 else
     resample = 1;
+end
+if isKey(map, 'add wgn')
+    dBLevel = map('add wgn');
+else
+    dBLevel = 0;
 end
 
 % set window and number of compare points to be odd
@@ -125,9 +130,14 @@ for file = 1:nFile
     nFrame = size(BfMat, 3);
     
     % add noise (experimental)
-    for frame = 1:nFrame
-       BfMat(:,1,frame,1) = BfMat(:,1,frame,1) + wgn(nSample, 1, 79.8); 
+    if dBLevel > 0
+        BfMat = addwgn(1, BfMat, dBLevel);
     end
+%     for frame = 1:nFrame
+%        BfMat(:,1,frame,1) = BfMat(:,1,frame,1) + wgn(nSample, 1, 79.8); 
+%     end
+
+    
     
     % resample BF data if desired
     if resample > 1
