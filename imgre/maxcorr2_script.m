@@ -28,10 +28,11 @@ prms('interpolate') = 100;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
-prms('add wgn') = 5;
+prms('add wgn') = 20;
 
 % misc
 prms('progress') = true;
+startPath = './data/styro/';
 
 % DEFINE GEOMETRY
 RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
@@ -51,11 +52,28 @@ windowSpace = windowTime*SOUND_SPEED/2
 velRes = deltaSpace*PULSE_REPITITION_RATE/(prms('interleave') + 1)
 maxVel = nCompare/2*velRes
 
+%% choose MAT/MATF file(s)
+[filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
+if isa(filename, 'cell')
+    MatFiles = cellstr(cat(2, repmat(pathname, numel(filename), 1), ...
+        cat(1, filename{:})));
+else
+    MatFiles = cat(2, pathname, filename);
+end
+%% choose PRE file(s)
+[filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
+if isa(filename, 'cell')
+    PreFiles = cellstr(cat(2, repmat(pathname, numel(filename), 1), ...
+        cat(1, filename{:})));
+else
+    PreFiles = cat(2, pathname, filename);
+end
 %% RF filtering and conversion
 daq2mat([], [], prms);
 
 %% preprocessing (instantaneous estimate)   
-maxcorrpre2([], [], [], RxPos, FieldPos, nCompare, deltaSample, nWindowSample, prms);
+maxcorrpre2(MatFiles, [], [], RxPos, FieldPos, nCompare, deltaSample, ...
+    nWindowSample, prms);
 
 %% velocity estimate (max correlation estimate)
-[VelEst, XCMat] = maxcorrest([], nCompare, deltaSample, prms);
+[VelEst, XCMat] = maxcorrest(PreFiles, nCompare, deltaSample, prms);
