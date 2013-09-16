@@ -25,3 +25,5 @@
 /imgre/bin/fw/**/*
 /imgre/+maq/src/mexw32/*
 /imgre/+mexo/src/mexw32/*
+/imgre/+fieldii/*
+/imgre/+fieldii/**/*

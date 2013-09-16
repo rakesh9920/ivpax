@@ -1,14 +1,15 @@
-function [] = labeler(img, dyn, cmap)
+function [] = labeler(ImgMat, dynRange, cMap)
 
-[ny nx] = size(img);
-iptsetpref('ImshowAxesVisible','on');
+[height width] = size(ImgMat);
 
-imshow(img, [-dyn 0],'XData',[0 nx.*75e-3],'YData',...
-    [0 ny.*75e-3],'InitialMagnification',200);
+iptsetpref('ImshowAxesVisible', 'on');
+
+imshow(ImgMat, [-dynRange 0],'XData',[0 width.*75e-3],'YData',...
+    [0 height.*75e-3],'InitialMagnification',200);
 
 xlabel('lateral [mm]');
 ylabel('axial [mm]');
-colormap(cmap);
+colormap(cMap);
 
 end
 
