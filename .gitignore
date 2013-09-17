@@ -20,6 +20,7 @@
 /imgre/data/*
 /imgre/data/**/*
 /imgre/bin/*.dll
+/imgre/bin/*.exe
 /imgre/bin/dat/*
 /imgre/bin/fw/*
 /imgre/bin/fw/**/*

@@ -16,25 +16,25 @@ apr.mid = 50;
 apr.btm = 100;
 apr.vmid = 50;
 
-tx.centerElement = 8.5;
+tx.centerElement = 24;
 tx.aperture = 16;
 tx.angle = 0;
 tx.focusDistance = 300000;
-tx.frequency = 6000000;
-tx.pulseShape = '+-+-';
+tx.frequency = 10000000;
+tx.pulseShape = '+-';
 tx.speedOfSound = 1500;
 tx.tableIndex = -1;
 tx.useManualDelays = false;
 tx.manualDelays = zeros(1,129);
-tx.useMask = true;
+tx.useMask = false;
 tx.mask = zeros(1,128);
 tx.sync = 1;
 
-rx.centerElement = 8.5;
+rx.centerElement = 8;
 rx.aperture = 16;
 rx.angle = 0;
-rx.maxApertureDepth = 50000;
-rx.acquisitionDepth = 50000;
+rx.maxApertureDepth = 20000;
+rx.acquisitionDepth = 20000;
 rx.saveDelay = 0;
 rx.speedOfSound = 1500;
 rx.channelMask = [-1 -1];%[uint32(2^32) uint32(2^32)];%[uint32(0) uint32(2147483648)];
@@ -66,10 +66,10 @@ texoActivateProbeConnector(0);
 texoForceConnector(3);
 texoEnableSyncNotify(false);
 
-%% TEXO SEQUENCING
+%% TEXO SEQUENCING 1 (SINGLE LINE)
 
 pulseShape = '+-';
-power = 11;
+power = 1;
 
 if ~texoBeginSequence()
     error('texoBeginSequence failed');
@@ -77,13 +77,24 @@ end
 
 tx.pulseShape = pulseShape;
 tx.aperture = 16;
+rx.aperture = 16;
+tx.centerElement = 23;  
+rx.centerElement = 7;
 
-for line = 1:32
-    
-    tx.centerElement = 0.5 + (line - 1)*0.5;
-    rx.centerElement = 0.5 + (line - 1)*0.5;
-    [success, lineSize, lineDuration] = texoAddLine(tx, rx);
-end
+% rxMask = zeros(1,64);
+% rxMask(1:16) = 1;
+% channelMask1 = int32(twos2dec(sprintf('%d',rxMask(1:32))));
+% channelMask2 = int32(twos2dec(sprintf('%d',rxMask(33:64))));
+% rx.channelMask = [channelMask1 channelMask2];
+
+[success, lineSize, lineDuration] = texoAddLine(tx, rx);
+
+% for line = 1:16
+%     
+%     tx.centerElement = 16 + (line - 1)
+%     rx.centerElement = 0 + (line - 1)
+%     [success, lineSize, lineDuration] = texoAddLine(tx, rx);
+% end
 
 if ~texoEndSequence()
     error('texoEndSequence failed');
@@ -93,8 +104,43 @@ texoSetPower(15, power, power);
 
 lineSize
 lineDuration
-frameSize = texoGetFrameSize();
-samplesPerFrame = frameSize/2;
+frameSize = texoGetFrameSize()
+samplesPerFrame = frameSize/2
+
+%% TEXO SEQUENCING 2
+
+pulseShape = '+-';
+power = 2;
+
+if ~texoBeginSequence()
+    error('texoBeginSequence failed');
+end
+
+tx.pulseShape = pulseShape;
+tx.aperture = 16;
+rx.aperture = 1;
+tx.centerElement = 24;
+rx.centerElement = 8;
+
+[success, lineSize, lineDuration] = texoAddLine(tx, rx);
+
+% for line = 1:16
+%     
+%     tx.centerElement = 16 + (line - 1)
+%     rx.centerElement = 0 + (line - 1)
+%     [success, lineSize, lineDuration] = texoAddLine(tx, rx);
+% end
+
+if ~texoEndSequence()
+    error('texoEndSequence failed');
+end
+
+texoSetPower(15, power, power);
+
+lineSize
+lineDuration
+frameSize = texoGetFrameSize()
+samplesPerFrame = frameSize/2
 
 %% SET IMAGING PARAMETERS
 imgprms = containers.Map();
@@ -105,9 +151,10 @@ imgprms('cmap') = 'gray';
 
 %% COLLECT FRAMES
 texoCollectFrames(1);
-BfMat = texoGetCine(samplesPerFrame);
+BfMat = reshape(texoGetCine(samplesPerFrame),1, []);
 
-imager(BfMat, 20, imgprms);
+%imager(BfMat, 20, imgprms);
+plot(BfMat);
 
 %% SHUTDOWN
 texoShutdown()
