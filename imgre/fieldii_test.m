@@ -10,7 +10,7 @@ field_init;
 global SOUND_SPEED
 SOUND_SPEED = 1500;
 
-f0 = 5e5;
+f0 = 6e5;
 fs = 100e6;
 set_field('c', SOUND_SPEED);
 set_field('fs', fs);

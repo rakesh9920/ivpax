@@ -1,4 +1,4 @@
-function [FT f F] = quickfft(sig, varargin)
+function [FT, f, F] = quickfft(sig, varargin)
 
 if nargin > 1
     Fs = varargin{1}; % sampling frequency

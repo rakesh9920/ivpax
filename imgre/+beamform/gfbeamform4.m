@@ -105,7 +105,7 @@ for point = 1:nFieldPos
         RxSigMatSpect = fft(PadSigMat, [], 2);
         BfSigSpect = bsxfun(@times, Phase, RxSigMatSpect);
         
-        BfSig = real(ifft(sum(BfSigSpect), [], 2));
+        BfSig = real(ifft(sum(BfSigSpect, 1), [], 2));
         WinBfSig = BfSig(1,winFront:winBack,:);
         
         BfSigMat(:,point,blockFront:blockBack) = reshape(WinBfSig, nWinSample, 1, []);
