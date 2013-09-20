@@ -3,41 +3,42 @@ import ultrasonix.*
 import flow.*
 
 global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED;
-SOUND_SPEED = 1500;
-PULSE_REPITITION_RATE = 1000;
-SAMPLE_FREQUENCY = 40e6;
+SOUND_SPEED = 1540;
+PULSE_REPITITION_RATE = 2000;
+SAMPLE_FREQUENCY = 50e6;
 
 % SET PARAMETERS
 prms = containers.Map();
 
 % filtering
 prms('filter') = true;
-prms('bw') = 5.2e6;
-prms('fc') = 6.6e6;
+prms('bw') = 5.66e6;
+prms('fc') = 6e6;
 
 % beamforming & preprocessing
 prms('bfmethod') = 'frequency';
 prms('planetx') = true;
 prms('recombine') = true;
-prms('resample') = 1;
+prms('resample') = 10;
 
 % instantaneous phase estimate
 prms('ensemble') = 1;
-prms('range gate') = 32;
+prms('range gate') = 1;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
 
 % misc
 prms('progress') = true;
-startPath = './data/styro/';
+startPath = './data/sct/';
 
 % DEFINE GEOMETRY
-RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-FieldPos = [0; 0; 0.014];
+%RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
+RxPos = Centers;
+FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
 
 % SET OTHER PARAMETER
-nWindowSample = 101;
+nWindowSample = 101*10;
 
 % CALCULATE MISC. VALUES
 windowTime = nWindowSample/SAMPLE_FREQUENCY/prms('resample')
@@ -46,14 +47,16 @@ windowSpace = windowTime*SOUND_SPEED/2
 %% choose MAT/MATF file(s)
 [filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
 if isa(filename, 'cell')
-    MatFiles = cat(2, repmat(pathname, numel(filename), 1), cat(1, filename{:}));
+    MatFiles = cellstr(cat(2, repmat(pathname, numel(filename), 1), ...
+        cat(1, filename{:})));
 else
     MatFiles = cat(2, pathname, filename);
 end
 %% choose PRE file(s)
 [filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
 if isa(filename, 'cell')
-    PreFiles = cat(2, repmat(pathname, numel(filename), 1), cat(1, filename{:}));
+    PreFiles = cellstr(cat(2, repmat(pathname, numel(filename), 1), ...
+        cat(1, filename{:})));
 else
     PreFiles = cat(2, pathname, filename);
 end

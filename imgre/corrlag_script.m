@@ -45,14 +45,16 @@ windowSpace = windowTime*SOUND_SPEED/2
 %% choose MAT/MATF file(s)
 [filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
 if isa(filename, 'cell')
-    MatFiles = cat(2, repmat(pathname, numel(filename), 1), cat(1, filename{:}));
+    MatFiles = cellstr(cat(2, repmat(pathname, numel(filename), 1), ...
+        cat(1, filename{:})));
 else
     MatFiles = cat(2, pathname, filename);
 end
 %% choose PRE file(s)
 [filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
 if isa(filename, 'cell')
-    PreFiles = cat(2, repmat(pathname, numel(filename), 1), cat(1, filename{:}));
+    PreFiles = cellstr(cat(2, repmat(pathname, numel(filename), 1), ...
+        cat(1, filename{:})));
 else
     PreFiles = cat(2, pathname, filename);
 end
