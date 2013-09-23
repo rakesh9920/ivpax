@@ -33,7 +33,7 @@ for el = 1:numElements
     Rect(17:19,elStart:elEnd) = PhysInfo(8:10,:) + repmat(Centers(:,el), 1, 180); 
 end
 
-CMUT = xdc_rectangles(Rect.', Centers.', [0 0 0]);
+CMUT = xdc_rectangles(Rect.', Centers.', [0 0 300]);
 
 
 

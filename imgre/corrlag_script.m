@@ -3,17 +3,17 @@ import ultrasonix.*
 import flow.*
 
 global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED;
-SOUND_SPEED = 1500;
-PULSE_REPITITION_RATE = 1000;
-SAMPLE_FREQUENCY = 40e6;
+SOUND_SPEED = 1540;
+PULSE_REPITITION_RATE = 2000;
+SAMPLE_FREQUENCY = 50e6;
 
 % SET PARAMETERS
 prms = containers.Map();
 
 % filtering
 prms('filter') = true;
-prms('bw') = 5.2e6;
-prms('fc') = 6.6e6;
+prms('bw') = 5.66e6;
+prms('fc') = 6e6;
 
 % beamforming & preprocessing
 prms('bfmethod') = 'frequency';
@@ -29,11 +29,12 @@ prms('window') = 'rectwin';
 
 % misc
 prms('progress') = true;
-startPath = './data/styro/';
+startPath = './data/sct3/';
 
 % DEFINE GEOMETRY
-RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-FieldPos = [0; 0; 0.014];
+%RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
+RxPos = Centers;
+FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
 
 % SET OTHER PARAMETER
 nWindowSample = 101;
