@@ -22,7 +22,7 @@ tx.angle = 0;
 tx.focusDistance = 300000;
 tx.frequency = 10000000;
 tx.pulseShape = '+-';
-tx.speedOfSound = 1500;
+tx.speedOfSound = 1450;
 tx.tableIndex = -1;
 tx.useManualDelays = false;
 tx.manualDelays = zeros(1,129);
@@ -33,10 +33,10 @@ tx.sync = 1;
 rx.centerElement = 8;
 rx.aperture = 16;
 rx.angle = 0;
-rx.maxApertureDepth = 20000;
-rx.acquisitionDepth = 20000;
+rx.maxApertureDepth = 30000;
+rx.acquisitionDepth = 30000;
 rx.saveDelay = 0;
-rx.speedOfSound = 1500;
+rx.speedOfSound = 1450;
 rx.channelMask = [-1 -1];%[uint32(2^32) uint32(2^32)];%[uint32(0) uint32(2147483648)];
 rx.applyFocus = true;
 rx.useManualDelays = false;
@@ -80,6 +80,7 @@ tx.aperture = 16;
 rx.aperture = 16;
 tx.centerElement = 23;  
 rx.centerElement = 7;
+tx.angle = 0;
 
 % rxMask = zeros(1,64);
 % rxMask(1:16) = 1;
@@ -110,7 +111,7 @@ samplesPerFrame = frameSize/2
 %% TEXO SEQUENCING 2
 
 pulseShape = '+-';
-power = 2;
+power = 1;
 
 if ~texoBeginSequence()
     error('texoBeginSequence failed');
@@ -118,18 +119,17 @@ end
 
 tx.pulseShape = pulseShape;
 tx.aperture = 16;
-rx.aperture = 1;
-tx.centerElement = 24;
-rx.centerElement = 8;
+rx.aperture = 16;
+tx.centerElement = 23;
+rx.centerElement = 7;
+tx.focusDistance = 10000;
+rx.applyFocus = true;
 
-[success, lineSize, lineDuration] = texoAddLine(tx, rx);
-
-% for line = 1:16
-%     
-%     tx.centerElement = 16 + (line - 1)
-%     rx.centerElement = 0 + (line - 1)
-%     [success, lineSize, lineDuration] = texoAddLine(tx, rx);
-% end
+for line = 1:91
+    
+    tx.angle = -45000 + (line - 1)*1000;
+    [success, lineSize, lineDuration] = texoAddLine(tx, rx);
+end
 
 if ~texoEndSequence()
     error('texoEndSequence failed');
