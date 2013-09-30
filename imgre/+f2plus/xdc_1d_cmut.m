@@ -5,12 +5,12 @@ function [CMUT, Centers] = xdc_1d_cmut()
 import fieldii.*
 
 pitch = 245e-6;
-numElements = 16;
+numElements = 4;
 
 Centers = -((numElements/2 - 1)*pitch + pitch/2):pitch:((numElements/2 - 1)*pitch + pitch/2);
 Centers = [Centers; zeros(1, numElements); zeros(1, numElements)];
 
-Rect = zeros(19, 180*16);
+Rect = zeros(19, 180*numElements);
 
 for el = 1:numElements
     
