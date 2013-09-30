@@ -36,7 +36,7 @@ startPath = './data/sct3/';
 %RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 RxPos = Centers;
 %FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
-[X, Y, Z] = ndgrid(-0.01:0.0005:0.01, 0, 0:0.0005:0.01);
+[X, Y, Z] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.02);
 grd = [X(:) Y(:) Z(:)];
 FieldPos = grd.';
 

@@ -1,4 +1,4 @@
-function [VelEstOut, BfSigMatAvg] = corrlagest(inFile, varargin)
+function [VelEstOut, BfSigMatAvg, Coeff] = corrlagest(inFile, varargin)
 %
 % window, averaging, progress
 
@@ -85,11 +85,11 @@ for file = 1:nFile
             BfSigMatAvg(:,:,frame) = sum(BfSigMatWin(:,:,frame:(frame+averaging-1)),3);
         end
         
-        VelEst{file} = lagdoppler(BfSigMatAvg, mapOut);
+        [VelEst{file}, Coeff] = lagdoppler(BfSigMatAvg, mapOut);
     else
         
         BfSigMatAvg = [];
-        VelEst{file} = lagdoppler(BfSigMatWin, mapOut);
+        [VelEst{file}, Coeff] = lagdoppler(BfSigMatWin, mapOut);
     end
     
     if progress

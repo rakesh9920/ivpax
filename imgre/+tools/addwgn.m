@@ -2,7 +2,6 @@ function [RfDataOut] = addwgn(dim, RfData, dbLevel)
 %
 %
 
-
 CellData = num2cell(RfData, dim);
 nInd = numel(CellData);
 

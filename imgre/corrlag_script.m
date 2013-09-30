@@ -26,6 +26,7 @@ prms('interpolate') = 100;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
+prms('threshold') = 0.6;
 
 % misc
 prms('progress') = true;
@@ -34,10 +35,11 @@ startPath = './data/sct3/';
 % DEFINE GEOMETRY
 %RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 RxPos = Centers;
-FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
+%FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
+FieldPos = [0; 0; 0.005];
 
 % SET OTHER PARAMETER
-nWindowSample = 101;
+nWindowSample = 61;
 
 % CALCULATE MISC. VALUES
 windowTime = nWindowSample/SAMPLE_FREQUENCY/prms('resample')
@@ -66,5 +68,5 @@ daq2mat([], [], prms);
 instpre(MatFiles, [], [], RxPos, FieldPos, nWindowSample, prms);
 
 %% velocity estimate (instantaneous estimate)
-[VelEst, ~] = corrlagest(PreFiles, prms);
+[VelEst, ~, Coeff] = corrlagest(PreFiles, prms);
 

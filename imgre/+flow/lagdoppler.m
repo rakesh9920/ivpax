@@ -1,4 +1,4 @@
-function [VelEst] = lagdoppler(BfSigMat, varargin)
+function [VelEst, Coeff] = lagdoppler(BfSigMat, varargin)
 %
 % interleave, progress
 
@@ -38,6 +38,11 @@ if isKey(map, 'resample')
 else
     resample = 1;
 end
+if isKey(map, 'threshold')
+    threshold = map('threshold');
+else
+    threshold = 0;
+end
 
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE
@@ -53,6 +58,7 @@ end
 
 nEstimate = nFrame - interleave - 1;
 VelEst = zeros(nFieldPos, nEstimate);
+Coeff = zeros(nFieldPos, nEstimate);
 
 nCorrSample = 2*nSample - 1;
 
@@ -70,19 +76,36 @@ for pos = 1:nFieldPos
         
         CrossCorr = xcorr(Signal1, Signal2, 'coeff');
         
+        if all(isnan(CrossCorr))
+           VelEst(pos,est) = 0;
+           continue
+        end
+        
         if interpolate > 0
             
             CrossCorrInterp = spline(Lag, CrossCorr, LagInterp);
-            [~, maxInd] = max(CrossCorrInterp);
+            [maxVal, maxInd] = max(CrossCorrInterp);
             
             VelEst(pos,est) = -(maxInd - (nSample - 1)*interpolate)/...
                 SAMPLE_FREQUENCY/resample/interpolate/2*SOUND_SPEED*...
                 PULSE_REPITITION_RATE/(interleave+1);
+            
+            Coeff(pos,est) = maxVal;
+            
+            if abs(maxVal) < threshold
+               VelEst(pos,est) = 0; 
+            end
         else
             
-            [~, maxInd] = max(CrossCorr);
+            [maxVal, maxInd] = max(CrossCorr);
             VelEst(pos,est) = -(maxInd - nSample)/SAMPLE_FREQUENCY/resample/2*...
                 SOUND_SPEED*PULSE_REPITITION_RATE/(interleave+1);
+            
+            Coeff(pos,est) = maxVal;
+            
+            if abs(maxVal) < threshold
+               VelEst(pos,est) = 0; 
+            end
         end
     end
 end

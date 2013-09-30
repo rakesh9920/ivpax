@@ -69,8 +69,8 @@ nBlock = ceil(nFrame/framesPerBlock);
 FrontPad = zeros(nSignal, floor((nFreq - nSample)/2), framesPerBlock);
 BackPad = zeros(nSignal, nFreq - nSample - size(FrontPad, 2), framesPerBlock);
 
-winFront = size(FrontPad, 2) - (nWinSample-1)/2;
-winBack = size(FrontPad, 2) + (nWinSample-1)/2;
+winFront = size(FrontPad, 2) - (nWinSample-1)/2 + 1;
+winBack = size(FrontPad, 2) + (nWinSample-1)/2 + 1;
 
 if progress
     bar = upicbar('Beamforming ...');
