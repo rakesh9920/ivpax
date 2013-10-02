@@ -39,6 +39,7 @@ else
     rangeGate = 1;
 end
 
+
 % global constants
 global SOUND_SPEED SAMPLE_FREQUENCY PULSE_REPITITION_RATE CENTER_FREQUENCY
 if isempty(SOUND_SPEED)
@@ -51,6 +52,12 @@ if isempty(CENTER_FREQUENCY)
     CENTER_FREQUENCY = 6.6e6;
 end
 
+if isKey(map, 'bw')
+    bw = map('bw');
+else
+    bw = 0.80*CENTER_FREQUENCY;
+end
+
 [nSample nFieldPos nFrame] = size(BfSigMat);
 
 nEstimate = nFrame - ensemble - interleave;
@@ -60,7 +67,8 @@ deltaPhi = zeros(rangeGate, nEstimate);
 
 for pos = 1:nFieldPos
     
-    [hI, hQ] = iqdemod(squeeze(BfSigMat(:,pos,:)), 6.6e6, 5.2e6, 40e6);
+    [hI, hQ] = iqdemod(squeeze(BfSigMat(:,pos,:)), CENTER_FREQUENCY, ...
+        CENTER_FREQUENCY*2, SAMPLE_FREQUENCY);
     
     rangeStart = midSample - floor(rangeGate/2) + 2;
     rangeStop = rangeStart + rangeGate - 1;

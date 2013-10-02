@@ -1,11 +1,11 @@
-function [CMUT, Centers] = xdc_1d_cmut()
+function [CMUT, Centers] = xdc_1d_cmut(numElements)
 %
 %
 
 import fieldii.*
 
 pitch = 245e-6;
-numElements = 4;
+%numElements = 4;
 
 Centers = -((numElements/2 - 1)*pitch + pitch/2):pitch:((numElements/2 - 1)*pitch + pitch/2);
 Centers = [Centers; zeros(1, numElements); zeros(1, numElements)];

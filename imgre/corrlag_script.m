@@ -17,7 +17,7 @@ prms('fc') = 6e6;
 
 % beamforming & preprocessing
 prms('bfmethod') = 'frequency';
-prms('planetx') = true;
+prms('planetx') = false;
 prms('recombine') = true;
 prms('resample') = 1;
 
@@ -26,7 +26,7 @@ prms('interpolate') = 100;
 prms('averaging') = 1;
 prms('interleave') = 0;
 prms('window') = 'rectwin';
-prms('threshold') = 0.6;
+prms('threshold') = 0;
 
 % misc
 prms('progress') = true;
@@ -34,9 +34,11 @@ startPath = './data/sct3/';
 
 % DEFINE GEOMETRY
 %RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-RxPos = Centers;
+RxPos = Centers1;
 %FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
-FieldPos = [0; 0; 0.005];
+[X, Y, Z] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.02);
+grd = [X(:) Y(:) Z(:)];
+FieldPos = grd.';
 
 % SET OTHER PARAMETER
 nWindowSample = 61;

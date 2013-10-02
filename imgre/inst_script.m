@@ -2,10 +2,11 @@ import tools.*
 import ultrasonix.*
 import flow.*
 
-global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED;
+global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED CENTER_FREQUENCY;
 SOUND_SPEED = 1540;
 PULSE_REPITITION_RATE = 2000;
 SAMPLE_FREQUENCY = 50e6;
+CENTER_FREQUENCY = 6e6;
 
 % SET PARAMETERS
 prms = containers.Map();
@@ -36,7 +37,7 @@ startPath = './data/sct3/';
 %RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
 RxPos = Centers;
 %FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
-[X, Y, Z] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.02);
+[X, Y, Z] = ndgrid(-0.02:0.0005:0.02, 0, 0:0.0005:0.02);
 grd = [X(:) Y(:) Z(:)];
 FieldPos = grd.';
 

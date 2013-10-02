@@ -27,17 +27,17 @@ xdc_focus(CMUT, 0, [0 0 0.01]);
 [X, Y, Z] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.02);
 grd = [X(:) Y(:) Z(:)];
 
-FieldPressure = calc_hp(CMUT2, grd);
+FieldPressure = calc_hp(DTX, grd);
 FieldPressure = reshape(FieldPressure, [], 161, 1, 81);
 
 %%
 %f = 1;
 for i = 1:1:size(FieldPressure,1)
     mesh(X, Z, squeeze(FieldPressure(i,:,1,:)));
-    caxis([-0.1e-13 0.1e-13]);
+    caxis([-0.1e-12 0.1e-12]);
     %view(az, el)
-    axis([-0.02 0.02 0 0.02 -0.5e-13 0.5e-13]);
-    daspect([1 1 1e-11])
+    axis([-0.02 0.02 0 0.02 -0.5e-12 0.5e-12]);
+    daspect([1 1 1e-10])
     xlabel('lateral [m]');
     ylabel('axial [m]');
     zlabel('pressure (relative) [Pa]');

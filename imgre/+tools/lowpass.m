@@ -22,8 +22,10 @@ else
 end
 
 % design chebyshev type 2 lowpass filter
-[b, a] = cheby2(18, 120, fh/(fs/2)); % 60dB attenuation, 12th order
-%[b, a] = butter(18, fh/(fs/2));
+%[b, a] = cheby2(18, 120, fh/(fs/2)); % 60dB attenuation, 12th order
+[z, p, k] = butter(28, fh/(fs/2), 'low');
+%[z, p, k] = cheby2(18, 120, fh/(fs/2), 'low');
+[sos,g] = zp2sos(z,p,k);
 
 CellData = num2cell(RfData, dim);
 cellSize = size(CellData);
@@ -39,7 +41,7 @@ for ind = 1:nInd
     sub = cell(1,3);
     [sub{:}] = ind2sub(cellSize, ind);
     
-    FiltData{ind} = filtfilt(b, a, double(CellData{ind})); 
+    FiltData{ind} = filtfilt(sos, g, double(CellData{ind})); 
     
     if progress
         upicbar(upic, ind/nInd);
