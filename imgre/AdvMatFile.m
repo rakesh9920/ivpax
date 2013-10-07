@@ -2,7 +2,6 @@ classdef AdvMatFile
     
     properties
         Label = {};
-        %Dim = 0;
         Mat;
     end
     
@@ -19,32 +18,37 @@ classdef AdvMatFile
         
         function ref = subsref(obj, s)
             
-            ref = AdvDouble(subsref(obj.Mat.Data, s), obj.Label);
+            ref = AdvDouble(subsref(obj.Mat.Data, s), obj.Mat.Label);
         end
         
         function obj = subsasgn(obj, s, b)
             
             switch s.type
-                
                 case '()'
                     
-                    obj.Mat.Data(s.subs{:}) = b;
-                    
+                    obj.Mat.Data(s.subs{:}) = double(b);
                 case '.'
                     
-                    if strcmpi(s.subs, 'data')
-                        
-                        obj.Mat.Data = b;
-                    else
-                        
-                        obj.Mat.(s.subs) = b;
-                        return
+                    switch lower(s.subs)
+                        case 'data'
+                            
+                            obj.Mat.Data = double(b);
+                            lbl = b.Label;
+                            
+                        case 'label'
+                            
+                            assert(isa(b, 'cell'));
+                            lbl = b;
+                            
+                        otherwise
+                            
+                            obj.Mat.(s.subs) = b;
+                            return
                     end
             end
             
             nd = ndims(obj.Mat.Data);
             
-            lbl = b.Label;
             if ~isempty(lbl)
                 if numel(lbl) < nd
                     
