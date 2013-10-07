@@ -9,9 +9,14 @@ classdef AdvDouble < double
         % CONSTRUCTORS
         function obj = AdvDouble(data, lbl)
             
-            assert(isa(lbl, 'cell'));
-            
-            if nargin == 0
+            if nargin > 1
+                
+                assert(isa(lbl, 'cell'));
+            elseif nargin > 0
+                
+                lbl = {};
+            else
+                
                 data = 0;
                 lbl = {};
             end
@@ -28,16 +33,75 @@ classdef AdvDouble < double
             
             data = double(obj);
             
-            subs = s.subs;
+            % check for label reference in subs
+            islabel = cellfun(@(x) isa(x, 'char') && ~strcmpi(x, ':'), s.subs);
             
+            if any(islabel)
+                
+                newsubs = repmat({':'}, 1, ndims(data));
+                
+                loc = find(islabel);
+                for idx = 1:numel(loc)
+                    
+                    dim = find(strcmpi(s.subs{loc(idx)}, obj.Label));
+                    if dim > 0
+                        
+                        newsubs{dim} = s.subs{loc(idx)+1};
+                    end
+                end
+                
+                s.subs = newsubs;
+            end
             
-            ref = subsref(data, s);
+            ref = AdvDouble(subsref(data, s), obj.Label);
         end
         
         function obj = subsasgn(obj, s, b)
             
             data = double(obj);
+            
+            % check for label reference in subs
+            islabel = cellfun(@(x) isa(x, 'char') && ~strcmpi(x, ':'), s.subs);
+            
+            if any(islabel)
+                
+                newsubs = repmat({':'}, 1, ndims(data));
+                
+                loc = find(islabel);
+                for idx = 1:numel(loc)
+                    
+                    dim = find(strcmpi(s.subs{loc(idx)}, obj.Label));
+                    if dim > 0
+                        
+                        newsubs{dim} = s.subs{loc(idx)+1};
+                    end
+                end
+                
+                s.subs = newsubs;
+            end
+            
             obj = AdvDouble(subsasgn(data, s, b), obj.Label);
+        end
+        
+        function sz = size(obj, varargin)
+            
+            data = double(obj);
+            lbl = obj.Label;
+            
+            if nargin > 1
+                
+                dimlabel = varargin{1};
+                loc = find(strcmpi(dimlabel, lbl));
+                
+                if isempty(loc)
+                    error('');
+                else
+                    sz = size(data, loc);
+                end
+            else
+                
+                sz = size(data);
+            end
         end
         
         % OVERLOADED CONCATENATION METHODS
@@ -63,7 +127,6 @@ classdef AdvDouble < double
             newdouble = cat(dim, data{:});
             
             newobj = AdvDouble(newdouble, lbl);
-            
         end
         
         % OVERLOADED DATA ORGANIZATION METHODS
@@ -121,9 +184,9 @@ classdef AdvDouble < double
         end
         
         function lbl = get.Label(obj)
+            
             lbl = obj.Label;
         end
-        
     end
 end
 
