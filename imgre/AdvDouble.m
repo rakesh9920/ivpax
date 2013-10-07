@@ -94,7 +94,7 @@ classdef AdvDouble < double
                 loc = find(strcmpi(dimlabel, lbl));
                 
                 if isempty(loc)
-                    error('');
+                    error('invalid dimension label');
                 else
                     sz = size(data, loc);
                 end

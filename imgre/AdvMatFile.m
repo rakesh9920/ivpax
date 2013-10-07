@@ -2,7 +2,7 @@ classdef AdvMatFile
     
     properties
         Label = {};
-        Dim = 0;
+        %Dim = 0;
         Mat;
     end
     
@@ -12,8 +12,8 @@ classdef AdvMatFile
             obj.Mat = matfile(filename, varargin{:});
             
             if exist(filename,'file') == 2
+                
                 obj.Label = obj.Mat.Label;
-                obj.Dim = obj.Mat.Dim;
             end
         end
         
@@ -24,26 +24,37 @@ classdef AdvMatFile
         
         function obj = subsasgn(obj, s, b)
             
-            obj.Mat.Data(s.subs{:}) = b;
-            obj.Dim = ndims(obj.Mat.Data);
-  
-            lbl = obj.Label;
-            if numel(lbl) < obj.
+            switch s.type
                 
-                obj.Label = cell(1, nd);
-                obj.Label(1:numel(lbl)) = lbl;
-            else
-                
-                obj.Label = lbl(1:nd);
+                case '()'
+                    
+                    obj.Mat.Data(s.subs{:}) = b;
+                    
+                case '.'
+                    
+                    if strcmpi(s.subs, 'data')
+                        
+                        obj.Mat.Data = b;
+                    else
+                        
+                        obj.Mat.(s.subs) = b;
+                        return
+                    end
             end
             
-        end
-        
-        function obj = set.Label(obj, lbl)
+            nd = ndims(obj.Mat.Data);
             
-            nd = obj.Dim;
-            
-            
+            lbl = b.Label;
+            if ~isempty(lbl)
+                if numel(lbl) < nd
+                    
+                    obj.Label = cell(1, nd);
+                    obj.Label(1:numel(lbl)) = lbl;
+                else
+                    
+                    obj.Label = lbl(1:nd);
+                end
+            end
         end
     end
     
