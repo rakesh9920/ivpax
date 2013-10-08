@@ -31,56 +31,68 @@ classdef AdvDouble < double
         % OVERLOADED INDEXING METHODS
         function ref = subsref(obj, s)
             
-            data = double(obj);
-            
-            % check for label reference in subs
-            islabel = cellfun(@(x) isa(x, 'char') && ~strcmpi(x, ':'), s.subs);
-            
-            if any(islabel)
-                
-                newsubs = repmat({':'}, 1, ndims(data));
-                
-                loc = find(islabel);
-                for idx = 1:numel(loc)
+            switch s(1).type
+                case '.'
+                    ref = obj.(s(1).subs);
+                case '{}'
+                case '()'
+                    data = double(obj);
                     
-                    dim = find(strcmpi(s.subs{loc(idx)}, obj.Label));
-                    if dim > 0
+                    % check for label reference in subs
+                    islabel = cellfun(@(x) isa(x, 'char') && ~strcmpi(x, ':'), s.subs);
+                    
+                    if any(islabel)
                         
-                        newsubs{dim} = s.subs{loc(idx)+1};
+                        newsubs = repmat({':'}, 1, ndims(data));
+                        
+                        loc = find(islabel);
+                        for idx = 1:numel(loc)
+                            
+                            dim = find(strcmpi(s.subs{loc(idx)}, obj.Label));
+                            if dim > 0
+                                
+                                newsubs{dim} = s.subs{loc(idx)+1};
+                            end
+                        end
+                        
+                        s.subs = newsubs;
                     end
-                end
-                
-                s.subs = newsubs;
+                    
+                    ref = AdvDouble(subsref(data, s), obj.Label);
             end
-            
-            ref = AdvDouble(subsref(data, s), obj.Label);
         end
         
         function obj = subsasgn(obj, s, b)
             
-            data = double(obj);
-            
-            % check for label reference in subs
-            islabel = cellfun(@(x) isa(x, 'char') && ~strcmpi(x, ':'), s.subs);
-            
-            if any(islabel)
-                
-                newsubs = repmat({':'}, 1, ndims(data));
-                
-                loc = find(islabel);
-                for idx = 1:numel(loc)
+            switch s(1).type
+                case '.'
+                    obj.(s(1).subs) = b;
+                case '{}'
+                case '()'
+                    data = double(obj);
                     
-                    dim = find(strcmpi(s.subs{loc(idx)}, obj.Label));
-                    if dim > 0
+                    % check for label reference in subs
+                    islabel = cellfun(@(x) isa(x, 'char') && ~strcmpi(x, ':'), s.subs);
+                    
+                    if any(islabel)
                         
-                        newsubs{dim} = s.subs{loc(idx)+1};
+                        newsubs = repmat({':'}, 1, ndims(data));
+                        
+                        loc = find(islabel);
+                        for idx = 1:numel(loc)
+                            
+                            dim = find(strcmpi(s.subs{loc(idx)}, obj.Label));
+                            if dim > 0
+                                
+                                newsubs{dim} = s.subs{loc(idx)+1};
+                            end
+                        end
+                        
+                        s.subs = newsubs;
                     end
-                end
-                
-                s.subs = newsubs;
+                    
+                    obj = AdvDouble(subsasgn(data, s, b), obj.Label);
             end
-            
-            obj = AdvDouble(subsasgn(data, s, b), obj.Label);
         end
         
         function sz = size(obj, varargin)
@@ -181,11 +193,6 @@ classdef AdvDouble < double
             else
                 obj.Label = lbl(1:nd);
             end
-        end
-        
-        function lbl = get.Label(obj)
-            
-            lbl = obj.Label;
         end
     end
 end
