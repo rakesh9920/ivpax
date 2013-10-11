@@ -40,7 +40,7 @@ xdc_focus_times(TxAperture, 0, delays);
 rxDepth = 0.06;
 nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
 
-[scat, t0] = calc_scat_multi(TxAperture, RxAperture, [0 0 0.03], 1);
+[scat, t0] = calc_scat_multi(TxAperture, RxAperture, [0 0 0.01], 1);
 
 scat = padarray(scat.', [0 round(t0*fs)], 'pre');
 scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
@@ -54,7 +54,7 @@ RxSigMat = scat;
 
 %[X, Y, Z] = ndgrid(-0.02:0.0005:0.02, 0, 0.015:0.0005:0.04);
 %[X, Y, Z] = ndgrid(0, -0.02:0.0005:0.02, 0.015:0.0005:0.04);
-[X, Y, Z] = ndgrid(-0.02:0.0005:0.02, -0.02:0.0005:0.02, 0.03);
+[X, Y, Z] = ndgrid(-0.02:0.0005:0.02, -0.02:0.0005:0.02, 0.011);
 grd = [X(:) Y(:) Z(:)];
 
 FieldPos = grd.';
