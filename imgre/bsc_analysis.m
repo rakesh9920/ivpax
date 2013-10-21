@@ -18,47 +18,71 @@ fs = 100e6;
 set_field('c', SOUND_SPEED);
 set_field('fs', fs);
 
-% Array1 = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, 1, [0 0 300]);
-% PhysInfo = xdc_get(Array1, 'rect');
-% xdc_free(Array1);
-% Rect = zeros(19,100);
-% Centers = zeros(100,3);
-% for el = 1:100
-%
-%     Rect(1,el) = el; % physical element no.
-%     % rectangle coords
-%     Rect(2:13,el) = PhysInfo(11:22,el) + repmat([0; 0; -0.005], 4, 1);
-%     Rect(14,el) = 1; % apodization
-%     Rect(15,el) = PhysInfo(3,el); % math element width
-%     Rect(16,el) = PhysInfo(4,el); % math element height
-%     % math element center
-%     Rect(17:19,el) = PhysInfo(8:10,el) + repmat([0; 0; -0.005], 1, 1);
-%     Centers(el,:) = Rect(17:19,el).';
-% end
-% TxArray = xdc_rectangles(Rect.', Centers, [0 0 300]);
-
-TxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, 1, [0 0 300]);
-RxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, 1, [0 0 0.005]);
-
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
-xdc_impulse(TxArray, 1.023694488611560e12*impulse_response);
-xdc_impulse(RxArray, 5.245934383229829e11.*impulse_response);
+excitation = 1.*sin(2*pi*10e6*(0:1/fs:1/10e6));
 
-excitation = 4.*sin(2*pi*10e6*(0:1/fs:1/10e6));
+% 10x10 transmit array
+TxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
+    1, [0 0 300]);
+xdc_impulse(TxArray, 1.023694488611560e12.*impulse_response);
 xdc_excitation(TxArray, excitation);
+xdc_focus_times(TxArray, 0, zeros(1,100));
 
+% 10x10 receive array 
+RxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
+    1, [0 0 0.005]);
+xdc_impulse(RxArray, 5.245934383229829e11.*impulse_response);
+xdc_focus_times(TxArray, 0, zeros(1,100));
+
+% 10x10 receive array (small)
+RxArray2 = xdc_2d_array(10, 10, 45e-6, 45e-6, 5e-6, 5e-6, ones(10,10), 1, ...
+    1, [0 0 0.005]);
+xdc_impulse(RxArray2, 1.557136275444180e+10.*impulse_response);
 xdc_focus_times(TxArray, 0, zeros(1,100));
 
 % xdc_convert(TxArray);
 % xdc_convert(RxArray);
-%%
+
+% 40x40 plane transmit array (z displaced)
+Array1 = xdc_2d_array(40, 40, 90e-6, 90e-6, 10e-6, 10e-6, ones(40,40), 1, ...
+    1, [0 0 300]);
+PhysInfo = xdc_get(Array1, 'rect');
+xdc_free(Array1);
+Rect = zeros(19,1600);
+Centers = zeros(1600,3);
+for el = 1:1600
+    
+    Rect(1,el) = el; % physical element no.
+    % rectangle coords
+    Rect(2:13,el) = PhysInfo(11:22,el) + repmat([0; 0; -0.10], 4, 1);
+    Rect(14,el) = 1; % apodization
+    Rect(15,el) = PhysInfo(3,el); % math element width
+    Rect(16,el) = PhysInfo(4,el); % math element height
+    % math element center
+    Rect(17:19,el) = PhysInfo(8:10,el) + repmat([0; 0; -0.10], 1, 1);
+    Centers(el,:) = Rect(17:19,el).';
+end
+PlaneArray2 = xdc_rectangles(Rect.', Centers, [0 0 300]);
+xdc_impulse(PlaneArray2, 1.269692385603829e+12.*impulse_response);
+xdc_excitation(PlaneArray2, excitation);
+xdc_focus_times(PlaneArray, 0, zeros(1, 1600));
+
+% 40x40 plane transmit array (origin centered)
+PlaneArray = xdc_2d_array(40, 40, 90e-6, 90e-6, 10e-6, 10e-6, ones(40,40), 1, ...
+    1, [0 0 300]);
+
+xdc_impulse(PlaneArray, 1.269692385603829e+12.*impulse_response);
+xdc_excitation(PlaneArray, excitation);
+xdc_focus_times(PlaneArray, 0, zeros(1, 1600));
+
+%% simulate cube of randomly distributed scatterers
+
 v = zeros(100, 200);
 m = zeros(100,1);
 
 N = 200;
 Dim = [0.001 0.001 0.001];
-%tic;
 
 for i = 1:100
     
@@ -86,9 +110,44 @@ end
 b = abs(hilbert(v(:,60:140)));
 
 Nres = 24.309839217819821;
-%toc
+
+%% make scattering wall
+
+N = 800;
+Dim = [0.002 0.002];
+[PosX, PosY, PosZ] = ndgrid(linspace(0, Dim(1), round(sqrt(N))), ...
+    linspace(0, Dim(2), round(sqrt(N))), 0);
+WallPos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 0.05]);
+WallAmp = ones(round(sqrt(N))^2, 1);
+
+%% make backscatter field
+
+ns = 100; % scatterers per mm^3
+Dim = [0.002 0.002 0.002];
+Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
+
+PosX = rand(Ns,1).*Dim(1);
+PosY = rand(Ns,1).*Dim(2);
+PosZ = rand(Ns,1).*Dim(3);
+
+BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 (0.005 - Dim(3)/2)]);
+BSAmp = ones(Ns,1).*1;%2/sqrt(pi*Nres)*0.5; 
+
 %%
 
+%[FieldX, FieldY, FieldZ] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.04);
+[FieldX, FieldY, FieldZ] = ndgrid(0, 0, 0:0.001:0.20);
+FieldPos = [FieldX(:) FieldY(:) FieldZ(:)];
+
+[hp, t0] = calc_hp(PlaneArray, FieldPos);
+
+Pres = reshape(hp, [size(hp,1) size(FieldX)]);
+
+% for i = 1:3022
+%     imagesc(FieldZ(:), FieldX(:), squeeze(Pres(i,:,:,:)),[-2e-12 2e-12]);
+%     pause(0.001);
+% end
+%%
 rxDepth = 0.03;
 nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
 
