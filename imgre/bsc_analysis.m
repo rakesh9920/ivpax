@@ -22,29 +22,29 @@ impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
 excitation = 1.*sin(2*pi*10e6*(0:1/fs:1/10e6));
 
-% 10x10 transmit array
+%% 10x10 transmit array
 TxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
     1, [0 0 300]);
 xdc_impulse(TxArray, 1.023694488611560e12.*impulse_response);
 xdc_excitation(TxArray, excitation);
 xdc_focus_times(TxArray, 0, zeros(1,100));
 
-% 10x10 receive array 
+%% 10x10 receive array 
 RxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
     1, [0 0 0.005]);
 xdc_impulse(RxArray, 5.245934383229829e11.*impulse_response);
 xdc_focus_times(TxArray, 0, zeros(1,100));
 
-% 10x10 receive array (small)
+%% 10x10 receive array (small)
 RxArray2 = xdc_2d_array(10, 10, 45e-6, 45e-6, 5e-6, 5e-6, ones(10,10), 1, ...
     1, [0 0 0.005]);
 xdc_impulse(RxArray2, 1.557136275444180e+10.*impulse_response);
-xdc_focus_times(TxArray, 0, zeros(1,100));
+xdc_focus_times(RxArray2, 0, zeros(1,100));
 
 % xdc_convert(TxArray);
 % xdc_convert(RxArray);
 
-% 40x40 plane transmit array (z displaced)
+%% 40x40 plane transmit array (z displaced)
 Array1 = xdc_2d_array(40, 40, 90e-6, 90e-6, 10e-6, 10e-6, ones(40,40), 1, ...
     1, [0 0 300]);
 PhysInfo = xdc_get(Array1, 'rect');
@@ -66,9 +66,9 @@ end
 PlaneArray2 = xdc_rectangles(Rect.', Centers, [0 0 300]);
 xdc_impulse(PlaneArray2, 1.269692385603829e+12.*impulse_response);
 xdc_excitation(PlaneArray2, excitation);
-xdc_focus_times(PlaneArray, 0, zeros(1, 1600));
+xdc_focus_times(PlaneArray2, 0, zeros(1, 1600));
 
-% 40x40 plane transmit array (origin centered)
+%% 40x40 plane transmit array (origin centered)
 PlaneArray = xdc_2d_array(40, 40, 90e-6, 90e-6, 10e-6, 10e-6, ones(40,40), 1, ...
     1, [0 0 300]);
 
@@ -131,7 +131,7 @@ PosY = rand(Ns,1).*Dim(2);
 PosZ = rand(Ns,1).*Dim(3);
 
 BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 (0.005 - Dim(3)/2)]);
-BSAmp = ones(Ns,1).*1;%2/sqrt(pi*Nres)*0.5; 
+BSAmp = ones(Ns,1).*10;
 
 %%
 
@@ -148,15 +148,23 @@ Pres = reshape(hp, [size(hp,1) size(FieldX)]);
 %     pause(0.001);
 % end
 %%
-rxDepth = 0.03;
+rxDepth = 0.06;
 nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
 
-[scat0, t0] = calc_scat(TxArray, RxArray, [0 0 0.005], 1);
+[scat, t0] = calc_scat_multi(PlaneArray, RxArray2, WallPos, WallAmp);
+scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
 
-scat0 = padarray(scat0.', [0 round(t0*fs)], 'pre');
-scat0 = padarray(scat0, [0 nSample - size(scat0, 2)], 'post');
+RfMatIn = scat;
 
-max(abs(scat0))
+[scat, t0] = calc_scat_multi(PlaneArray2, RxArray2, BSPos, BSAmp);
+scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
+
+RfMatOut = scat;
+
+
+
 
 
 
