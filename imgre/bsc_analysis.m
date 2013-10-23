@@ -38,9 +38,12 @@ xdc_focus_times(TxArray, 0, zeros(1,100));
 %% 10x10 receive array (small)
 RxArray2 = xdc_2d_array(10, 10, 45e-6, 45e-6, 5e-6, 5e-6, ones(10,10), 1, ...
     1, [0 0 0.005]);
-xdc_impulse(RxArray2, 1.557136275444180e+10.*impulse_response);
+xdc_impulse(RxArray2, 1.*impulse_response); % 1.557136275444180e+10
 xdc_focus_times(RxArray2, 0, zeros(1,100));
+xdc_excitation(RxArray2, excitation);
 
+RxScale = 8.733288113753747e-12;
+d3db = 0.004; % -3dB length at 1cm
 % xdc_convert(TxArray);
 % xdc_convert(RxArray);
 
@@ -72,7 +75,7 @@ xdc_focus_times(PlaneArray2, 0, zeros(1, 1600));
 PlaneArray = xdc_2d_array(40, 40, 90e-6, 90e-6, 10e-6, 10e-6, ones(40,40), 1, ...
     1, [0 0 300]);
 
-xdc_impulse(PlaneArray, 1.269692385603829e+12.*impulse_response);
+xdc_impulse(PlaneArray, 1.*impulse_response); % 1.269692385603829e+12
 xdc_excitation(PlaneArray, excitation);
 xdc_focus_times(PlaneArray, 0, zeros(1, 1600));
 
@@ -113,55 +116,74 @@ Nres = 24.309839217819821;
 
 %% make scattering wall
 
-N = 800;
-Dim = [0.002 0.002];
+N = 51200;
+Dim = [0.005 0.005];
 [PosX, PosY, PosZ] = ndgrid(linspace(0, Dim(1), round(sqrt(N))), ...
     linspace(0, Dim(2), round(sqrt(N))), 0);
-WallPos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 0.05]);
+WallPos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 0.01]);
 WallAmp = ones(round(sqrt(N))^2, 1);
 
 %% make backscatter field
 
-ns = 100; % scatterers per mm^3
-Dim = [0.002 0.002 0.002];
+ns = 50; % scatterers per mm^3
+Dim = [0.005 0.005 0.005];
+BSC = 10e-6; % in 1/(cm*sr)
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
+for i = 1:100
+    PosX = rand(Ns,1).*Dim(1);
+    PosY = rand(Ns,1).*Dim(2);
+    PosZ = rand(Ns,1).*Dim(3);
+    
+    BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 0.01]);
+    BSAmp = ones(Ns,1).*sqrt(BSC./ns./10^3).*2074;
+    
+    [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
+    scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+    scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
+    
+    RfMatOut = scat;
+    ps(i,:) = sum(RfMatOut);
+end
 
-PosX = rand(Ns,1).*Dim(1);
-PosY = rand(Ns,1).*Dim(2);
-PosZ = rand(Ns,1).*Dim(3);
+sig = ps(1,:);
 
-BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 (0.005 - Dim(3)/2)]);
-BSAmp = ones(Ns,1).*10;
+psh = abs(hilbert(ps(:,1400:1450)));
+BSCm = mean(mean(psh.^2,2)./mean(pr.^2)*0.01^2/2/(d3db^2)/1540/(50*10e-9)/100);
 
 %%
 
 %[FieldX, FieldY, FieldZ] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.04);
-[FieldX, FieldY, FieldZ] = ndgrid(0, 0, 0:0.001:0.20);
+%[FieldX, FieldY, FieldZ] = ndgrid(0, 0, 0:0.001:0.20);
+[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, 0, 0.005:0.0001:0.015);
 FieldPos = [FieldX(:) FieldY(:) FieldZ(:)];
 
-[hp, t0] = calc_hp(PlaneArray, FieldPos);
-
+[hp, t0] = calc_hp(RxArray2, FieldPos);
+                                                                                    
 Pres = reshape(hp, [size(hp,1) size(FieldX)]);
 
-% for i = 1:3022
-%     imagesc(FieldZ(:), FieldX(:), squeeze(Pres(i,:,:,:)),[-2e-12 2e-12]);
-%     pause(0.001);
-% end
+for i = 1:size(Pres, 1)
+    imagesc(FieldZ(:), FieldX(:), squeeze(Pres(i,:,:,:)),[-2e-12 2e-12]);
+    pause(0.001);
+end
+
+
 %%
-rxDepth = 0.06;
+rxDepth = 0.10;
 nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
 
-[scat, t0] = calc_scat_multi(PlaneArray, RxArray2, WallPos, WallAmp);
+[scat, t0] = calc_scat_multi(RxArray2, RxArray2, WallPos, WallAmp);
 scat = padarray(scat.', [0 round(t0*fs)], 'pre');
 scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
 
 RfMatIn = scat;
+pr = sum(RfMatIn);
 
-[scat, t0] = calc_scat_multi(PlaneArray2, RxArray2, BSPos, BSAmp);
+[scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
 scat = padarray(scat.', [0 round(t0*fs)], 'pre');
 scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
 
 RfMatOut = scat;
+ps = sum(RfMatOut);
 
 
 
