@@ -125,7 +125,7 @@ WallAmp = ones(round(sqrt(N))^2, 1);
 
 %% make backscatter field
 
-ns = 50; % scatterers per mm^3
+ns = 25; % scatterers per mm^3
 Dim = [0.005 0.005 0.005];
 BSC = 10e-6; % in 1/(cm*sr)
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
