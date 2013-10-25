@@ -156,13 +156,14 @@ scat = padarray(scat.', [0 round(t0*fs)], 'pre');
 scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
 
 RfMatIn = scat;
+PIn = sum(RfMatIn);
 
 [scat, t0] = calc_scat_multi(PlaneArray2, RxArray2, BSPos, BSAmp);
 scat = padarray(scat.', [0 round(t0*fs)], 'pre');
 scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
 
 RfMatOut = scat;
-
+POut = sum(RfMatOut);
 
 
 
