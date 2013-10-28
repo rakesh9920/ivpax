@@ -4,12 +4,9 @@ import tools.*
 
 %%
 global SOUND_SPEED SAMPLE_FREQUENCY
-if isempty(SOUND_SPEED)
-    SOUND_SPEED = 1450;
-end
-if isempty(SAMPLE_FREQUENCY)
-    SAMPLE_FREQUENCY = 40e6;
-end
+SOUND_SPEED = 1450;
+SAMPLE_FREQUENCY = 40e6;
+
 
 prms = containers.Map();
 prms('progress') = true;
@@ -27,23 +24,23 @@ RxPos = [(1:nElement).*pitch - nElement/2*pitch - pitch/2; zeros(1, nElement); .
 
 TxPos = [];
 
-[X, Y, Z] = ndgrid(-0.005:0.0001:0.005, 0, 0:0.0001:0.01);
+[X, Y, Z] = ndgrid(-0.005:0.000025:0.005, 0, 0:0.000025:0.04);
 FieldPos = [X(:) Y(:) Z(:)].';
 
 %%
 daq2mat([], [], prms);
 %%
 
-BfMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, 100, prms);
-BfMat = reshape(BfMat, [101 101 101]);
+BfMat = gfbeamform4(RxSigMat, TxPos, RxPos, FieldPos, 201, prms);
+BfMat = reshape(BfMat, [201 401 1601]);
 
 DMat = zeros(size(BfMat));
-for i = 1:101
-    for j = 1:101
+for i = 1:401
+    for j = 1:1601
         DMat(:,i,j) = abs(hilbert(BfMat(:,i,j)));
     end
 end
 
-ImgMat = squeeze(DMat(51,:,:));
+ImgMat = squeeze(DMat(101,:,:));
 
-imtool(20.*log10(ImgMat./max(max(ImgMat))), [-20 0]);
+imtool(20.*log10(ImgMat./max(max(ImgMat))), 'DisplayRange', [-20 0]);
