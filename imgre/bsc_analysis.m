@@ -110,13 +110,13 @@ PRefED = abs(hilbert(PRef));
 %% make backscatter field
 
 ns = 10; % scatterers per mm^3
-Dim = [0.006 0.006 0.005];
+Dim = [0.006 0.006 0.003];
 BSC = 1; % in 1/(cm*sr)
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
 R = 0.01;
 rxDepth = 0.06;
-nIter = 50;
-tau = 2e-6;
+nIter = 100;
+tau = 1e-6;
 
 nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
 PScat = zeros(nIter, nSample);
@@ -138,11 +138,11 @@ end
 
 PScatED = abs(hilbert(PScat.')).';
 %%
-nWinSample = 300; % in samples
+nWinSample = 200; % in samples
 nWinStart = 1500;
 T = nWinSample*10e-9;
 PS = PScatED(:,nWinStart:(nWinStart + nWinSample - 1));
-PR = PRefED(1,1250:1550);
+PR = PRefED(1,1300:1500);
 C1 = mean(mean(PS.^2,2)./mean(PR.^2));
 C2 = R^2/(2*pi*(d3db/2)^2*SOUND_SPEED*T);
 C3 = 2*tau*SOUND_SPEED*att/(exp(tau*SOUND_SPEED*att) - ...
