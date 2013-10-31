@@ -15,12 +15,19 @@ PULSE_REPITITION_RATE = 2000;
 
 f0 = 5e6;
 fs = 100e6;
+att = 176; % in dB/m
+freq_att = 0;
+att_f0 = 5e6;
 set_field('c', SOUND_SPEED);
 set_field('fs', fs);
+set_field('att', att);
+set_field('freq_att', freq_att);
+set_field('att_f0', att_f0);
+set_field('use_att', 1);
 
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
-excitation = 1.*sin(2*pi*10e6*(0:1/fs:1/10e6));
+excitation = 1.*sin(2*pi*f0*(0:1/fs:5/f0));
 
 %% 10x10 transmit array
 TxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
@@ -43,7 +50,7 @@ xdc_focus_times(RxArray2, 0, zeros(1,100));
 xdc_excitation(RxArray2, excitation);
 
 RxScale = 8.733288113753747e-12;
-d3db = 0.004; % -3dB length at 1cm
+d3db = 0.0051; % -3dB length at 1cm
 % xdc_convert(TxArray);
 % xdc_convert(RxArray);
 
@@ -78,6 +85,72 @@ PlaneArray = xdc_2d_array(40, 40, 90e-6, 90e-6, 10e-6, 10e-6, ones(40,40), 1, ..
 xdc_impulse(PlaneArray, 1.*impulse_response); % 1.269692385603829e+12
 xdc_excitation(PlaneArray, excitation);
 xdc_focus_times(PlaneArray, 0, zeros(1, 1600));
+
+%% scattering wall simulation
+
+N = 51200;
+Dim = [0.005 0.005];
+R = 0.01;
+rxDepth = 0.06;
+
+[PosX, PosY, PosZ] = ndgrid(linspace(0, Dim(1), round(sqrt(N))), ...
+    linspace(0, Dim(2), round(sqrt(N))), 0);
+WallPos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 R]);
+WallAmp = ones(round(sqrt(N))^2, 1);
+
+nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
+
+[scat, t0] = calc_scat_multi(RxArray2, RxArray2, WallPos, WallAmp);
+scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
+
+PRef = sum(scat);
+PRefED = abs(hilbert(PRef));
+
+%% make backscatter field
+
+ns = 10; % scatterers per mm^3
+Dim = [0.006 0.006 0.005];
+BSC = 1; % in 1/(cm*sr)
+Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
+R = 0.01;
+rxDepth = 0.06;
+nIter = 50;
+tau = 2e-6;
+
+nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
+PScat = zeros(nIter, nSample);
+
+for i = 1:nIter
+    PosX = rand(Ns,1).*Dim(1);
+    PosY = rand(Ns,1).*Dim(2);
+    PosZ = rand(Ns,1).*Dim(3);
+    
+    BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 R]);
+    BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)*1000*1540/(0.0005^2));
+    
+    [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
+    scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+    scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
+    
+    PScat(i,:) = sum(scat);
+end
+
+PScatED = abs(hilbert(PScat.')).';
+%%
+nWinSample = 300; % in samples
+nWinStart = 1500;
+T = nWinSample*10e-9;
+PS = PScatED(:,nWinStart:(nWinStart + nWinSample - 1));
+PR = PRefED(1,1250:1550);
+C1 = mean(mean(PS.^2,2)./mean(PR.^2));
+C2 = R^2/(2*pi*(d3db/2)^2*SOUND_SPEED*T);
+C3 = 2*tau*SOUND_SPEED*att/(exp(tau*SOUND_SPEED*att) - ...
+    exp(-tau*SOUND_SPEED*att));
+C4 = 2*SOUND_SPEED*att*T/(exp(SOUND_SPEED*att*T) - exp(-SOUND_SPEED*att*T));
+C5 = exp(-SOUND_SPEED*att*T);
+
+BSCm = mean(C1.*C2*C3*C4*C5/100) % in 1/(cm*sr)
 
 %% simulate cube of randomly distributed scatterers
 
@@ -114,71 +187,28 @@ b = abs(hilbert(v(:,60:140)));
 
 Nres = 24.309839217819821;
 
-%% make scattering wall
-
-N = 51200;
-Dim = [0.005 0.005];
-[PosX, PosY, PosZ] = ndgrid(linspace(0, Dim(1), round(sqrt(N))), ...
-    linspace(0, Dim(2), round(sqrt(N))), 0);
-WallPos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 0.01]);
-WallAmp = ones(round(sqrt(N))^2, 1);
-
-%% make backscatter field
-
-ns = 25; % scatterers per mm^3
-Dim = [0.005 0.005 0.005];
-BSC = 10e-6; % in 1/(cm*sr)
-Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
-for i = 1:100
-    PosX = rand(Ns,1).*Dim(1);
-    PosY = rand(Ns,1).*Dim(2);
-    PosZ = rand(Ns,1).*Dim(3);
-    
-    BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 0.01]);
-    BSAmp = ones(Ns,1).*sqrt(BSC./ns./10^3).*2074;
-    
-    [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
-    scat = padarray(scat.', [0 round(t0*fs)], 'pre');
-    scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
-    
-    RfMatOut = scat;
-    ps(i,:) = sum(RfMatOut);
-end
-
-sig = ps(1,:);
-
-psh = abs(hilbert(ps(:,1400:1450)));
-BSCm = mean(mean(psh.^2,2)./mean(pr.^2)*0.01^2/2/(d3db^2)/1540/(50*10e-9)/100);
 
 %%
 
 %[FieldX, FieldY, FieldZ] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.04);
 %[FieldX, FieldY, FieldZ] = ndgrid(0, 0, 0:0.001:0.20);
-[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, 0, 0.005:0.0001:0.015);
+%[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, 0, 0.005:0.0001:0.015);
+[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, -0.005:0.0001:0.005, 0.01);
 FieldPos = [FieldX(:) FieldY(:) FieldZ(:)];
 
-[hp, t0] = calc_hp(RxArray2, FieldPos);
+[hp, t0] = calc_hp(RxArray2, FieldPos);        
                                                                                     
 Pres = reshape(hp, [size(hp,1) size(FieldX)]);
 
 for i = 1:size(Pres, 1)
-    imagesc(FieldZ(:), FieldX(:), squeeze(Pres(i,:,:,:)),[-2e-12 2e-12]);
-    pause(0.001);
+    imagesc(FieldY(:), FieldX(:), squeeze(Pres(i,:,:,:)),[-2e-12 2e-12]);
+    axis square
+    title(num2str(i));
+    pause;
 end
 
 
 %%
-rxDepth = 0.10;
-nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
-
-[scat, t0] = calc_scat_multi(RxArray2, RxArray2, WallPos, WallAmp);
-scat = padarray(scat.', [0 round(t0*fs)], 'pre');
-scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
-
-RfMatIn = scat;
-
-pr = sum(RfMatIn);
-
 
 [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
 scat = padarray(scat.', [0 round(t0*fs)], 'pre');
@@ -188,7 +218,33 @@ RfMatOut = scat;
 
 ps = sum(RfMatOut);
 
+%%
+ns = 50; % scatterers per mm^3
+Dim = [0.005 0.005 0.010];
+Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
+R = 0.01;
+rxDepth = 0.06;
+nIter = 100;
 
+nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
+
+PD = zeros(nIter, nSample);
+
+for i = 1:nIter
+    
+    PosX = rand(Ns,1).*Dim(1);
+    PosY = rand(Ns,1).*Dim(2); 
+    PosZ = rand(Ns,1).*Dim(3);
+    
+    BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 R]);
+    BSAmp = ones(Ns,1).*1;
+    
+    [scat, t0] = calc_scat(TxArray2, RxArray2, BSPos, BSAmp);
+    scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+    scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
+    
+    PD(i,:) = scat;
+end
 
 
 
