@@ -27,7 +27,7 @@ set_field('use_att', 1);
 
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
-excitation = 1.*sin(2*pi*f0*(0:1/fs:5/f0));
+excitation = 1.*sin(2*pi*f0*(0:1/fs:1/f0));
 
 %% 10x10 transmit array
 TxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
@@ -127,7 +127,8 @@ for i = 1:nIter
     PosZ = rand(Ns,1).*Dim(3);
     
     BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 R]);
-    BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)*1000*1540/(0.0005^2));
+    %BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)*1000*1540/(0.0005^2));
+    BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)/0.01^2);
     
     [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
     scat = padarray(scat.', [0 round(t0*fs)], 'pre');
@@ -192,19 +193,22 @@ Nres = 24.309839217819821;
 
 %[FieldX, FieldY, FieldZ] = ndgrid(-0.02:0.00025:0.02, 0, 0:0.00025:0.04);
 %[FieldX, FieldY, FieldZ] = ndgrid(0, 0, 0:0.001:0.20);
-%[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, 0, 0.005:0.0001:0.015);
-[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, -0.005:0.0001:0.005, 0.01);
+[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, 0, 0:0.0001:0.015);
+%[FieldX, FieldY, FieldZ] = ndgrid(-0.005:0.0001:0.005, -0.005:0.0001:0.005, 0.01);
 FieldPos = [FieldX(:) FieldY(:) FieldZ(:)];
 
-[hp, t0] = calc_hp(RxArray2, FieldPos);        
-                                                                                    
+[hp, t0] = calc_hp(TxArray, FieldPos);                                                                                     
 Pres = reshape(hp, [size(hp,1) size(FieldX)]);
 
-for i = 1:size(Pres, 1)
-    imagesc(FieldY(:), FieldX(:), squeeze(Pres(i,:,:,:)),[-2e-12 2e-12]);
-    axis square
-    title(num2str(i));
-    pause;
+for i = 1:1:size(Pres, 1)
+    %imagesc(0:0.0001:0.015, -0.005:0.0001:0.005, squeeze(Pres(i,:,:,:)),[-2 2]);
+    surf(FieldZ,FieldX,squeeze(Pres(i,:,:,:)));
+    set(gcf,'renderer','zbuffer')
+    axis([0 0.015 -0.005 0.005 -10 10]); caxis([-2 2]);
+    %axis equal; axis tight;
+    title(num2str(i)); xlabel('z [m]'); ylabel('x [m]');
+    drawnow; pause(0.001);
+    writeVideo(vw, getframe);
 end
 
 
