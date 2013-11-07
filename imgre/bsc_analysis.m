@@ -128,7 +128,8 @@ for i = 1:nIter
     
     BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 R]);
     %BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)*1000*1540/(0.0005^2));
-    BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)/0.01^2);
+    %BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)/0.01^2);
+    BSAmp = ones(Ns,1).*2.*1540^2.*sqrt(BSC*100/(pi*ns*1000^3));
     
     [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
     scat = padarray(scat.', [0 round(t0*fs)], 'pre');
