@@ -47,9 +47,9 @@ else
             X = [Info(7,elem) Info(10,elem) Info(13,elem)];
             Y = [Info(8,elem) Info(11,elem) Info(14,elem)];
             Z = [Info(9,elem) Info(12,elem) Info(15,elem)];
-            C = repmat(Info(5,elem), 1, 3);
+            C = repmat(Info(5,elem), 1, 3).*cmult;
             
-            trisurf([1 2 3], X, Y, Z, C); colormap(cmap);
+            trisurf([1 2 3], X, Y, Z, C);
             hold on;
         end
         
