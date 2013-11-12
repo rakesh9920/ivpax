@@ -47,8 +47,9 @@ xdc_impulse(PistonTx, impScale.*impulse_response);
 xdc_excitation(PistonTx, excScale.*excitation);
 xdc_focus_times(PistonTx, 0, zeros(1, xdc_nphys(PistonTx)));
 
-U_0 = max(abs(cumtrapz(conv(excScale.*excitation,impScale.*impulse_response)./...
-    rho.*(1/fs))));
+U_0 = max(abs(cumtrapz(conv(excScale.*excitation,impScale.*impulse_response)./fs./...
+    rho./fs)));
+
 %% DEFINE GRID POINTS
 
 AxPoints = [zeros(1, 1000); zeros(1, 1000); linspace(0, 0.10, 1000)];
@@ -78,7 +79,77 @@ plot(sol_ax,'r');
 [hp_ax, t0] = calc_hp(PistonTx, AxPoints.');
 
 figure;
-plot(max(abs(hp_ax(10000:15000,:))));
+plot(max(abs(hp_ax(10000:15000,:))),'g');
+
+%% DEFINE AND SIMULATE REFLECTIVE WALL
+
+N = 5120;
+Dim = [0.005 0.005];
+R = 1;
+
+[PosX, PosY, PosZ] = ndgrid(linspace(0, Dim(1), round(sqrt(N))), ...
+    linspace(0, Dim(2), round(sqrt(N))), 0);
+WallPos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 R]);
+WallAmp = ones(round(sqrt(N))^2, 1);
+
+[scat, t0] = calc_scat(PistonTx, PistonTx, WallPos, WallAmp);
+scat = scat.';
+
+
+%% DEFINE AND SIMULATE SINGLE SCATTERER
+
+R = 1;
+
+SinglePos = [0 0 R];
+SingleAmp = 1;
+
+% rxDepth = 0.10;
+
+[scat, t0] = calc_scat(PistonTx, PistonTx, SinglePos, SingleAmp);
+scat = scat.';
+% scat = padarray(scat.', [0 round(t0*fs)], 'pre');
+% scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
+
+U_r = cumtrapz(deconvwnr(scat, impulse_response).*fs./fs);
+%plot(U_r);
+U_r = max(abs(U_r(5000:10000)));
+
+pref = 1e-6;
+iref = pref^2/(rho*c);
+wref = iref*4*pi;
+
+p1 = calc_hp(PistonTx, [0 0 1]);
+P1 = max(abs(p1));
+SL = 20*log10(P1/sqrt(2)/pref);
+
+TL1 = 10*log10(4*pi*R^2);
+TL2 = TL1;
+
+pr1 = piston_ax_mag(1, 2*pi*f0/c, radius, U_r);
+PR1 = max(abs(pr1));
+EL = 20*log10(PR1/sqrt(2)/pref);
+
+TS = EL - SL + TL1 + TL2
+sigma = 10^(TS/10)*4*pi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
