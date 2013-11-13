@@ -71,15 +71,15 @@ t = t.';
 sim_ax = 1i*2*pi*f0*U_0*rho.*sum(bsxfun(@times, SIR, exp(-1i*2*pi*f0.*t)));
 
 figure;
-plot(abs(sim_ax)); hold on;
-plot(sol_ax,'r');
+plot(AxPoints(3,:), abs(sim_ax)); hold on;
+plot(AxPoints(3,:), sol_ax,'r');
 
 %% CALCULATE SIMULATED SOLUTIONS FROM CALC_HP
 
 [hp_ax, t0] = calc_hp(PistonTx, AxPoints.');
 
 figure;
-plot(max(abs(hp_ax(10000:15000,:))),'g');
+plot(AxPoints(3,:), max(abs(hp_ax(10000:15000,:))),'g');
 
 %% DEFINE AND SIMULATE REFLECTIVE WALL
 
@@ -101,54 +101,45 @@ scat = scat.';
 R = 1;
 
 SinglePos = [0 0 R];
-SingleAmp = 1;
 
 % rxDepth = 0.10;
 
-[scat, t0] = calc_scat(PistonTx, PistonTx, SinglePos, SingleAmp);
+Tx = PistonTx;
+Rx = PistonTx2;
+Rad = radius/2;
+SingleAmp = 1;%/(pi*Rad^2);
+
+[scat, t0] = calc_scat(Tx, Rx, SinglePos, SingleAmp);
 scat = scat.';
 % scat = padarray(scat.', [0 round(t0*fs)], 'pre');
 % scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
 
-U_r = cumtrapz(deconvwnr(scat, impulse_response).*fs./fs);
+U_r = cumtrapz(deconvwnr(scat, impScale.*impulse_response).*fs./fs);
 %plot(U_r);
 U_r = max(abs(U_r(5000:10000)));
+F_r = deconvwnr(scat, impScale.*impulse_response).*fs;
+F_r = max(abs(F_r(5000:10000)));
 
 pref = 1e-6;
 iref = pref^2/(rho*c);
 wref = iref*4*pi;
 
-p1 = calc_hp(PistonTx, [0 0 1]);
+p1 = calc_hp(Tx, [0 0 1]);
 P1 = max(abs(p1));
-SL = 20*log10(P1/sqrt(2)/pref);
+SL = 20*log10(P1/sqrt(2)/pref)
 
 TL1 = 10*log10(4*pi*R^2);
 TL2 = TL1;
 
-pr1 = piston_ax_mag(1, 2*pi*f0/c, radius, U_r);
+pr1 = piston_ax_mag(1, 2*pi*f0/c, Rad, U_r);
 PR1 = max(abs(pr1));
 EL = 20*log10(PR1/sqrt(2)/pref);
+EL2 = 10*log10((F_r/(pi*Rad^2))^2/(2*rho*c)/iref)
+EL3 = 20*log10((F_r/(pi*Rad^2))/sqrt(2)/pref)
+%EL2 = 10*log10((U_r*rho*c)^2/(2*rho*c)/iref)
 
-TS = EL - SL + TL1 + TL2
-sigma = 10^(TS/10)*4*pi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+TS = EL2 - SL + TL1 + TL2
+sigma = 10^(TS/10)*4*pi;
 
 
 
