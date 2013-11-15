@@ -7,7 +7,7 @@ addpath ./bin/
 rho = 1000; % kg/m^3
 c = 1540;
 fs = 100e6;
-f0 = 5e6;
+f0 = 10e6;
 att = 0; % 176 % in dB/m
 freq_att = 0;
 att_f0 = 5e6;
@@ -79,7 +79,7 @@ plot(AxPoints(3,:), sol_ax,'r');
 [hp_ax, t0] = calc_hp(PistonTx, AxPoints.');
 
 figure;
-plot(AxPoints(3,:), max(abs(hp_ax(10000:15000,:))),'g');
+plot(AxPoints(3,:), max(abs(hp_ax(8000:10000,:))),'g');
 
 %% DEFINE AND SIMULATE REFLECTIVE WALL
 
@@ -105,8 +105,8 @@ SinglePos = [0 0 R];
 % rxDepth = 0.10;
 
 Tx = PistonTx;
-Rx = PistonTx2;
-Rad = radius/2;
+Rx = PistonTx;
+Rad = radius;
 SingleAmp = 1;%/(pi*Rad^2);
 
 [scat, t0] = calc_scat(Tx, Rx, SinglePos, SingleAmp);

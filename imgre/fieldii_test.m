@@ -1,45 +1,44 @@
-%
-%
 
 import fieldii.*
+import f2plus.*
 addpath ./bin/
 
-field_init;
-%%
+%% INITIALIZE FIELD II
 
-global SOUND_SPEED
-SOUND_SPEED = 1500;
-
-f0 = 6e5;
+rho = 1000; % kg/m^3
+c = 1540;
 fs = 100e6;
-set_field('c', SOUND_SPEED);
-set_field('fs', fs);
+f0 = 10e6;
+att = 0; % 176 % in dB/m
+freq_att = 0;
+att_f0 = 5e6;
 
-tx = xdc_linear_array(10, 0.001, 0.001, 0.001, 2, 2, [0 0 0]);
+field_init(-1);
+
+set_field('c', c);
+set_field('fs', fs);
+set_field('att', att);
+set_field('freq_att', freq_att);
+set_field('att_f0', att_f0);
+set_field('use_att', 1);
+
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
+excitation = 1.*sin(2*pi*f0*(0:1/fs:1000/f0));
 
-xdc_impulse(tx, impulse_response);
-xdc_excitation(tx, sin(2*pi*f0*(0:1/fs:2/f0)));
-xdc_focus(tx, 0, [0 0 300]);
+%% DEFINE CIRCULAR PISTON ARRAY
 
-[X, Y, Z] = ndgrid(-0.01:0.0001:0.01, 0, 0:0.0001:0.02);
-grd = [X(:) Y(:) Z(:)];
+radius = 5/1000;
+elementSize = 0.1/1000;
+impScale = 1;
+excScale = 1;
 
+PistonTx = xdc_piston(radius, elementSize);
 
-%%
-
-h = calc_hp(tx, grd);
-h = reshape(h, [], 201, 1, 201);
-
-%%
-for i = 1:size(h,1)
-    mesh(X, Z, squeeze(h(i,:,1,:)));
-    axis([-0.01 0.01 0 0.02 -1e-9 1e-9]);
-    pause(0.01);
-end
+xdc_impulse(PistonTx, impScale.*impulse_response);
+xdc_excitation(PistonTx, excScale.*excitation);
+xdc_focus_times(PistonTx, 0, zeros(1, xdc_nphys(PistonTx)));
 
 %%
-for bl = 1:10000:length(grd)
-    
-end
+
+[scat, t0] = calc_scat(PistonTx, PistonTx, [0 0 1], 1);
