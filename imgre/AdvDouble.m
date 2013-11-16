@@ -1,13 +1,14 @@
-classdef AdvDouble < double
+classdef advdouble < double
     
     properties
         Label = {};
         Dim = 0;
+        Meta;
     end
     
     methods
         % CONSTRUCTORS
-        function obj = AdvDouble(data, lbl)
+        function obj = advdouble(data, lbl)
             
             if nargin > 1
                 
@@ -33,7 +34,14 @@ classdef AdvDouble < double
             
             switch s(1).type
                 case '.'
-                    ref = obj.(s(1).subs);
+                    sub1 = lower(s(1).subs);
+                    sub1(1) = upper(sub1(1));
+                    
+                    if size(s, 2) > 1
+                        ref = subsref(obj.(sub1), s(2:end));
+                    else
+                        ref = obj.(sub1);
+                    end
                 case '{}'
                 case '()'
                     data = double(obj);
@@ -58,7 +66,7 @@ classdef AdvDouble < double
                         s.subs = newsubs;
                     end
                     
-                    ref = AdvDouble(subsref(data, s), obj.Label);
+                    ref = advdouble(subsref(data, s), obj.Label);
             end
         end
         
@@ -66,7 +74,14 @@ classdef AdvDouble < double
             
             switch s(1).type
                 case '.'
-                    obj.(s(1).subs) = b;
+                    sub1 = lower(s(1).subs);
+                    sub1(1) = upper(sub1(1));
+                    
+                    if size(s, 2) > 1
+                        obj.(sub1) = subsasgn(obj.(sub1), s(2:end), b);
+                    else
+                        obj.(sub1) = b;
+                    end
                 case '{}'
                 case '()'
                     data = double(obj);
@@ -91,7 +106,7 @@ classdef AdvDouble < double
                         s.subs = newsubs;
                     end
                     
-                    obj = AdvDouble(subsasgn(data, s, b), obj.Label);
+                    obj = advdouble(subsasgn(data, s, b), obj.Label);
             end
         end
         
@@ -138,20 +153,20 @@ classdef AdvDouble < double
             
             newdouble = cat(dim, data{:});
             
-            newobj = AdvDouble(newdouble, lbl);
+            newobj = advdouble(newdouble, lbl);
         end
         
         % OVERLOADED DATA ORGANIZATION METHODS
         function obj = transpose(obj)
             
             data = double(obj);
-            obj = AdvDouble(transpose(data), fliplr(obj.Label));
+            obj = advdouble(transpose(data), fliplr(obj.Label));
         end
         
         function obj = ctranspose(obj)
             
             data = double(obj);
-            obj = AdvDouble(ctranspose(data), fliplr(obj.Label));
+            obj = advdouble(ctranspose(data), fliplr(obj.Label));
         end
         
         function obj = squeeze(obj)
@@ -161,7 +176,7 @@ classdef AdvDouble < double
             
             obj.Label(dim == 1) = [];
             
-            obj = AdvDouble(squeeze(data), obj.Label);
+            obj = advdouble(squeeze(data), obj.Label);
         end
         
         function obj = permute(obj, order)
@@ -180,7 +195,7 @@ classdef AdvDouble < double
                 end
             end
             
-            obj = AdvDouble(permute(data, order), newlbl);
+            obj = advdouble(permute(data, order), newlbl);
         end
         
         % GETTERS AND SETTERS
