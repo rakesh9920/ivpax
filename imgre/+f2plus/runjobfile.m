@@ -3,7 +3,6 @@ function [Job] = runjobfile(jobFile)
 %
 
 import tools.loadmat
-import f2plus.run_sim_multi
 
 % read jobFile and list unprocessed files
 
@@ -11,8 +10,11 @@ import f2plus.run_sim_multi
 
 switch ext
     case {'.csv', '.txt'}
+
         Log = readtable(jobFile);
+	Log = parsecsv(Log);
     case '.mat'
+
         Log = loadmat(jobFile); 
 end
 
@@ -27,13 +29,14 @@ for task = 1:nTask
    
     fHandle = str2func(cell2mat(TaskList{task, 'FUNCTION'}));
     nArgOut = TaskList{task, 'NARGOUT'};
-    ArgIn = cell(TaskList{task, 'ARGIN'});
+    ArgIn = TaskList{task, 'ARGIN'};
 
     createTask(Job, fHandle, nArgOut, ArgIn);
 end
 
 % submit jobs
 
+%submit(Job);
 
 end
 
