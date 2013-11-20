@@ -7,7 +7,7 @@ addpath ./bin/
 rho = 1000; % kg/m^3
 c = 1540;
 fs = 100e6;
-f0 = 10e6;
+f0 = 5e6;
 att = 0; % 176 % in dB/m
 freq_att = 0;
 att_f0 = 5e6;
@@ -52,11 +52,11 @@ U_0 = max(abs(cumtrapz(conv(excScale.*excitation,impScale.*impulse_response)./fs
 
 %% DEFINE GRID POINTS
 
-AxPoints = [zeros(1, 1000); zeros(1, 1000); linspace(0, 0.10, 1000)];
+AxPoints = [zeros(1, 1000); zeros(1, 1000); linspace(0, 1, 1000)];
 theta = linspace(-pi/2, pi/2, 1000);
 R = 0.10;
 FFPoints = R.*[sin(theta); zeros(1, 1000); cos(theta)];
-    
+
 %% CALCULATE ANALYTICAL SOLUTIONS
 
 sol_ax = piston_ax_mag(AxPoints(3,:), 2*pi*f0/c, radius, U_0);
@@ -79,7 +79,7 @@ plot(AxPoints(3,:), sol_ax,'r');
 [hp_ax, t0] = calc_hp(PistonTx, AxPoints.');
 
 figure;
-plot(AxPoints(3,:), max(abs(hp_ax(8000:10000,:))),'g');
+plot(AxPoints(3,:), max(abs(hp_ax(8000:48000,:))),'g');
 
 %% DEFINE AND SIMULATE REFLECTIVE WALL
 
@@ -107,7 +107,7 @@ SinglePos = [0 0 R];
 Tx = PistonTx;
 Rx = PistonTx;
 Rad = radius;
-SingleAmp = 1;%/(pi*Rad^2);
+SingleAmp = 1;%0.500773604008522;%/(pi*Rad^2);
 
 [scat, t0] = calc_scat(Tx, Rx, SinglePos, SingleAmp);
 scat = scat.';
@@ -142,5 +142,24 @@ TS = EL2 - SL + TL1 + TL2
 sigma = 10^(TS/10)*4*pi;
 
 
+%% COMBINE RF FILES
+import tools.*
+fs = 100e6;
+nSample = 11000;
+RfMat = zeros(nSample, 1);
+
+for part = 1:12
+    Rf = loadmat(strcat('./bsc_test/n2/rf_',sprintf('%0.4d', part),'.mat'));
+    t0 = Rf.meta.startTime;
+    Rf = padarray(double(Rf), [round((t0 - 6.493e-4)*fs) 0], 'pre');
+    Rf = padarray(Rf, [nSample - size(Rf, 1) 0], 'post');
+    
+    RfMat = RfMat + Rf;
+end
+
+RfMat = advdouble(RfMat,{'rf','ch'});
+RfMat.meta.nScatTotal = round(sqrt(100000))^2;
+
+save ./bsc_test/n2/rf_total.mat 'RfMat';
 
 

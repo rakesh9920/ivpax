@@ -1,9 +1,8 @@
+function [] = sct_uniform_flow(outDir)
 %
 %
 
-global SOUND_SPEED CENTER_FREQUENCY PULSE_REPITITION_RATE
-SOUND_SPEED = 1540;    %  Ultrasound propagation velocity [m/s]
-CENTER_FREQUENCY = 6e6;    %  Center frequency of transducer  [Hz]
+global PULSE_REPITITION_RATE
 PULSE_REPITITION_RATE = 2000;
 
 RangeX = [-0.01 0.01];    %  x range for the scatterers  [m]

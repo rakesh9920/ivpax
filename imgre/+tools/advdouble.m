@@ -1,4 +1,5 @@
 classdef advdouble < double
+   
     
     properties
         Label = {};
@@ -66,7 +67,7 @@ classdef advdouble < double
                         s.subs = newsubs;
                     end
                     
-                    ref = advdouble(subsref(data, s), obj.Label);
+                    ref = tools.advdouble(subsref(data, s), obj.Label);
             end
         end
         
@@ -106,14 +107,19 @@ classdef advdouble < double
                         s.subs = newsubs;
                     end
                     
-                    obj = advdouble(subsasgn(data, s, b), obj.Label);
+                    obj = tools.advdouble(subsasgn(data, s, b), obj.Label);
             end
         end
         
-        function sz = size(obj, varargin)
+        function varargout = size(obj, varargin)
             
             data = double(obj);
             lbl = obj.Label;
+            if nargout > 1
+                outargs = cell(nargout);
+            else
+                outargs = cell(1);
+            end
             
             if nargin > 1
                 
@@ -123,12 +129,13 @@ classdef advdouble < double
                 if isempty(loc)
                     error('invalid dimension label');
                 else
-                    sz = size(data, loc);
+                    [outargs{:}] = size(data, loc);
                 end
             else
-                
-                sz = size(data);
+                [outargs{:}] = size(data);
             end
+            
+            varargout = outargs;
         end
         
         % OVERLOADED CONCATENATION METHODS
@@ -153,20 +160,20 @@ classdef advdouble < double
             
             newdouble = cat(dim, data{:});
             
-            newobj = advdouble(newdouble, lbl);
+            newobj = tools.advdouble(newdouble, lbl);
         end
         
         % OVERLOADED DATA ORGANIZATION METHODS
         function obj = transpose(obj)
             
             data = double(obj);
-            obj = advdouble(transpose(data), fliplr(obj.Label));
+            obj = tools.advdouble(transpose(data), fliplr(obj.Label));
         end
         
         function obj = ctranspose(obj)
             
             data = double(obj);
-            obj = advdouble(ctranspose(data), fliplr(obj.Label));
+            obj = tools.advdouble(ctranspose(data), fliplr(obj.Label));
         end
         
         function obj = squeeze(obj)
@@ -176,7 +183,7 @@ classdef advdouble < double
             
             obj.Label(dim == 1) = [];
             
-            obj = advdouble(squeeze(data), obj.Label);
+            obj = tools.advdouble(squeeze(data), obj.Label);
         end
         
         function obj = permute(obj, order)
@@ -195,7 +202,7 @@ classdef advdouble < double
                 end
             end
             
-            obj = advdouble(permute(data, order), newlbl);
+            obj = tools.advdouble(permute(data, order), newlbl);
         end
         
         % GETTERS AND SETTERS

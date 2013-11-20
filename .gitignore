@@ -12,6 +12,7 @@
 *.png
 *.daq
 *.tif
+*.txt
 /dat/*
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*

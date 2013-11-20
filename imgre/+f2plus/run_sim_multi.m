@@ -2,17 +2,28 @@ function [RfMat] = run_sim_multi(scriptFile, sctFile, varargin)
 % Runs calc_scat_multi in Field II using the field and transducer
 % definitions in scriptFile and scatterer info in sctFile
 
-import fieldii.field_init fieldii.calc_scat_multi
+import fieldii.field_init
+import fieldii.calc_scat_multi
+import fieldii.field_end
+addpath ./bin/Mat_field.mexw64
+addpath ./bin/Mat_field.mexa64
+
+% import fieldiia.field_init
+% import fieldiia.calc_scat_multi
+% import fieldiia.field_end
+% addpath ./bin/Mat_field.mexa64
+
 import tools.loadmat
+import tools.advdouble
 
 if nargin > 2
     outDir = varargin{1};
+    if outDir(end) ~= '/'
+        outDir = strcat(outDir, '/');
+    end
 else
-    outDir = [];
-end
-
-if outDir(end) ~= '/'
-    outDir = strcat(outDir, '/');
+    pathstr = fileparts(sctFile);
+    outDir = strcat(pathstr, '/');
 end
 
 % load sctFile and read meta data
@@ -26,18 +37,15 @@ field_init(-1)
 
 run(scriptFile)
 
-[RfMat, startTime] = calc_scat_multi(txArray, rxArray, ScatInfo(:,1:3), ...
-    ScatInfo(:,4));
-
-xdc_free(txArray);
-xdc_free(rxArray);
+[RfMat, startTime] = calc_scat_multi(TxArray, RxArray, double(ScatInfo(:,1:3)), ...
+    double(ScatInfo(:,4)));
 
 field_end;
 
 % write metadata and save output
-RfMat = advdouble(RfMat, {'rf', 'scatt'});
-RfMat.Meta.startTime = startTime;
+RfMat = advdouble(RfMat, {'rf', 'scatterer'});
 RfMat.Meta.fileNo = fileNo;
+RfMat.Meta.startTime = startTime;
 
 if nargout == 0
     save(outFile, 'RfMat');
