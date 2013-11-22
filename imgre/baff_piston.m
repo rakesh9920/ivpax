@@ -5,13 +5,6 @@ import fieldii.xdc_piston
 import fieldii.xdc_impulse
 import fieldii.xdc_excitation
 import fieldii.xdc_focus_times
-
-% import fieldiia.set_field
-% import fieldiia.xdc_piston
-% import fieldiia.xdc_impulse
-% import fieldiia.xdc_excitation
-% import fieldiia.xdc_focus_times
-
 import f2plus.xdc_nphys
 
 % Set Field II parameters
@@ -37,15 +30,19 @@ excitation = 1.*sin(2*pi*f0*(0:1/fs:1000/f0));
 
 % Define circular piston for transmit and receive
 
-radius = 5/1000;
+radius1 = 3/1000;
+radius2 = 1/1000;
 elementSize = 0.05/1000;
 impScale = 1;
 excScale = 1;
 
-TxArray = xdc_piston(radius, elementSize);
-
+TxArray = xdc_piston(radius1, elementSize);
 xdc_impulse(TxArray, impScale.*impulse_response);
 xdc_excitation(TxArray, excScale.*excitation);
 xdc_focus_times(TxArray, 0, zeros(1, xdc_nphys(TxArray)));
 
-RxArray = TxArray;
+RxArray = xdc_piston(radius2, elementSize);
+xdc_impulse(RxArray, impScale.*impulse_response);
+xdc_excitation(RxArray, excScale.*excitation);
+xdc_focus_times(RxArray, 0, zeros(1, xdc_nphys(RxArray)));
+

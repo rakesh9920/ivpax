@@ -106,7 +106,7 @@ SinglePos = [0 0 R];
 Tx = PistonTx;
 Rx = PistonTx;
 Rad = radius;
-SingleAmp = 1.574539432315113;
+SingleAmp = 1;%1.574539432315113;
 
 [scat, t0] = calc_scat(Tx, Rx, SinglePos, SingleAmp);
 scat = scat.';
@@ -148,7 +148,7 @@ nSample = 21000;
 RfMat = zeros(nSample, 1);
 
 for part = 1:12
-    Rf = loadmat(strcat('./data/bsc_test/n3/rf_',sprintf('%0.4d', part),'.mat'));
+    Rf = loadmat(strcat('./data/wall/rf_',sprintf('%0.4d', part),'.mat'));
     t0 = Rf.meta.startTime;
     Rf = padarray(double(Rf), [round((t0 - 6.493e-4)*fs) 0], 'pre');
     Rf = padarray(Rf, [nSample - size(Rf, 1) 0], 'post');
@@ -157,8 +157,8 @@ for part = 1:12
 end
 
 RfMat = advdouble(RfMat,{'rf','ch'});
-RfMat.meta.nScatTotal = round(sqrt(100000))^2;
+RfMat.meta.nScatTotal = round(sqrt(50000))^2;
 
-save ./data/bsc_test/n3/rf_total.mat 'RfMat';
+save ./data/wall/rf_total.mat 'RfMat';
 
 
