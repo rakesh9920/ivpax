@@ -95,10 +95,9 @@ WallAmp = ones(round(sqrt(N))^2, 1);
 [scat, t0] = calc_scat(PistonTx, PistonTx, WallPos, WallAmp);
 scat = scat.';
 
-
 %% DEFINE AND SIMULATE SINGLE SCATTERER
 
-R = 1;
+R = 0.5;
 
 SinglePos = [0 0 R];
 
@@ -107,7 +106,7 @@ SinglePos = [0 0 R];
 Tx = PistonTx;
 Rx = PistonTx;
 Rad = radius;
-SingleAmp = 1;%0.500773604008522;%/(pi*Rad^2);
+SingleAmp = 1.574539432315113;
 
 [scat, t0] = calc_scat(Tx, Rx, SinglePos, SingleAmp);
 scat = scat.';
@@ -128,12 +127,12 @@ p1 = calc_hp(Tx, [0 0 1]);
 P1 = max(abs(p1));
 SL = 20*log10(P1/sqrt(2)/pref)
 
-TL1 = 10*log10(4*pi*R^2);
+TL1 = 10*log10(R^2);
 TL2 = TL1;
 
 pr1 = piston_ax_mag(1, 2*pi*f0/c, Rad, U_r);
 PR1 = max(abs(pr1));
-EL = 20*log10(PR1/sqrt(2)/pref);
+%EL = 20*log10(PR1/sqrt(2)/pref);
 EL2 = 10*log10((F_r/(pi*Rad^2))^2/(2*rho*c)/iref)
 EL3 = 20*log10((F_r/(pi*Rad^2))/sqrt(2)/pref)
 %EL2 = 10*log10((U_r*rho*c)^2/(2*rho*c)/iref)
@@ -145,11 +144,11 @@ sigma = 10^(TS/10)*4*pi;
 %% COMBINE RF FILES
 import tools.*
 fs = 100e6;
-nSample = 11000;
+nSample = 21000;
 RfMat = zeros(nSample, 1);
 
 for part = 1:12
-    Rf = loadmat(strcat('./bsc_test/n2/rf_',sprintf('%0.4d', part),'.mat'));
+    Rf = loadmat(strcat('./data/bsc_test/n3/rf_',sprintf('%0.4d', part),'.mat'));
     t0 = Rf.meta.startTime;
     Rf = padarray(double(Rf), [round((t0 - 6.493e-4)*fs) 0], 'pre');
     Rf = padarray(Rf, [nSample - size(Rf, 1) 0], 'post');
@@ -160,6 +159,6 @@ end
 RfMat = advdouble(RfMat,{'rf','ch'});
 RfMat.meta.nScatTotal = round(sqrt(100000))^2;
 
-save ./bsc_test/n2/rf_total.mat 'RfMat';
+save ./data/bsc_test/n3/rf_total.mat 'RfMat';
 
 

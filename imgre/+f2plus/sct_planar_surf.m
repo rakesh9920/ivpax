@@ -23,7 +23,8 @@ nPart = 12;
 [PosX, PosY, PosZ] = ndgrid(linspace(0, Dim(1), sqrt(nScat)), ...
     linspace(0, Dim(2), sqrt(nScat)), 0);
 Pos = bsxfun(@plus, [PosX(:) PosY(:) PosZ(:)], [-Dim(1)/2 -Dim(2)/2 R]);
-Amp = ones(nScat, 1).*sqrt(16*pi^2*Ii/ns/sigma/wref);
+% Amp = ones(nScat, 1).*sqrt(16*pi^2*Ii/ns/sigma/wref);
+Amp = ones(nScat, 1).*1.574539432315113/sqrt(ns);
 % Amp = ones(nScat, 1).*0.500773604008522;
 
 partSize = ceil(nScat/nPart);

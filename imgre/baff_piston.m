@@ -19,7 +19,7 @@ import f2plus.xdc_nphys
 rho = 1000; % kg/m^3
 c = 1540;
 fs = 100e6;
-f0 = 10e6;
+f0 = 5e6;
 att = 0; % 176 % in dB/m
 freq_att = 0;
 att_f0 = 5e6;
