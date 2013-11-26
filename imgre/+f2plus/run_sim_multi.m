@@ -5,16 +5,10 @@ function [RfMat] = run_sim_multi(scriptFile, sctFile, varargin)
 import fieldii.field_init
 import fieldii.calc_scat_multi
 import fieldii.field_end
-addpath ./bin/Mat_field.mexw64
-addpath ./bin/Mat_field.mexa64
-
-% import fieldiia.field_init
-% import fieldiia.calc_scat_multi
-% import fieldiia.field_end
-% addpath ./bin/Mat_field.mexa64
-
 import tools.loadmat
 import tools.advdouble
+addpath ./bin/Mat_field.mexw64
+addpath ./bin/Mat_field.mexa64
 
 if nargin > 2
     outDir = varargin{1};
@@ -33,9 +27,9 @@ fileNo = ScatInfo.Meta.fileNo;
 outFile = strcat(outDir, 'rf_', sprintf('%0.4d', fileNo));
 
 % run Field II
-field_init(-1)
+field_init(-1);
 
-run(scriptFile)
+run(scriptFile);
 
 [RfMat, startTime] = calc_scat_multi(TxArray, RxArray, double(ScatInfo(:,1:3)), ...
     double(ScatInfo(:,4)));

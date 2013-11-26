@@ -4,12 +4,15 @@ import fieldii.xdc_get
 import fieldii.xdc_free
 import fieldii.xdc_rectangles
 import fieldii.xdc_triangles
+import fieldii.xdc_focus_times
 
 if size(Pos,1) ~=3
     Pos = Pos.';
 end
 
 Info = xdc_get(ApertureIn, 'rect');
+
+%xdc_free(ApertureIn);
 
 if ~isempty(Info)
     
@@ -37,7 +40,6 @@ if ~isempty(Info)
     PhysPos = Info(24:26,:); 
     
     % determine physical element centers
-    
     nPhysElement = max(PhysElem) + 1;
     PhysCenter = zeros(3, nPhysElement);
     
@@ -47,35 +49,44 @@ if ~isempty(Info)
         PhysCenter(:,phys) = PhysPos(:, idx) + Pos;
     end
 
+    % create rectangle definitions and define aperture
     Rect = zeros(19, nElement);
-    
-    Rect(1,:) = PhysElem;
+    Rect(1,:) = PhysElem  + 1;
     Rect(2:13,:) = bsxfun(@plus, Corners, repmat(Pos, 4, 1));
     Rect(14,:) = Apod;
     Rect(15,:) = Width;
     Rect(16,:) = Height;
     Rect(17:19,:) = bsxfun(@plus, MathPos, Pos);
 
-    ApertureOut = xdc_rectangles(Rect.', PhysCenter.', [0 0 0]);
-    xdc_focus_times(ApertureOut, 0, Delays);
+    ApertureOut = xdc_rectangles(Rect.', PhysCenter.', [0 0 300]);
+    xdc_focus_times(ApertureOut, Delays(:,1), Delays(:,2:end));
     
 else
     
-    
     nElement = size(Info, 2);
     PhysElem = Info(1,:);
-    MathElem = Info(2,:);
+    % MathElem = Info(2,:);
     Apod = Info(3,:);
     MathPos = Info(4:6,:);
     Corners = Info(7:15,:);
     
+    % determine physical element centers
+    nPhysElement = max(PhysElem) + 1;
+    PhysCenter = zeros(3, nPhysElement);
+    
+    for phys = 1:nPhysElement
+       
+        idx = find(PhysElem == (phys - 1), 1);
+        PhysCenter(:,phys) = MathPos(:, idx) + Pos;
+    end
+    
     Tri = zeros(11, nElement);
     
-    Tri(1,:) = PhysElem;
-    Tri(2:10) = Corners;
+    Tri(1,:) = PhysElem + 1;
+    Tri(2:10) = bsxfun(@plus, Corners, repmat(Pos, 3, 1));
     Tri(11,:) = Apod;
     
-    ApertureOut = xdc_triangles(Info);
+    ApertureOut = xdc_triangles(Tri.', PhysCenter.', [0 0 300]);
 end
 
 end
