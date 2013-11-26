@@ -70,7 +70,7 @@ xdc_excitation(TxArray, excScale.*excitation);
 xdc_focus_times(TxArray, 0, zeros(1, xdc_nphys(TxArray)));
 
 RxArray2 = xdc_piston(radius2, elementSize);
-RxArray = xdc_shift(RxArray2, [0 0 R]);
+RxArray = xdc_shift(RxArray2, [0 0 rxDepth]);
 xdc_impulse(RxArray, impScale.*impulse_response);
 xdc_excitation(RxArray, excScale.*excitation);
 xdc_focus_times(RxArray, 0, zeros(1, xdc_nphys(RxArray)));
