@@ -53,14 +53,14 @@ U_0 = max(abs(cumtrapz(conv(excScale.*excitation,impScale.*impulse_response)./fs
 %% DEFINE GRID POINTS
 
 AxPoints = [zeros(1, 1000); zeros(1, 1000); linspace(0, 1, 1000)];
-theta = linspace(-pi/2, pi/2, 1000);
-R = 0.10;
-FFPoints = R.*[sin(theta); zeros(1, 1000); cos(theta)];
+theta = linspace(-pi/2, pi/2, 5000);
+R = 0.5;
+FFPoints = R.*[sin(theta); zeros(1, 5000); cos(theta)];
 
 %% CALCULATE ANALYTICAL SOLUTIONS
 
 sol_ax = piston_ax_mag(AxPoints(3,:), 2*pi*f0/c, radius, U_0);
-sol_ff = piston_ff_mag(R.*ones(1,1000), theta, 2*pi*f0/c, radius, U_0);
+sol_ff = piston_ff_mag(R.*ones(1,5000), theta, 2*pi*f0/c, radius, U_0);
 
 %% CALCULATE SIMULATED SOLUTIONS FROM SPATIAL IMPULSE RESPONSE
 
