@@ -25,12 +25,12 @@ set_field('use_att', 1);
 
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
-excitation = 1.*sin(2*pi*f0*(0:1/fs:5/f0));
+excitation = 1.*sin(2*pi*f0*(0:1/fs:1/f0));
 
 % Define circular piston for transmit and receive
 
 radius1 = 5/1000;
-elementSize = 0.05/1000;
+elementSize = 0.1/1000;
 impScale = 1;
 excScale = 1;
 
@@ -40,19 +40,21 @@ xdc_excitation(TxArray, excScale.*excitation);
 xdc_focus_times(TxArray, 0, zeros(1, xdc_nphys(TxArray)));
 
 ns = 5; % scatterers per mm^3
-Dim = [0.01 0.01 0.003];
-BSC = 0.000001; % in 1/(m*sr)
+Dim = [0.008 0.008 0.1];
+BSC = 0.001; % in 1/(m*sr)
 sigma = 0.316798267931919;
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
 R = 0.5;
 rxDepth = 1;
-nIter = 50;
+nIter = 1;
 
 nSample = ceil(rxDepth/c*2*fs);
 vscat2 = zeros(nIter, nSample);
 
 [vscat1, t1] = calc_scat(TxArray, TxArray, [0 0 R], 2*sqrt(2*BSC/sigma/(ns*1000^3)));
-vscat1 = vscat1.';
+%vscat1 = vscat1.';
+vscat1 = padarray(vscat1.', [0 round(t1*fs)], 'pre');
+vscat1 = padarray(vscat1, [0 nSample - size(vscat1, 2)], 'post');
 
 for i = 1:nIter
     PosX = rand(Ns,1).*Dim(1);
@@ -70,7 +72,7 @@ for i = 1:nIter
 end
 
 p1m = max(abs(calc_hp(TxArray, [0 0 1])));
-
+%%
 field_end
 %%
 pscat1 = deconvwnr(vscat1, impulse_response).*fs/(pi*radius1^2);
@@ -78,20 +80,20 @@ pscat2 = deconvwnr(vscat2, impulse_response).*fs/(pi*radius1^2);
 p2ed = abs(hilbert(pscat2));
 pmean = mean(p2ed, 1);
 
-Rr = (1:129871)./2./fs.*c;
+Rr = (1:nSample)./2./fs.*c;
 Wtx = p1m^2/(2*rho*c)*4*pi;
 Ii = Wtx./(4*pi*Rr.^2);
 
-Wr = (p2ed.^2./(2*rho*c).*4*pi).*repmat(Rr, nIter, 1);
+Wr = (p2ed.^2./(2*rho*c).*4*pi).*repmat(Rr.^2, nIter, 1);
 sigmar = Wr./repmat(Ii, nIter, 1);
-sigmarwin = sigmar(:,64900:65200);
-sigmarmean = mean(sigmarwin(:));
+sigmarwin = sigmar(:,60000:70000);
+sigmarmean = mean(sigmarwin(:))
 
 N = sigmarmean*2/pi/(Amp(1)^2*sigma);
 Vres = sigmarmean*2/pi/(Amp(1)^2*sigma)/(ns*1000^3);
 
-figure; hist(sqrt(sigmarwin(:)),40);
-figure; probplot('rayleigh',sqrt(sigmarwin(:)));
+figure; hist(sqrt(sigmarwin(:)), 40);
+figure; probplot('rayleigh', sqrt(sigmarwin(:)));
 % figure; probplot('exponential',sigmarwin(:));
 
 % BSCm = sigmarmean/(4*pi*Vres)

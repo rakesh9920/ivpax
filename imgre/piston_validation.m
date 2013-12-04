@@ -24,7 +24,7 @@ set_field('use_att', 1);
 
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
-excitation = 1.*sin(2*pi*f0*(0:1/fs:1000/f0));
+excitation = 1.*sin(2*pi*f0*(0:1/fs:1/f0));
 
 %% DEFINE FUNCTIONS TO CALCULATE PISTON FIELD (ANALYTICAL SOLUTION)
 
@@ -36,8 +36,8 @@ piston_ff_mag = @(r, theta, k, a, U_0) piston_ax_mag(r, k, a, U_0).*...
 
 %% DEFINE CIRCULAR PISTON ARRAY
 
-radius = 5/1000;
-elementSize = 0.05/1000;
+radius = 10/1000;
+elementSize = 0.1/1000;
 impScale = 1;
 excScale = 1;
 
