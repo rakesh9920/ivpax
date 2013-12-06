@@ -1,6 +1,5 @@
 function [nElement] = xdc_nmath(Aperture)
-%
-%
+% Returns the number of mathematical elements in an aperture.
 
 import fieldii.xdc_get;
 
@@ -11,7 +10,6 @@ nElement = [];
 if ~isempty(Info)
     
     nElement = size(Info, 2);
-    
 else
     
     Info = xdc_get(Aperture, 'tri');

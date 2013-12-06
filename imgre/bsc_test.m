@@ -41,18 +41,20 @@ xdc_focus_times(TxArray, 0, zeros(1, xdc_nphys(TxArray)));
 
 ns = 5; % scatterers per mm^3
 Dim = [0.008 0.008 0.1];
-BSC = 0.001; % in 1/(m*sr)
+BSC = 0.00001; % in 1/(m*sr)
 sigma = 0.316798267931919;
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
 R = 0.5;
 rxDepth = 1;
-nIter = 1;
+nIter = 50;
+%BscAmp = 2*sqrt(2*BSC/sigma/(ns*1000^3));
+BscAmp = sqrt(2*pi*BSC/sigma/(ns*1000^3));
 
 nSample = ceil(rxDepth/c*2*fs);
 vscat2 = zeros(nIter, nSample);
 
-[vscat1, t1] = calc_scat(TxArray, TxArray, [0 0 R], 2*sqrt(2*BSC/sigma/(ns*1000^3)));
-%vscat1 = vscat1.';
+[vscat1, t1] = calc_scat(TxArray, TxArray, [0 0 R], BscAmp);
+
 vscat1 = padarray(vscat1.', [0 round(t1*fs)], 'pre');
 vscat1 = padarray(vscat1, [0 nSample - size(vscat1, 2)], 'post');
 
@@ -62,7 +64,7 @@ for i = 1:nIter
     PosZ = rand(Ns,1).*Dim(3);
     
     Pos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 (R - Dim(3)/2)]);
-    Amp = ones(Ns,1).*2*sqrt(2*BSC/sigma/(ns*1000^3));
+    Amp = ones(Ns,1).*BscAmp;
     
     [scat, t2] = calc_scat(TxArray, TxArray, Pos, Amp);
     scat = padarray(scat.', [0 round(t2*fs)], 'pre');
@@ -89,11 +91,15 @@ sigmar = Wr./repmat(Ii, nIter, 1);
 sigmarwin = sigmar(:,60000:70000);
 sigmarmean = mean(sigmarwin(:))
 
-N = sigmarmean*2/pi/(Amp(1)^2*sigma);
-Vres = sigmarmean*2/pi/(Amp(1)^2*sigma)/(ns*1000^3);
+%N = sigmarmean*2/pi/(BscAmp^2*sigma);
+%Vres = sigmarmean*2/pi/(BscAmp^2*sigma)/(ns*1000^3);
+N = sigmarmean/2/(BscAmp^2*sigma);
+Vres = N/(ns*1000^3);
+Vresg = 24*10e-9*1540/2*pi*0.0023^2;
+BSCm = sigmarmean/(4*pi*Vresg)
 
 figure; hist(sqrt(sigmarwin(:)), 40);
 figure; probplot('rayleigh', sqrt(sigmarwin(:)));
 % figure; probplot('exponential',sigmarwin(:));
 
-% BSCm = sigmarmean/(4*pi*Vres)
+

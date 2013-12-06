@@ -1,6 +1,5 @@
 function [nElement] = xdc_nphys(Aperture)
-%
-%
+% Returns the number of physical elements in an aperture.
 
 import fieldii.xdc_get;
 
@@ -11,7 +10,6 @@ nElement = [];
 if ~isempty(Info)
     
     nElement = Info(1,end) + 1;
-    
 else
     
     Info = xdc_get(Aperture, 'tri');

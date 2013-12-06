@@ -1,10 +1,12 @@
 function [ApertureOut] = xdc_shift(ApertureIn, Pos)
+% Defines a new aperture that is a copy of ApertureIn shifted spatially by
+% the vector Pos.
 
 import fieldii.xdc_get
-import fieldii.xdc_free
 import fieldii.xdc_rectangles
 import fieldii.xdc_triangles
 import fieldii.xdc_focus_times
+%import fieldii.xdc_free
 
 if size(Pos,1) ~=3
     Pos = Pos.';
