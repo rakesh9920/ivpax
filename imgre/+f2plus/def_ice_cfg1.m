@@ -1,15 +1,13 @@
-function [Prms, TxArray, RxArray] = def_baff_piston()
+function [Prms, TxArray, RxArray] = def_ice_cfg1()
 % Field II environment and transducer definition for transmit/receive
 % circular baffled piston.
 
 import fieldii.set_field
-import fieldii.xdc_piston
 import fieldii.xdc_impulse
 import fieldii.xdc_excitation
 import fieldii.xdc_focus_times
 import fieldii.xdc_free
 import f2plus.xdc_nphys
-import f2plus.xdc_shift
 
 % Set Field II parameters
 
