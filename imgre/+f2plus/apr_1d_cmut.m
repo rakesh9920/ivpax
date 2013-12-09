@@ -1,4 +1,4 @@
-function [CMUT, Centers] = xdc_1d_cmut(numElements)
+function [CMUT, Centers] = apr_1d_cmut(numElements)
 %
 %
 

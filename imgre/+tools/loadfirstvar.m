@@ -1,4 +1,4 @@
-function [Mat] = loadmat(filename)
+function [Mat] = loadfirstvar(filename)
 
 MatStruct = load(filename);
 fields = fieldnames(MatStruct);

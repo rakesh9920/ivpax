@@ -1,16 +1,16 @@
-function [] = sct_uniform_flow(outDir, targetRange, targetAmp, targetDensity, ...
+function [] = sct_uniform_flow(outPath, targetRange, targetAmp, targetDensity, ...
     flowVelocity, nFrame)
 %
 %
 
 import tools.advdouble
 
-if isempty(outDir)
-    outDir = uigetdir('','Select an output directory');
+if isempty(outPath)
+    outPath = uigetdir('','Select an output directory');
 end
 
-if outDir(end) == '/'
-    outDir(end) = [];
+if outPath(end) == '/'
+    outPath(end) = [];
 end
 
 global PULSE_REPITITION_RATE
@@ -46,12 +46,13 @@ Amp = ones(nTarget, 1).*targetAmp;
 
 for frame = 1:nFrame
     
-    Pos = bsxfun(@plus, InitPos, Vel./PULSE_REPITITION_RATE.*(frame - 1);
+    Pos = bsxfun(@plus, InitPos, Vel./PULSE_REPITITION_RATE.*(frame - 1));
     TargetMat = advdouble([Pos Amp],{'target no.'});
-    TargetMat.meta.frameNo = frame;
-    TargetMat.meta.fileNo = frame;
-    TargetMat.meta.numTarget = nTarget;
+    TargetMat.meta.frameNumber = frame;
+    TargetMat.meta.fileNumber = frame;
+    TargetMat.meta.numberOfTargets = nTarget;
     
-    save(strcat(outDir, '\', 'sct_', sprintf('%0.4d', frame)), 'TargetMat');
+    outFile = strcat(outPath, '\', 'sct_', sprintf('%0.4d', frame));
+    save(outFile, 'TargetMat');
 end
 

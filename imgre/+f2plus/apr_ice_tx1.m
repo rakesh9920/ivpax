@@ -1,41 +1,29 @@
-function [CMUT, Centers] = xdc_ice_rx()
+function [CMUT, Centers] = apr_ice_tx1()
 %
 %
 
 import fieldii.*
 
-% 72 H 24 V
+% 70 H 24 V
 % element: 4 membranes, element spacing 20um
 % membrane: 35x35um, 10um spacing
 
 pitch = 100e-6;
 
-TR_x = (1:36).*pitch - pitch/2;
-TR_y = ones(1,36).*(13*pitch - pitch/2);
-R_x = ones(1,24).*(36*pitch - pitch/2);
-R_y = (12*pitch - pitch/2):-pitch:(-12*pitch + pitch/2);
-BR_x = fliplr(TR_x);
-BR_y = -TR_y;
-BL_x = -TR_x;
-BL_y = -TR_y;
-L_x = -R_x;
-L_y = -R_y;
-TL_x = fliplr(-TR_x);
-TL_y = TR_y;
-All_z = zeros(1,192);
+H_x = repmat((-35*pitch + pitch/2):pitch:(35*pitch - pitch/2), 1, 24);
+H_y = repmat((12*pitch - pitch/2):-pitch:(-12*pitch + pitch/2), 70, 1);
+H_y = H_y(:).';
+H_z = zeros(1, 1680);
 
-Centers = zeros(3,192);
-Centers(1,:) = [TR_x R_x BR_x BL_x L_x TL_x];
-Centers(2,:) = [TR_y R_y BR_y BL_y L_y TL_y];
-Centers(3,:) = All_z;
+Centers = [H_x; H_y; H_z];
 
-Rect = zeros(19, 4*192);
+Rect = zeros(19, 1680*4);
 
 Phys = xdc_2d_array(2, 2, 35e-6, 35e-6, 10e-6, 10e-6, ones(2, 2), 1, 1, [0 0 0]);
 PhysInfo = xdc_get(Phys, 'rect');
 xdc_free(Phys);
 
-for el = 1:192
+for el = 1:1680
 
     elStart = 1 + (el - 1)*4;
     elEnd = elStart + 4 - 1;
