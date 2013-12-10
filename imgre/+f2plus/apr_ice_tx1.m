@@ -1,35 +1,56 @@
-function [CMUT, Centers] = apr_ice_tx1()
+function [Aperture] = apr_ice_tx1()
 %
 %
 
-import fieldii.*
+import fieldii.xdc_2d_array
+import fieldii.xdc_get
+import fieldii.xdc_free
+import fieldii.xdc_rectangles
 
 % element: 4 elements per membranes, 10um between elements vertically (80um pitch),
 % 10um between elements horizontally (80um pitch)
 % membrane: 30x30um, 10um between membranes (40um pitch)
 
-
 Phys = xdc_2d_array(2, 2, 30e-6, 30e-6, 10e-6, 10e-6, ones(2, 2), 1, 1, [0 0 0]);
 PhysInfo = xdc_get(Phys, 'rect');
 xdc_free(Phys);
 
+% Reference for xdc_get
+% number of elements = size(Info, 2);
+% physical element no. = Info(1,:);
+% mathematical element no. = Info(2,:);
+% element width = Info(3,:);
+% element height = Info(4,:);
+% apodization weight = Info(5,:);
+% mathematical element center = Info(8:10,:);
+% element corners = Info(11:22,:);
+% delays = Info(23,:);
+% physical element position = Info(24:26,:);
+Rect = [];
+
 for elem = 1:15
     
-    elStart = 1 + (elem - 1)*4;
-    elEnd = elStart + 4 - 1;
+    MathCenters = rectpts(elem);
     
+    nMathElements = size(MathCenters, 2).*4;
+    PhysRect = zeros(19, nMathElements);
     
-    Rect(1,elStart:elEnd) = el; % physical element no.
+    PhysRect(1,:) = elem; % physical element no.
     % rectangle coords
-    Rect(2:13,elStart:elEnd) = PhysInfo(11:22,:) + repmat(Centers(:,el), 4, 4);
-    Rect(14,elStart:elEnd) = 1; % apodization
-    Rect(15,elStart:elEnd) = PhysInfo(3,:); % math element width
-    Rect(16,elStart:elEnd) = PhysInfo(4,:); % math element height
+    PhysRect(2:13,:) = repmat(PhysInfo(11:22,:), [1 nMathElements/4]) + repmat(kron(MathCenters, [1 1 1 1]), [4 1]);
+    PhysRect(14,:) = ones(1, nMathElements).*1;%elem/15; % apodization
+    PhysRect(15,:) = repmat(PhysInfo(3,:), [1 nMathElements/4]); % math element width
+    PhysRect(16,:) = repmat(PhysInfo(4,:), [1 nMathElements/4]); % math element height
     % math element center
-    Rect(17:19,elStart:elEnd) = PhysInfo(8:10,:) + repmat(Centers(:,el), 1, 4);
+    PhysRect(17:19,:) = repmat(PhysInfo(8:10,:), [1 nMathElements/4]) + kron(MathCenters, [1 1 1 1]);
+    
+    Rect = [Rect PhysRect];
 end
 
-CMUT = xdc_rectangles(Rect.', Centers.', [0 0 300]);
+Centers = zeros(3, 15);
+
+Aperture = xdc_rectangles(Rect.', Centers.', [0 0 300]);
+
 end
 
 function [Centers] = rectpts(iElement)
