@@ -2,7 +2,7 @@ function [Job] = runjobfile(jobFile, varargin)
 % Creates a job with tasks based on a job file and submits it to the local
 % parallel cluster.
 
-import tools.loadmat
+import tools.loadfirstvar
 
 if nargin > 1
     AttachedFiles = varargin{1};
@@ -15,12 +15,10 @@ end
 
 switch ext
     case {'.csv', '.txt'}
-        
         Log = readtable(jobFile);
         Log = parsecsv(Log);
     case '.mat'
-        
-        Log = loadmat(jobFile);
+        Log = loadfirstvar(jobFile);
 end
 
 TaskList = Log(Log.COMPLETE == false,:);

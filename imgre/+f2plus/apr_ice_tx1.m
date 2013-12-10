@@ -1,6 +1,6 @@
-function [Aperture] = apr_ice_tx1()
-%
-%
+function [Aperture, Centers] = apr_ice_tx1()
+% ICE transmit configuration #1: 15 defocused rectangular rings with 80um
+% pitch between rings.
 
 import fieldii.xdc_2d_array
 import fieldii.xdc_get

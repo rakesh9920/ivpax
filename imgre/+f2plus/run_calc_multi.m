@@ -7,8 +7,7 @@ import fieldii.calc_scat_multi
 import fieldii.field_end
 import tools.loadfirstvar
 import tools.advdouble
-addpath ./bin/Mat_field.mexw64
-addpath ./bin/Mat_field.mexa64
+addpath ./bin/
 
 if nargin > 2
     outPath = varargin{1};
@@ -39,6 +38,8 @@ field_end;
 
 % write metadata and save output
 RfMat = advdouble(RfMat, {'sample', 'channel'});
+RfMat.meta.numberOfSamples = size(RfMat, 1);
+RfMat.meta.numberOfChannels = size(RfMat, 2);
 RfMat.meta = TargetInfo.meta;
 RfMat.meta.startTime = startTime;
 

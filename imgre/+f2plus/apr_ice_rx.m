@@ -1,8 +1,11 @@
 function [CMUT, Centers] = apr_ice_rx()
-%
-%
+% ICE receive configuration: 192 element ring with 100um pitch between
+% elements.
 
-import fieldii.*
+import fieldii.xdc_free
+import fieldii.xdc_get
+import fieldii.xdc_rectangles
+import fieldii.xdc_2d_array
 
 % 72 H 24 V
 % element: 4 membranes, 20um between elements

@@ -10,7 +10,7 @@ if isa(def, 'char')
 end
 
 if isempty(inPath)
-    inPath = uigetdir('','Select an output directory');
+    inPath = uigetdir('','Select an input directory');
 end
 
 if inPath(end) == '/'

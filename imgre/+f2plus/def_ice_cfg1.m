@@ -32,21 +32,16 @@ Prms.excitation = 1.*sin(2*pi*f0*(0:1/fs:5/f0));
 
 % Define circular piston for transmit and receive
 
-radius1 = 3/1000;
-radius2 = 1/1000;
-elementSize = 0.05/1000;
 impScale = 1;
 excScale = 1;
 
-TxArray = xdc_piston(radius1, elementSize);
+TxArray = apr_ice_cfg1();
 xdc_impulse(TxArray, impScale.*impulse_response);
 xdc_excitation(TxArray, excScale.*excitation);
 xdc_focus_times(TxArray, 0, zeros(1, xdc_nphys(TxArray)));
 
-RxArray2 = xdc_piston(radius2, elementSize);
-RxArray = xdc_shift(RxArray2, [0 0 R]);
+RxArray = apr_ice_rx;
 xdc_impulse(RxArray, impScale.*impulse_response);
 xdc_excitation(RxArray, excScale.*excitation);
 xdc_focus_times(RxArray, 0, zeros(1, xdc_nphys(RxArray)));
 
-xdc_free(RxArray2);

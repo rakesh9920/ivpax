@@ -37,7 +37,7 @@ if isempty(SAMPLE_FREQUENCY)
 end
 
 nFieldPos = size(FieldPos, 2);
-[nSignal nSample nFrame] = size(RxSigMat);
+[nSignal, nSample, nFrame] = size(RxSigMat);
 
 RxSigMat = double(RxSigMat);
 

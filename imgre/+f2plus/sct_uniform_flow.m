@@ -1,7 +1,6 @@
 function [] = sct_uniform_flow(outPath, targetRange, targetAmp, targetDensity, ...
     flowVelocity, nFrame)
 %
-%
 
 import tools.advdouble
 import tools.saveadv
@@ -51,8 +50,9 @@ for frame = 1:nFrame
     
     Pos = bsxfun(@plus, InitPos, Vel./PULSE_REPITITION_RATE.*(frame - 1));
     TargetMat = advdouble([Pos Amp],{'target'});
-    TargetMat.meta.frameNumber = frame;
     TargetMat.meta.fileNumber = frame;
+    TargetMat.meta.startFrame = frame;
+    TargetMat.meta.endFrame = frame;
     TargetMat.meta.numberOfTargets = nTarget;
     
     outFile = strcat(outPath, '\', 'sct_', sprintf('%0.4d', frame));
