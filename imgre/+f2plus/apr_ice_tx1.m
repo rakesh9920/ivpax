@@ -38,7 +38,7 @@ for elem = 1:15
     PhysRect(1,:) = elem; % physical element no.
     % rectangle coords
     PhysRect(2:13,:) = repmat(PhysInfo(11:22,:), [1 nMathElements/4]) + repmat(kron(MathCenters, [1 1 1 1]), [4 1]);
-    PhysRect(14,:) = ones(1, nMathElements).*1;%elem/15; % apodization
+    PhysRect(14,:) = ones(1, nMathElements); % apodization
     PhysRect(15,:) = repmat(PhysInfo(3,:), [1 nMathElements/4]); % math element width
     PhysRect(16,:) = repmat(PhysInfo(4,:), [1 nMathElements/4]); % math element height
     % math element center

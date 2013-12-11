@@ -29,7 +29,7 @@ TargetInfo = loadfirstvar(sctFile);
 % run Field II
 field_init(-1);
 
-[~, TxArray, RxArray] = defHandle();
+[Prms, TxArray, RxArray] = defHandle();
 
 [RfMat, startTime] = calc_scat_multi(TxArray, RxArray, double(TargetInfo(:,1:3)), ...
     double(TargetInfo(:,4)));
@@ -40,6 +40,8 @@ field_end;
 RfMat = advdouble(RfMat, {'sample', 'channel'});
 RfMat.meta.numberOfSamples = size(RfMat, 1);
 RfMat.meta.numberOfChannels = size(RfMat, 2);
+RfMat.meta.sampleFrequency = Prms.fs;
+RfMat.meta.soundSpeed = Prms.c;
 RfMat.meta = TargetInfo.meta;
 RfMat.meta.startTime = startTime;
 
