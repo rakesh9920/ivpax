@@ -205,6 +205,16 @@ classdef advdouble < double
             obj = tools.advdouble(permute(data, order), newlbl);
         end
         
+        % OVERLOAD OTHER METHODS
+        function obj = padarray(varargin)
+            
+            adv = varargin{1};
+            lbl = adv.Label;
+            remarg = varargin(2:end);
+            newdata = padarray(double(adv), remarg{:});
+            obj = tools.advdouble(newdata, lbl);
+        end
+        
         % GETTERS AND SETTERS
         function obj = set.Label(obj, lbl)
             
