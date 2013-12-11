@@ -2,6 +2,8 @@ function [] = grouprf(inPath, framesPerGroup)
 %
 
 import tools.loadmeta
+import tools.saveadv
+import tools.advdouble
 
 if isempty(inPath)
     inPath = uigetdir('','Select an input directory');
@@ -24,6 +26,7 @@ MetaData.filePath = FileNames;
 
 nFrames = max(MetaData.endFrame);
 nGroups = ceil(nFrames/framesPerGroup);
+nChannels = MetaData{1,numberOfChannels};
 sampleFreq = MetaData{1,sampleFrequency};
 
 for group = 1:nGroups
@@ -35,9 +38,14 @@ for group = 1:nGroups
     
     lateTime = max(GroupMeta{:,'startTime'} + GroupMeta{:,'numberOfSamples'}./sampleFreq);
     earlyTime = min(GroupMeta.startTime);
-    
     minSamples = ceil((lateTime - earlyTime)*sampleFreq);
     
+    RfMat = zeros(minSamples, nChannels, framesPerGroup);
+    
+    for file = 1:size(GroupMeta, 1)
+        
+        
+    end
 end
 
 
