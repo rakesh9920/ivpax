@@ -1,0 +1,13 @@
+import beamform.*
+import f2plus.*
+import fieldii.*
+import flow.*
+import imager.*
+import maq.*
+import mexo.*
+import sirm.*
+import tools.*
+import ultrasonix.*
+addpath ./bin/
+addpath ./f2scripts/
+addpath ./flowscripts/

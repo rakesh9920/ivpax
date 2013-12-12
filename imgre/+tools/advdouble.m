@@ -1,5 +1,5 @@
 classdef advdouble < double
-   
+    
     
     properties
         Label = {};
@@ -8,26 +8,37 @@ classdef advdouble < double
     end
     
     methods
-        % CONSTRUCTORS
-        function obj = advdouble(data, lbl)
+        % CONSTRUCTOR
+        function obj = advdouble(varargin)
             
-            if nargin > 1
-                
-                assert(isa(lbl, 'cell'));
-            elseif nargin > 0
-                
-                lbl = {};
-            else
-                
-                data = 0;
-                lbl = {};
+            switch nargin
+                case 3
+                    meta = varargin{3};
+                    lbl = varargin{2};
+                    data = varargin{1};
+                case 2
+                    meta = [];
+                    lbl = varargin{2};
+                    data = varargin{1};
+                case 1
+                    meta = [];
+                    lbl = {};
+                    data = varargin{1};
+                otherwise
+                    if nargin > 3
+                        error('too many input arguments');
+                    else
+                        meta = [];
+                        lbl = {};
+                        data = [];
+                    end
             end
             
             obj = obj@double(data);
-            
             nd = ndims(data);
             obj.Dim = nd;
             obj.Label = lbl;
+            obj.Meta = meta;
         end
         
         % OVERLOADED INDEXING METHODS
@@ -67,7 +78,7 @@ classdef advdouble < double
                         s.subs = newsubs;
                     end
                     
-                    ref = tools.advdouble(subsref(data, s), obj.Label);
+                    ref = tools.advdouble(subsref(data, s), obj.Label, obj.Meta);
             end
         end
         
@@ -107,7 +118,7 @@ classdef advdouble < double
                         s.subs = newsubs;
                     end
                     
-                    obj = tools.advdouble(subsasgn(data, s, b), obj.Label);
+                    obj = tools.advdouble(subsasgn(data, s, b), obj.Label, obj.Meta);
             end
         end
         
@@ -124,13 +135,16 @@ classdef advdouble < double
             if nargin > 1
                 
                 dimlabel = varargin{1};
-                loc = find(strcmpi(dimlabel, lbl));
-                
-                if isempty(loc)
-                    error('invalid dimension label');
+                if isa(dimlabel, 'char')
+                    loc = find(strcmpi(dimlabel, lbl));
+                    if isempty(loc)
+                        error('invalid dimension label');
+                    end
                 else
-                    [outargs{:}] = size(data, loc);
+                    loc = dimlabel;
                 end
+                
+                [outargs{:}] = size(data, loc);
             else
                 [outargs{:}] = size(data);
             end
@@ -152,6 +166,7 @@ classdef advdouble < double
         function newobj = cat(dim, varargin)
             
             lbl = varargin{1}.Label;
+            meta = varargin{1}.Meta;
             
             data = cell(1, nargin - 1);
             for in = 1:(nargin - 1)
@@ -160,20 +175,20 @@ classdef advdouble < double
             
             newdouble = cat(dim, data{:});
             
-            newobj = tools.advdouble(newdouble, lbl);
+            newobj = tools.advdouble(newdouble, lbl, meta);
         end
         
         % OVERLOADED DATA ORGANIZATION METHODS
         function obj = transpose(obj)
             
             data = double(obj);
-            obj = tools.advdouble(transpose(data), fliplr(obj.Label));
+            obj = tools.advdouble(transpose(data), fliplr(obj.Label), obj.Meta);
         end
         
         function obj = ctranspose(obj)
             
             data = double(obj);
-            obj = tools.advdouble(ctranspose(data), fliplr(obj.Label));
+            obj = tools.advdouble(ctranspose(data), fliplr(obj.Label), obj.Meta);
         end
         
         function obj = squeeze(obj)
@@ -183,7 +198,7 @@ classdef advdouble < double
             
             obj.Label(dim == 1) = [];
             
-            obj = tools.advdouble(squeeze(data), obj.Label);
+            obj = tools.advdouble(squeeze(data), obj.Label, obj.Meta);
         end
         
         function obj = permute(obj, order)
@@ -202,17 +217,69 @@ classdef advdouble < double
                 end
             end
             
-            obj = tools.advdouble(permute(data, order), newlbl);
+            obj = tools.advdouble(permute(data, order), newlbl, obj.Meta);
+        end
+        
+        % OVERLOAD OPERATORS
+        function obj = plus(a, b)
+            
+            data = double(a) + double(b);
+            lbl = a.Label;
+            obj = tools.advdouble(data, lbl, a.Meta);
+        end
+        
+        function obj = minus(a, b)
+            
+            data = double(a) - double(b);
+            lbl = a.Label;
+            obj = tools.advdouble(data, lbl, a.Meta);
+        end
+        
+        function obj = uplus(a)
+            
+            data = -double(a);
+            lbl = a.Label;
+            obj = tools.advdouble(data, lbl, a.Meta);
+        end
+        
+        function obj = uminus(a)
+            
+            data = -double(a);
+            lbl = a.Label;
+            obj = tools.advdouble(data, lbl, a.Meta);
+        end
+        
+        function obj = times(a, b)
+            
+            data = double(a).*double(b);
+            lbl = a.Label;
+            obj = tools.advdouble(data, lbl, a.Meta);
+        end
+        
+        function obj = mtimes(a, b)
+            
+            data = double(a)*double(b);
+            lbla = a.Label;
+            lblb = b.Label;
+            lbl = cat(2, lbla(1), lblb(2));
+            obj = tools.advdouble(data, lbl, a.Meta);
+        end
+        
+        function obj = power(a, b)
+            
+            data = double(a).^double(b);
+            lbl = a.Label;
+            obj = tools.advdouble(data, lbl, a.Meta);
         end
         
         % OVERLOAD OTHER METHODS
         function obj = padarray(varargin)
             
             adv = varargin{1};
-            lbl = adv.Label;
+
             remarg = varargin(2:end);
             newdata = padarray(double(adv), remarg{:});
-            obj = tools.advdouble(newdata, lbl);
+            obj = tools.advdouble(newdata, adv.Label, adv.Meta);
         end
         
         % GETTERS AND SETTERS
