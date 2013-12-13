@@ -1,6 +1,6 @@
 function [] = sct_uniform_flow(outPath, targetRange, targetAmp, targetDensity, ...
     flowVelocity, nFrame)
-%
+% Creates sct files for a uniform flow field.
 
 import tools.advdouble
 import tools.saveadv
@@ -11,6 +11,10 @@ end
 
 if outPath(end) == '/'
     outPath(end) = [];
+end
+
+if ~exist(outPath, 'dir')
+    mkdir(outPath);
 end
 
 global PULSE_REPITITION_RATE

@@ -1,4 +1,4 @@
-function [Job] = runjobfile(jobFile, varargin)
+function [Job] = readjoblist(jobFile, varargin)
 % Creates a job with tasks based on a job file and submits it to the local
 % parallel cluster.
 
@@ -11,14 +11,20 @@ else
 end
 
 % read jobFile and list unprocessed files
-[~, ~, ext] = fileparts(jobFile);
-
-switch ext
-    case {'.csv', '.txt'}
-        Log = readtable(jobFile);
-        Log = parsecsv(Log);
-    case '.mat'
-        Log = loadfirstvar(jobFile);
+if isa(jobFile, 'char')
+    
+    [~, ~, ext] = fileparts(jobFile);
+    
+    switch ext
+        case {'.csv', '.txt'}
+            Log = readtable(jobFile);
+            Log = parsecsv(Log);
+        case '.mat'
+            Log = loadfirstvar(jobFile);
+    end
+else
+    
+    Log = jobFile;
 end
 
 TaskList = Log(Log.COMPLETE == false,:);
@@ -29,13 +35,13 @@ Job = createJob(parcluster);
 %Job.AutoAttachFiles = false;
 Job.AttachedFiles = AttachedFiles;
 
-for task = 1:nTask
+for task = 1:500
     
-    fHandle = str2func(cell2mat(TaskList{task, 'FUNCTION'}));
+    fHandle = TaskList{task, 'FUNCTION'};
     nArgOut = TaskList{task, 'NARGOUT'};
     ArgIn = TaskList{task, 'ARGIN'};
-    
     createTask(Job, fHandle, nArgOut, ArgIn);
+    %createTask(Job, fHandle, nArgOut, reshape(ArgIn.', [1 2000]));
 end
 
 % submit jobs
@@ -63,7 +69,8 @@ for row = 1:nRows
     end
 end
 
-TableOut = table(TableIn.FUNCTION, TableIn.NARGOUT, TableIn.NARGIN, ArgIn, ...
+FUNCTION = cellfun(@str2fuc, TableIn.FUNCTION);
+TableOut = table(FUNCTION, TableIn.NARGOUT, TableIn.NARGIN, ArgIn, ...
     Complete);
 TableOut.Properties.VariableNames = {'FUNCTION', 'NARGOUT', 'NARGIN', 'ARGIN',...
     'COMPLETE'};
