@@ -1,9 +1,10 @@
 function [] = grouprf(inPath, framesPerGroup)
-%
+% Searches directory for RF files and align, sums, and groups RF data based
+% on their corresponding frames and start times.
 
 import tools.loadvar
 import tools.saveadv
-import tools.advdouble
+import tools.alignsumrf
 
 if isempty(inPath)
     inPath = uigetdir('','Select an input directory');
@@ -14,7 +15,7 @@ if inPath(end) == '/'
 end
 
 % scan directory for rf files and create listing
-Listing = struct2cell(dir(strcat(inPath, '/sct_*')));
+Listing = struct2cell(dir(strcat(inPath, '/rf_*')));
 nFiles = size(Listing, 2);
 FileNames = strcat(repmat(inPath, [nFiles 1]), '/', Listing(1,:).');
 
@@ -26,44 +27,45 @@ MetaData.filePath = FileNames;
 
 nFrames = max(MetaData.endFrame);
 nGroups = ceil(nFrames/framesPerGroup);
-nChannels = MetaData{1,numberOfChannels};
-sampleFreq = MetaData{1,sampleFrequency};
 
 for group = 1:nGroups
     
-    % find files that belong in the group
+    % find files that have frames belonging in the group
     startFrame = framesPerGroup*(group - 1) + 1;
-    endFrame = framesPerGroup*group;
+    endFrame = min(framesPerGroup*group, nFrames);
     idx = (MetaData.startFrame <= endFrame & MetaData.endFrame >= startFrame);
-    GroupMeta = MetaData(idx,:);
+    GroupMetaData = MetaData(idx,:);
     
-    % preallocate based on minimum number of samples required 
-    lateTime = max(GroupMeta{:,'startTime'} + GroupMeta{:,'numberOfSamples'}./sampleFreq);
-    earlyTime = min(GroupMeta.startTime);
-    minSamples = ceil((lateTime - earlyTime)*sampleFreq);
-    RfMat = advdouble(zeros(minSamples, nChannels, framesPerGroup), {'sample','channel','frame'});
+    % preallocate based on minimum number of samples required
+    % lateTime = max(GroupMeta{:,'startTime'} + GroupMeta{:,'numberOfSamples'}...
+    % ./sampleFreq);
+    % earlyTime = min(GroupMeta.startTime);
+    % minSamples = ceil((lateTime - earlyTime)*sampleFreq);
+    % RfMat = advdouble(zeros(minSamples, nChannels, framesPerGroup), ..
+    % {'sample','channel','frame'});
     
-    for file = 1:size(GroupMeta, 1)
+    % load first file
+    RfMat = loadadv(GroupMetaData{1, 'filePath'});
+    frontFrame = max(FileRfMat.meta.startFrame, startFrame);
+    backFrame = min(FileRfMat.meta.endFrame, endFrame);
+    RfMat = RfMat('frame', frontFrame:backFrame);
+    
+    for file = 2:size(GroupMetaData, 1)
         
-        % load file
-        RfData = loadadv(GroupMeta{file, 'filePath'});
-        startTime = RfData.meta.startTime;
-        numberOfSamples = RfData.meta.numberOfSamples;
-        frontFrame = max(RfData.meta.startFrame, startFrame);
-        backFrame = min(RfData.meta.endFrame, endFrame);
+        % load file and find frames in group
+        FileRfMat = loadadv(GroupMetaData{file, 'filePath'});
+        frontFrame = max(FileRfMat.meta.startFrame, startFrame);
+        backFrame = min(FileRfMat.meta.endFrame, endFrame);
         
-        % pad zeros in front and back
-        frontPad = round((startTime - earlyTime)*sampleFreq);
-        RfData = padarray(RfData, [frontPad 0 0], 'pre');
-        RfData = padarray(RfData, [minSamples - size(RfData, 1) 0 0], 'post');
-        
-        % add to total
-        RfMat('frame',frontFrame:backFrame) = RfMat('frame',frontFrame:backFrame) + RfData;
+        RfMat = RfMat + FileRfMat('frame', frontFrame:backFrame);
     end
     
     % set metadata for RfMat
-    
-    
+    RfMat.meta.fileNumber = group;
+    RfMat.meta.startFrame = startFrame;
+    RfMat.meta.endFrame = endFrame;
+    outPath = strcat(inPath, '/', 'rfg_', sprintf('%0.4d', group));
+    saveadv(outPath, RfMat);
 end
 
 
