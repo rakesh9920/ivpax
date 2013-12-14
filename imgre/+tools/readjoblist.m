@@ -35,15 +35,18 @@ Job = createJob(parcluster);
 %Job.AutoAttachFiles = false;
 Job.AttachedFiles = AttachedFiles;
 
-for task = 1:500
-    
-    fHandle = TaskList{task, 'FUNCTION'};
-    nArgOut = TaskList{task, 'NARGOUT'};
-    ArgIn = TaskList{task, 'ARGIN'};
-    createTask(Job, fHandle, nArgOut, ArgIn);
-    %createTask(Job, fHandle, nArgOut, reshape(ArgIn.', [1 2000]));
-end
+nJobs = ceil(nTask/12);
 
+for ijob = 1:nJobs
+    for task = 1:12
+        
+        fHandle = TaskList{task, 'FUNCTION'};
+        nArgOut = TaskList{task, 'NARGOUT'};
+        ArgIn = TaskList{task, 'ARGIN'};
+        createTask(Job, fHandle, nArgOut, ArgIn);
+        %createTask(Job, fHandle, nArgOut, reshape(ArgIn.', [1 2000]));
+    end
+end
 % submit jobs
 
 end
