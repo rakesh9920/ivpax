@@ -1,5 +1,6 @@
 function [RfMatOut] = alignsumrf(varargin)
-% Aligns (by zero-padding) and sums RF matrices based on their start times.
+% Aligns (by zero-padding) and sums RF matrices based on their start times
+% and frames.
 
 nMats = size(varargin, 2);
 
@@ -27,9 +28,9 @@ for mat = 2:nMats
     backFramePad = RfMatOut.meta.endFrame - endFrame;
     
     if backFramePad > 0
-        RfMat = padarray(RfMat, [0 0 backFramePad], 'pre');
+        RfMat = padarray(RfMat, [0 0 backFramePad], 'post');
     elseif backFramePad < 0
-        RfMatOut = padarray(RfMatOut, [0 0 -backFramePad], 'pre');
+        RfMatOut = padarray(RfMatOut, [0 0 -backFramePad], 'post');
         RfMatOut.meta.endFrame = endFrame;
     end
     
@@ -51,6 +52,7 @@ for mat = 2:nMats
         RfMatOut = padarray(RfMatOut, [-backPad 0 0], 'post');
     end
     
+    % add padded rf data to cumulative sum
     RfMatOut = RfMatOut + RfMat;
 end
 

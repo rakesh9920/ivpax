@@ -25,8 +25,6 @@ end
 nFiles = size(Listing, 2);
 FileNames = strcat(repmat(inPath, [nFiles 1]), '/', Listing(1,:).');
 
-% check if filenames is empty
-
 % load metadata for all rf files
 MetaData = struct2table(cellfun(@(x) loadvar(x, 'meta'), FileNames));
 MetaData.filePath = FileNames;
@@ -42,36 +40,18 @@ for group = 1:nGroups
     idx = (MetaData.startFrame <= endFrame & MetaData.endFrame >= startFrame);
     GroupMetaData = MetaData(idx,:);
     
-    % preallocate based on minimum number of samples required
-    % lateTime = max(GroupMeta{:,'startTime'} + GroupMeta{:,'numberOfSamples'}...
-    % ./sampleFreq);
-    % earlyTime = min(GroupMeta.startTime);
-    % minSamples = ceil((lateTime - earlyTime)*sampleFreq);
-    % RfMat = advdouble(zeros(minSamples, nChannels, framesPerGroup), ..
-    % {'sample','channel','frame'});
+    % load rf data from these files
+    RfMats = cellfun(@loadadv, GroupMetaData{:,'filePath'}, 'UniformOutput', false);
     
-    % load first file
-    RfMat = loadadv(cell2mat(GroupMetaData{1, 'filePath'}));
-    frontFrame = max(RfMat.meta.startFrame, startFrame);
-    backFrame = min(RfMat.meta.endFrame, endFrame);
-    RfMat = RfMat('frame', frontFrame:backFrame);
+    % align files wrt sample and frame and sum
+    RfMatOut = alignsumrf(RfMats{:});
+    RfMatOut.label = {'rf', 'channel', 'frame'};
     
-    for file = 2:size(GroupMetaData, 1)
-        
-        % load file and find frames in group
-        FileRfMat = loadadv(cell2mat(GroupMetaData{file, 'filePath'}));
-        frontFrame = max(FileRfMat.meta.startFrame, startFrame);
-        backFrame = min(FileRfMat.meta.endFrame, endFrame);
-        
-        RfMat = RfMat + FileRfMat('frame', frontFrame:backFrame);
-    end
-    
-    % set metadata for RfMat
-    RfMat.meta.fileNumber = group;
-    RfMat.meta.startFrame = startFrame;
-    RfMat.meta.endFrame = endFrame;
+    % only save the frames assigned to this group
+    front = startFrame - RfMatOut.meta.startFrame + 1;
+    back = front + endFrame - startFrame;
     outPath = strcat(inPath, '/', 'rfg_', sprintf('%0.4d', group));
-    saveadv(outPath, RfMat);
+    saveadv(outPath, RfMatOut('frame', front:back));
 end
 
 
