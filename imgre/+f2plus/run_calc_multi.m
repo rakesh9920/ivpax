@@ -5,7 +5,8 @@ function [RfMat] = run_calc_multi(defHandle, sctFile, varargin)
 import fieldii.field_init
 import fieldii.calc_scat_multi
 import fieldii.field_end
-import tools.loadfirstvar
+import tools.loadadv
+import tools.saveadv
 import tools.advdouble
 addpath ./bin/
 
@@ -23,8 +24,12 @@ else
     outPath = fileparts(sctFile);
 end
 
+if ~exist(outPath, 'dir')
+    mkdir(outPath);
+end
+
 % load sctFile
-TargetInfo = loadfirstvar(sctFile);
+TargetInfo = loadadv(sctFile);
 
 % run Field II
 field_init(-1);
@@ -48,7 +53,7 @@ RfMat.meta.startTime = startTime;
 outFile = strcat(outPath, '/', 'rf_', sprintf('%0.4d', RfMat.meta.fileNumber));
 
 if nargout == 0
-    save(outFile, 'RfMat');
+    saveadv(outFile, RfMat);
 end
 
 end

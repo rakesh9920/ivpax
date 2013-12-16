@@ -59,7 +59,7 @@ for frame = 1:nFrame
     TargetMat.meta.endFrame = frame;
     TargetMat.meta.numberOfTargets = nTarget;
     
-    outFile = strcat(outPath, '\', 'sct_', sprintf('%0.4d', frame));
+    outFile = strcat(outPath, '/', 'sct_', sprintf('%0.4d', frame));
     saveadv(outFile, TargetMat);
 end
 

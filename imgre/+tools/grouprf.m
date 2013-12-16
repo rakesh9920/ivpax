@@ -4,6 +4,7 @@ function [] = grouprf(inPath, framesPerGroup)
 
 import tools.loadvar
 import tools.saveadv
+import tools.loadadv
 import tools.alignsumrf
 
 if isempty(inPath)
@@ -16,13 +17,18 @@ end
 
 % scan directory for rf files and create listing
 Listing = struct2cell(dir(strcat(inPath, '/rf_*')));
+
+if isempty(Listing)
+   error('no RF files found in directory'); 
+end
+
 nFiles = size(Listing, 2);
 FileNames = strcat(repmat(inPath, [nFiles 1]), '/', Listing(1,:).');
 
 % check if filenames is empty
 
 % load metadata for all rf files
-MetaData = struct2table(cellfun(@loadvar, FileNames, 'meta'));
+MetaData = struct2table(cellfun(@(x) loadvar(x, 'meta'), FileNames));
 MetaData.filePath = FileNames;
 
 nFrames = max(MetaData.endFrame);
@@ -45,15 +51,15 @@ for group = 1:nGroups
     % {'sample','channel','frame'});
     
     % load first file
-    RfMat = loadadv(GroupMetaData{1, 'filePath'});
-    frontFrame = max(FileRfMat.meta.startFrame, startFrame);
-    backFrame = min(FileRfMat.meta.endFrame, endFrame);
+    RfMat = loadadv(cell2mat(GroupMetaData{1, 'filePath'}));
+    frontFrame = max(RfMat.meta.startFrame, startFrame);
+    backFrame = min(RfMat.meta.endFrame, endFrame);
     RfMat = RfMat('frame', frontFrame:backFrame);
     
     for file = 2:size(GroupMetaData, 1)
         
         % load file and find frames in group
-        FileRfMat = loadadv(GroupMetaData{file, 'filePath'});
+        FileRfMat = loadadv(cell2mat(GroupMetaData{file, 'filePath'}));
         frontFrame = max(FileRfMat.meta.startFrame, startFrame);
         backFrame = min(FileRfMat.meta.endFrame, endFrame);
         

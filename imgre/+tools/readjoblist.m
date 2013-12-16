@@ -1,4 +1,4 @@
-function [Job] = readjoblist(jobFile, varargin)
+function [Jobs] = readjoblist(joblist, varargin)
 % Creates a job with tasks based on a job file and submits it to the local
 % parallel cluster.
 
@@ -11,43 +11,50 @@ else
 end
 
 % read jobFile and list unprocessed files
-if isa(jobFile, 'char')
+if isa(joblist, 'char')
     
-    [~, ~, ext] = fileparts(jobFile);
+    [~, ~, ext] = fileparts(joblist);
     
     switch ext
         case {'.csv', '.txt'}
-            Log = readtable(jobFile);
+            Log = readtable(joblist);
             Log = parsecsv(Log);
         case '.mat'
-            Log = loadfirstvar(jobFile);
+            Log = loadfirstvar(joblist);
     end
 else
     
-    Log = jobFile;
+    Log = joblist;
 end
 
 TaskList = Log(Log.COMPLETE == false,:);
-nTask = height(TaskList);
+nTasks = height(TaskList);
 
 % create job and new task for each unprocessed file
-Job = createJob(parcluster);
-%Job.AutoAttachFiles = false;
-Job.AttachedFiles = AttachedFiles;
-
-nJobs = ceil(nTask/12);
+tasksPerJob = 24;
+nJobs = ceil(nTasks/tasksPerJob);
+Jobs = cell(1, nJobs);
 
 for ijob = 1:nJobs
-    for task = 1:12
+    
+    Jobs{ijob} = createJob(parcluster);
+    Jobs{ijob}.AttachedFiles = AttachedFiles;
+    
+    if ijob == nJobs
+        kTasks = nTasks - tasksPerJob*(nJobs - 1);
+    else
+        kTasks = tasksPerJob;
+    end
+    
+    for task = 1:kTasks
         
-        fHandle = TaskList{task, 'FUNCTION'};
-        nArgOut = TaskList{task, 'NARGOUT'};
-        ArgIn = TaskList{task, 'ARGIN'};
-        createTask(Job, fHandle, nArgOut, ArgIn);
-        %createTask(Job, fHandle, nArgOut, reshape(ArgIn.', [1 2000]));
+        idx = tasksPerJob*(ijob - 1) + task;
+        fHandle = TaskList{idx, 'FUNCTION'};
+        nArgOut = TaskList{idx, 'NARGOUT'};
+        ArgIn = TaskList{idx, 'ARGIN'};
+        createTask(Jobs{ijob}, fHandle, nArgOut, ArgIn);
     end
 end
-% submit jobs
 
 end
 
