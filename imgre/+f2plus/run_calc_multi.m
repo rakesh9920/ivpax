@@ -43,11 +43,11 @@ field_end;
 
 % write metadata and save output
 RfMat = advdouble(RfMat, {'sample', 'channel'});
+RfMat.meta = TargetInfo.meta;
 RfMat.meta.numberOfSamples = size(RfMat, 1);
 RfMat.meta.numberOfChannels = size(RfMat, 2);
 RfMat.meta.sampleFrequency = Prms.fs;
 RfMat.meta.soundSpeed = Prms.c;
-RfMat.meta = TargetInfo.meta;
 RfMat.meta.startTime = startTime;
 
 outFile = strcat(outPath, '/', 'rf_', sprintf('%0.4d', RfMat.meta.fileNumber));

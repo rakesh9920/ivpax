@@ -45,8 +45,8 @@ FieldPos = grd.';
 nWindowSample = 61;
 
 % CALCULATE MISC. VALUES
-windowTime = nWindowSample/SAMPLE_FREQUENCY/prms('resample')
-windowSpace = windowTime*SOUND_SPEED/2
+windowTime = nWindowSample/SAMPLE_FREQUENCY/prms('resample');
+windowSpace = windowTime*SOUND_SPEED/2;
 
 %% choose MAT/MATF file(s)
 [filename pathname] = uigetfile('', '', startPath, 'MultiSelect', 'on');
