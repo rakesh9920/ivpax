@@ -26,7 +26,7 @@ set_field('use_att', 1);
 
 impulse_response = sin(2*pi*f0*(0:1/fs:2/f0));
 impulse_response = impulse_response.*(hanning(length(impulse_response)).');
-excitation = 1.*sin(2*pi*f0*(0:1/fs:2/f0));
+excitation = 1.*sin(2*pi*f0*(0:1/fs:1/f0));
 
 Prms.rho = rho;
 Prms.c = c;
