@@ -1,15 +1,11 @@
-function [Prms, TxArray, RxArray] = def_ice_cfg1()
+function [Prms, TxArray, RxArray, TxPos, RxPos] = def_ice_cfg1()
 % Field II environment and transducer definition for transmit/receive
 % circular baffled piston.
 
-import fieldii.set_field
-import fieldii.xdc_impulse
-import fieldii.xdc_excitation
-import fieldii.xdc_focus_times
-import fieldii.xdc_free
-import f2plus.apr_ice_tx1
-import f2plus.apr_ice_rx
-import f2plus.xdc_nphys
+import fieldii.set_field fieldii.xdc_impulse fieldii.xdc_excitation 
+import fieldii.xdc_focus_times fieldii.xdc_free
+import f2plus.apr_ice_tx1 f2plus.apr_ice_rx f2plus.xdc_nphys
+import tools.sqdistance
 
 % Set Field II parameters
 
@@ -47,13 +43,26 @@ Prms.impulse_response = impulse_response;
 impScale = 1;
 excScale = 1;
 
-TxArray = apr_ice_tx1();
+[~, TxArray] = apr_ice_tx1();
 xdc_impulse(TxArray, impScale.*impulse_response);
 xdc_excitation(TxArray, excScale.*excitation);
 xdc_focus_times(TxArray, 0, zeros(1, xdc_nphys(TxArray)));
 
-RxArray = apr_ice_rx;
+[RxPos, RxArray] = apr_ice_rx();
 xdc_impulse(RxArray, impScale.*impulse_response);
 xdc_excitation(RxArray, excScale.*excitation);
 xdc_focus_times(RxArray, 0, zeros(1, xdc_nphys(RxArray)));
+
+% set defocused transmit delays
+TxPos = [0 0 -0.0035];
+RingPos = [(0:80e-6:14*80e-6).' zeros(15,1) zeros(15,1)];
+Defocus = sqrt(sqdistance(TxPos, RingPos))./c;
+xdc_focus_times(TxPos, 0, Defocus); 
+
+% set uniform receive delays
+xdc_focus_times(RxArray, 0, zeros(1, size(RxPos, 1)));
+
+
+
+
 

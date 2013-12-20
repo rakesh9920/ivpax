@@ -1,27 +1,31 @@
-function [TxPos, RxPos, FieldPos, Prms] = deficecfg1()
+function [FieldPos, Prms, nWinSample] = deficecfg1(section, nSection)
 %DEFICECFG1 Summary of this function goes here
+
+import tools.sphericalmesh
+import f2plus.apr_ice_rx
 
 global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED CENTER_FREQUENCY;
 SOUND_SPEED = 1540;
-PULSE_REPITITION_RATE = 2000;
+PULSE_REPITITION_RATE = 1000;
 SAMPLE_FREQUENCY = 100e6;
 CENTER_FREQUENCY = 6e6;
 
 % SET PARAMETERS
 Prms = containers.Map();
 
-% filtering
-Prms('filter') = true;
-Prms('bw') = 5.66e6;
-Prms('fc') = 6e6;
-
 % beamforming & preprocessing
 Prms('bfmethod') = 'frequency';
-Prms('planetx') = true;
-Prms('recombine') = true;
-Prms('resample') = 1;
+Prms('planetx') = false;
 
+nWinSample = 201;
 
+r1 = 0.0035/sin(pi/4);
+rvg = linspace(r1, 0.05 + r1, 100);
+tvg = linspace(0, pi - pi/100, 100);
+pvg = linspace(-pi/4, pi/4, 100);
+org = [0 0 -0.0035];
 
+[X, Y, Z] = sphericalmesh(rvg, tvg, pvg, org, section, nSection, 2);
+
+FieldPos = [X(:) Y(:) Z(:)];
 end
-

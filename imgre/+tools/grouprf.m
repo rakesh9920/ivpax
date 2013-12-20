@@ -2,10 +2,7 @@ function [] = grouprf(inPath, framesPerGroup)
 % Searches directory for RF files and align, sums, and groups RF data based
 % on their corresponding frames and start times.
 
-import tools.loadvar
-import tools.saveadv
-import tools.loadadv
-import tools.alignsumrf
+import tools.loadvar tools.saveadv tools.loadadv tools.alignsumrf
 
 if isempty(inPath)
     inPath = uigetdir('','Select an input directory');

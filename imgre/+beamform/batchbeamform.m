@@ -1,7 +1,7 @@
-function [BfMat] = rungfbeamform4(defHandle, RfFile, section, varargin)
+function [BfMat] = batchbeamform(defHandle, RfFile, section, nSection, varargin)
 %RUNGFBEAMFORM4 Summary of this function goes here
 
-import beamform.gfbeamform4
+import beamform.gfbeamform5
 import tools.loadadv
 import tools.advdouble
 
@@ -13,7 +13,7 @@ if isa(RfFile, 'char')
     RfFile = loadadv(RfFile);
 end
 
-if nargin > 3
+if nargin > 4
     outPath = varargin{1};
     
     if isempty(outPath)
@@ -34,17 +34,21 @@ if ~exist(outPath, 'dir')
     mkdir(outPath);
 end
 
-[TxPos, RxPos, FieldPos, Prms] = defHandle(section);
+TxPos = RfFile.meta.transmitPosition;
+RxPos = RfFile.meta.receivePosition;
 
-BfMat = advdouble(gfbeamform4(double(RfFile), TxPos, RxPos, FieldPos, Prms));
+[FieldPos, Prms, nWinSample] = defHandle(section, nSection);
 
-BfMat.label = {'sample', 'position', 'frame'};
+BfMat = advdouble(gfbeamform5(double(RfFile), TxPos, RxPos, FieldPos, ...
+    nWinSample, Prms));
+
+BfMat.label = {'sample', 'frame', 'position'};
 BfMat.meta.sampleFrequency = RfFile.meta.sampleFrequency;
 BfMat.meta.startFrame = RfFile.meta.startFrame;
 BfMat.meta.endFrame = RfFile.meta.endFrame;
-BfMat.meta.pixelPositions = FieldPos;
+BfMat.meta.fieldPosition = FieldPos;
 
-if nargout > 0
+if nargout == 0
     saveadv(outPath, BfMat);
 end
 

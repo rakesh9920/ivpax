@@ -5,6 +5,9 @@ function D = sqdistance(A, B, M)
 %   M: d x d  Mahalanobis matrix
 %   D: n1 x n2 pairwise square distance matrix
 % Written by Michael Chen (sth4nth@gmail.com).
+
+A = A.';
+B = B.';
 if nargin == 1
     A = bsxfun(@minus,A,mean(A,2));
     S = full(dot(A,A,1));

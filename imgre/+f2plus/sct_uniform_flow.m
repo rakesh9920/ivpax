@@ -53,7 +53,7 @@ Amp = ones(nTarget, 1).*targetAmp;
 for frame = 1:nFrame
     
     Pos = bsxfun(@plus, InitPos, Vel./PULSE_REPITITION_RATE.*(frame - 1));
-    TargetMat = advdouble([Pos Amp],{'target'});
+    TargetMat = advdouble([Pos Amp],{'target', 'info'});
     TargetMat.meta.fileNumber = frame;
     TargetMat.meta.startFrame = frame;
     TargetMat.meta.endFrame = frame;

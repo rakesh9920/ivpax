@@ -1,4 +1,4 @@
-function [Aperture, Centers] = apr_ice_tx1()
+function [Centers, Aperture] = apr_ice_tx1()
 % ICE transmit configuration #1: 15 defocused rectangular rings with 80um
 % pitch between rings.
 
@@ -47,9 +47,9 @@ for elem = 1:15
     Rect = [Rect PhysRect];
 end
 
-Centers = zeros(3, 15);
+Centers = zeros(15, 3);
 
-Aperture = xdc_rectangles(Rect.', Centers.', [0 0 300]);
+Aperture = xdc_rectangles(Rect.', Centers, [0 0 300]);
 
 end
 
