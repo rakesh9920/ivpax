@@ -1,4 +1,4 @@
-classdef AdvMatFile
+classdef advmatfile
     
     properties
         Mat;
