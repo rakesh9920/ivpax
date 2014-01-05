@@ -38,7 +38,7 @@ for elem = 1:15
     PhysRect(1,:) = elem; % physical element no.
     % rectangle coords
     PhysRect(2:13,:) = repmat(PhysInfo(11:22,:), [1 nMathElements/4]) + repmat(kron(MathCenters, [1 1 1 1]), [4 1]);
-    PhysRect(14,:) = ones(1, nMathElements);%.*rand*100; % apodization
+    PhysRect(14,:) = ones(1, nMathElements); % apodization
     PhysRect(15,:) = repmat(PhysInfo(3,:), [1 nMathElements/4]); % math element width
     PhysRect(16,:) = repmat(PhysInfo(4,:), [1 nMathElements/4]); % math element height
     % math element center
@@ -65,10 +65,6 @@ nElements = 15;
 
 ref1 = [(-35.5*100e-6) + hPitch*(nElements + 1); 0; 0];
 ref2 = [(35.5*100e-6) - hPitch*(nElements + 1); 0; 0];
-nHCenters = floor(((ref2(1) - ref1(1)) + hPitch)/hPitch);
-
-ref1 = [-(nHCenters - 1)*hPitch/2; 0; 0];
-ref2 = [(nHCenters - 1)*hPitch/2; 0; 0];
 ref3 = ref2;
 ref4 = ref1;
 %refPts = cat(2, ref1, ref2, ref3, ref4);
@@ -80,10 +76,10 @@ corner4 = ref4 + [-hPitch; -vPitch; 0].*(iElement - 1);
 cornerPts = cat(2, corner1, corner2, corner3, corner4);
 
 % (70e-6)*nh + 10e-6*(nh + 1) = abs(cornerPts(2,1) - cornerPts(1,1)) + 70e-6
-hDist = abs(cornerPts(1,2) - cornerPts(1,1));
-vDist = abs(cornerPts(2,3) - cornerPts(2,2));
-nHElements = floor((hDist + hPitch)/hPitch);
-nVElements = floor((vDist + vPitch)/vPitch);
+hDist = abs(cornerPts(1,2) - cornerPts(1,1)) + hLength;
+vDist = abs(cornerPts(2,3) - cornerPts(2,2)) + vLength;
+nHElements = floor((hDist - hSpace)/(hSpace + hLength));
+nVElements = floor((vDist - vSpace)/(vSpace + vLength));
 %     nHElements = floor((abs(cornerPts(2,1) - cornerPts(1,1) + 70e-6-10e-6))/80e-6);
 %     nVElements = floor((abs(cornerPts(2,3) - cornerPts(2,2) + 70e-6-10e-6))/80e-6);
 
