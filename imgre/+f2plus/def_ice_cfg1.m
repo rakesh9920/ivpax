@@ -57,6 +57,7 @@ xdc_focus_times(RxArray, 0, zeros(1, xdc_nphys(RxArray)));
 TxPos = [0 0 -0.0035];
 RingPos = [(0:80e-6:14*80e-6).' zeros(15,1) zeros(15,1)];
 Defocus = sqrt(sqdistance(TxPos, RingPos))./c;
+%Defocus = Defocus - min(Defocus);
 xdc_focus_times(TxPos, 0, Defocus); 
 
 % set uniform receive delays
