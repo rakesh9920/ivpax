@@ -21,9 +21,9 @@ nWinSample = 201;
 
 r1 = 0.0035/sin(pi/4);
 %rvg = linspace(r1, 0.05 + r1, 50);
-rvg = linspace(0.02, 0.05, 50);
+rvg = linspace(0.0035 + 0.025, 0.0035 + 0.035, 100);
 tvg = linspace(0, pi - pi/100, 100);
-pvg = -pi/4:pi/(4^4):pi/4;%linspace(-pi/4, pi/4, 50);
+pvg = -pi/4:pi/(4^4)/2:pi/4;%linspace(-pi/4, pi/4, 50);
 org = [0 0 -0.0035];
 
 [X, Y, Z] = sphericalmesh(rvg, tvg, pvg, org, section, nSection, 2);

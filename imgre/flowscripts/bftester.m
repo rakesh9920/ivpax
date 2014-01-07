@@ -46,7 +46,7 @@ EnvMat = envelope(BfMat, 1);
 X = reshape(FieldPos(:,1), [50 129 []]);
 Y = reshape(FieldPos(:,2), [50 129 []]);
 Z = reshape(FieldPos(:,3), [50 129 []]);
-C = reshape(EnvMat(101,1,:), [50 129 []]);
+C = reshape(EnvMat(152,1,:), [50 129 []]);
 D = 20.*log10(C./max(max(C))); D(D < -20) = -20;
 
 surf(X, Y, Z, D);
