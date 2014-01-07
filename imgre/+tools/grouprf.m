@@ -2,25 +2,13 @@ function [] = grouprf(inPath, framesPerGroup)
 % Searches directory for RF files and align, sums, and groups RF data based
 % on their corresponding frames and start times.
 
-import tools.loadvar tools.saveadv tools.loadadv tools.alignsumrf
+import tools.loadvar tools.saveadv tools.loadadv tools.alignsumrf tools.querydir
 
 if isempty(inPath)
     inPath = uigetdir('','Select an input directory');
 end
 
-if inPath(end) == '/'
-    inPath(end) = [];
-end
-
-% scan directory for rf files and create listing
-Listing = struct2cell(dir(strcat(inPath, '/rf_*')));
-
-if isempty(Listing)
-   error('no RF files found in directory'); 
-end
-
-nFiles = size(Listing, 2);
-FileNames = strcat(repmat(inPath, [nFiles 1]), '/', Listing(1,:).');
+[FileNames, nFiles] = querydir(inPath, 'rf_');
 
 % load metadata for all rf files
 MetaData = struct2table(cellfun(@(x) loadvar(x, 'meta'), FileNames));
@@ -47,7 +35,7 @@ for group = 1:nGroups
     % only save the frames assigned to this group
     front = startFrame - RfMatOut.meta.startFrame + 1;
     back = front + endFrame - startFrame;
-    outPath = strcat(inPath, '/', 'rfg_', sprintf('%0.4d', group));
+    outPath = strcat(inPath, '/', 'rf_', sprintf('%0.4d', group));
     saveadv(outPath, RfMatOut('frame', front:back));
 end
 
