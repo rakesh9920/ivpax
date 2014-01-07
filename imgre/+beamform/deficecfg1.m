@@ -1,7 +1,7 @@
 function [FieldPos, Prms, nWinSample] = deficecfg1(section, nSection)
 %DEFICECFG1 Summary of this function goes here
 
-import tools.sphericalmesh
+import beamform.sphericalmesh
 import f2plus.apr_ice_rx
 
 global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED CENTER_FREQUENCY;

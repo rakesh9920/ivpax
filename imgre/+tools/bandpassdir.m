@@ -26,7 +26,7 @@ end
 
 for file = 1:nFiles
    
-    RfMat = loadadv(FileNames(file,:));
+    RfMat = loadadv(FileNames{file});
     
     FiltMat = advdouble(bandpass(double(RfMat), 1, f1, f2, fs));
     FiltMat.label = RfMat.label;

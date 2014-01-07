@@ -1,6 +1,6 @@
 function [FileNames, nFiles] = querydir(inPath, heading)
 % Searches directory for files matching the specified heading and returns a
-% file listing.
+% file listing in a cell array.
 
 if inPath(end) == '/'
     inPath(end) = [];

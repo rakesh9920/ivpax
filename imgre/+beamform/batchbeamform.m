@@ -2,8 +2,7 @@ function [BfMat] = batchbeamform(defHandle, RfFile, section, nSection, varargin)
 %RUNGFBEAMFORM4 Summary of this function goes here
 
 import beamform.gfbeamform5
-import tools.loadadv
-import tools.advdouble
+import tools.loadadv tools.saveadv tools.advdouble
 
 if isa(defHandle, 'char')
     defHandle = str2func(defHandle);
