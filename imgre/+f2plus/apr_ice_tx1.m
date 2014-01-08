@@ -2,10 +2,7 @@ function [Centers, Aperture] = apr_ice_tx1()
 % ICE transmit configuration #1: 15 defocused rectangular rings with 80um
 % pitch between rings.
 
-import fieldii.xdc_2d_array
-import fieldii.xdc_get
-import fieldii.xdc_free
-import fieldii.xdc_rectangles
+import fieldii.xdc_2d_array fieldii.xdc_get fieldii.xdc_free fieldii.xdc_rectangles
 
 % element: 4 elements per membranes, 10um between elements vertically (80um pitch),
 % 10um between elements horizontally (80um pitch)

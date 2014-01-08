@@ -1,5 +1,5 @@
 function [FieldPos, Prms, nWinSample] = deficecfg1(section, nSection)
-%DEFICECFG1 Summary of this function goes here
+%DEFICECFG1 Beamformer definition script for CMUT ICE configuration 1.
 
 import beamform.sphericalmesh
 import f2plus.apr_ice_rx

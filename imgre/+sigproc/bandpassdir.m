@@ -2,24 +2,14 @@ function [] = bandpassdir(inPath, f1, f2, fs, varargin)
 % Bandpass filter rf files in a directory.
 
 import tools.bandpass tools.loadadv tools.saveadv tools.advdouble tools.querydir
+import tools.dirprompt
+
+inPath = dirprompt(inPath);
 
 if nargin > 4
-    outPath = varargin{1};
-    
-    if isempty(outPath)
-        outPath = uigetdir('','Select an output directory');
-    end
+    outDir = dirprompt(varargin{1});
 else
-    
-    outPath = inPath;
-end
-
-if outPath(end) == '/'
-    outPath(end) = [];
-end
-
-if isempty(inPath)
-    inPath = uigetdir('','Select an input directory');
+    outDir = dirprompt(inPath);
 end
 
 [FileNames, nFiles] = querydir(inPath, 'rf_');
@@ -36,12 +26,9 @@ for file = 1:nFiles
     FiltMat.meta.lowCutoff = f1;
     FiltMat.meta.highCutoff = f2;
     
-    outFile = strcat(outPath, '/rf_', ...
-        sprintf('%0.4d', RfMat.meta.fileNumber), '.mat');
-    saveadv(outFile, FiltMat);
+    outPath = fullfile(outDir, ['rf_' sprintf('%0.4d', RfMat.meta.fileNumber)]);
+    saveadv(outPath, FiltMat);
 end
-
-
 
 end
 

@@ -1,5 +1,6 @@
 function [EnvMatOut] = envelope(BfMat, varargin)
-% Envelope detection for RF data
+%ENVELOPE Envelope detection for RF data along the specified dimension
+%(default = 1).
 
 if nargin > 1
     dim = varargin{1};

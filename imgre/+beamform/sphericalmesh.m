@@ -1,6 +1,6 @@
 function [X, Y, Z] = sphericalmesh(rvg, tvg, pvg, org, section, nSection, sliceDim)
-% Creates a spherical mesh and subdivides the mesh into sections along the
-% specified dimension.
+%SPHERICALMESH Creates a spherical mesh and subdivides the mesh into sections 
+%along the specified dimension.
 
 dimSize = [numel(rvg) numel(tvg) numel(pvg)];
 

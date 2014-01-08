@@ -1,5 +1,5 @@
 function [] = xdc_draw(Aperture, varargin)
-% Draws an aperture with color weighted by apodization on 3D axes.
+%XDC_DRAW Draws an aperture with color weighted by apodization on 3D axes.
 
 import fieldii.xdc_get;
 

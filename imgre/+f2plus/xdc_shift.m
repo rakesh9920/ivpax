@@ -1,5 +1,5 @@
 function [ApertureOut] = xdc_shift(ApertureIn, Pos)
-% Defines a new aperture that is a copy of ApertureIn shifted spatially by
+%XDC_SHIFT Defines a new aperture that is a copy of ApertureIn shifted spatially by
 % the vector Pos.
 
 import fieldii.xdc_get

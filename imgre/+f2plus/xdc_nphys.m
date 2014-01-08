@@ -1,5 +1,5 @@
 function [nElement] = xdc_nphys(Aperture)
-% Returns the number of physical elements in an aperture.
+%XDC_NPHYS Returns the number of physical elements in an aperture.
 
 import fieldii.xdc_get;
 

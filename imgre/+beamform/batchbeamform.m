@@ -1,55 +1,63 @@
-function [BfMat] = batchbeamform(defHandle, RfFile, section, nSection, varargin)
-%RUNGFBEAMFORM4 Summary of this function goes here
+function [BfMat] = batchbeamform(defHandle, rfPath, section, nSection, varargin)
+%BATCHBEAMFORM Runs beamformer using the specified definition file for the
+%inputed RF data and volumetric section.
 
 import beamform.gfbeamform5
-import tools.loadadv tools.saveadv tools.advdouble
+import tools.loadadv tools.saveadv tools.advdouble tools.varorfile tools.dirprompt
 
 if isa(defHandle, 'char')
     defHandle = str2func(defHandle);
 end
 
-if isa(RfFile, 'char')
-    RfFile = loadadv(RfFile);
-end
+RfMat = varorfile(rfPath, @loadadv);
 
 if nargin > 4
-    outPath = varargin{1};
-    
-    if isempty(outPath)
-        outPath = uigetdir('','Select an output directory');
-    end
-    
-elseif isa(RfFile, 'char')
-    outPath = fileparts(RfFile);
+    outDir = dirprompt(varargin{1});
+elseif isa(rfPath, 'char')
+    outDir = fileparts(rfPath);
 else
-    outPath = './';
+    outDir = './';
 end
 
-if outPath(end) == '/'
-    outPath(end) = [];
-end
-
-if ~exist(outPath, 'dir')
-    mkdir(outPath);
-end
-
-TxPos = RfFile.meta.transmitPosition;
-RxPos = RfFile.meta.receivePosition;
+TxPos = RfMat.meta.transmitPosition;
+RxPos = RfMat.meta.receivePosition;
 
 [FieldPos, Prms, nWinSample] = defHandle(section, nSection);
 
-BfMat = advdouble(gfbeamform5(double(RfFile), TxPos, RxPos, FieldPos, ...
+BfMat = advdouble(gfbeamform5(double(RfMat), TxPos, RxPos, FieldPos, ...
     nWinSample, Prms));
 
 BfMat.label = {'sample', 'frame', 'position'};
-BfMat.meta.sampleFrequency = RfFile.meta.sampleFrequency;
-BfMat.meta.startFrame = RfFile.meta.startFrame;
-BfMat.meta.endFrame = RfFile.meta.endFrame;
+BfMat.meta = RfMat.meta;
 BfMat.meta.fieldPosition = FieldPos;
 
 if nargout == 0
+    
+    outPath = fullfile(outDir, 'bf_', sprintf('%0.4d', RfMat.meta.fileNumber));
     saveadv(outPath, BfMat);
 end
 
 end
 
+% if isa(RfFile, 'char')
+%     RfFile = loadadv(RfFile);
+% end
+% if nargin > 4
+%     outPath = varargin{1};
+%     if isempty(outPath)
+%         outPath = uigetdir('','Select an output directory');
+%     end   
+% elseif isa(RfMat, 'char')
+%     outPath = fileparts(RfMat);
+% else
+%     outPath = './';
+% end
+% if outPath(end) == '/'
+%     outPath(end) = [];
+% end
+% if ~exist(outPath, 'dir')
+%     mkdir(outPath);
+% end
+% BfMat.meta.sampleFrequency = RfMat.meta.sampleFrequency;
+% BfMat.meta.startFrame = RfMat.meta.startFrame;
+% BfMat.meta.endFrame = RfMat.meta.endFrame;

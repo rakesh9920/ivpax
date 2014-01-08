@@ -1,9 +1,7 @@
 function [CMUT, Centers] = apr_1d_cmut(numElements)
 % 1D linear CMUT array with 245um pitch.
 
-import fieldii.rectangles
-import fieldii.xdc_2d_array
-import fieldii.xdc_get
+import fieldii.rectangles fieldii.xdc_2d_array fieldii.xdc_get
 
 pitch = 245e-6;
 %numElements = 4;

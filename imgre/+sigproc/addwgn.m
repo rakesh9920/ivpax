@@ -1,11 +1,11 @@
 function [RfDataOut] = addwgn(dim, RfData, dbLevel)
-%
-%
+%ADDWGN Adds white gaussian noise to data at the specified power level (in
+%decibles).
 
 CellData = num2cell(RfData, dim);
-nInd = numel(CellData);
+nLines = numel(CellData);
 
-for ind = 1:nInd
+for ind = 1:nLines
     
     signal = CellData{ind};
     power = 20.*log10(rms(signal));

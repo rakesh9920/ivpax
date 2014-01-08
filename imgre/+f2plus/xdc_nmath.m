@@ -1,5 +1,5 @@
 function [nElement] = xdc_nmath(Aperture)
-% Returns the number of mathematical elements in an aperture.
+%XDC_NMATH Returns the number of mathematical elements in an aperture.
 
 import fieldii.xdc_get;
 
