@@ -5,11 +5,16 @@ import sigproc.bandpassdir
 import beamform.batchbeamform
 import imagevis.envelope;
 
-PATH_MAIN = './data/bftester/';
-PATH_SCT = strcat(PATH_MAIN, '/sct/'); mkdir(PATH_SCT);
-PATH_RFRAW = strcat(PATH_MAIN, '/rf/'); mkdir(PATH_RFRAW);
-PATH_RFF = strcat(PATH_MAIN, '/rff/'); mkdir(PATH_RFF);
-PATH_BF = strcat(PATH_MAIN, '/bf/'); mkdir(PATH_BF);
+PATH_MAIN = './data/icecfg1/psfpoint/';
+PATH_SCT = strcat(PATH_MAIN, 'sct/'); 
+PATH_RFRAW = strcat(PATH_MAIN, 'rf/');
+PATH_RFF = strcat(PATH_MAIN, 'rff/'); 
+PATH_BF = strcat(PATH_MAIN, 'bf/'); 
+
+if ~exist(PATH_SCT, 'dir'), mkdir(PATH_SCT), end
+if ~exist(PATH_RFRAW, 'dir'), mkdir(PATH_RFRAW), end
+if ~exist(PATH_RFF, 'dir'), mkdir(PATH_RFF), end
+if ~exist(PATH_BF, 'dir'), mkdir(PATH_BF), end
 
 %% create target data
 SctMat = advdouble([0 0 0.03 1], {'target', 'info'});
@@ -38,7 +43,7 @@ batchbeamform(@beamform.deficecfg1, fullfile(PATH_RFRAW, 'rf_0001'), 1, 100, ...
     PATH_BF);
 
 %% plot psf
-BfMat = loadadv(fullfile(PATH_MAIN, 'bf2'));
+BfMat = loadadv(fullfile(PATH_BF, 'bf2'));
 FieldPos = BfMat.meta.fieldPosition;
 
 EnvMat = envelope(BfMat, 1);
@@ -51,10 +56,15 @@ D = 20.*log10(C./max(max(C))); D(D < -20) = -20;
 
 %% mesh plot with 2D view
 figure;
-mesh(X, Y, Z, D);
-view([0 1 0]);
-axis([-0.5 0.5 -0.5 0.5 2.6 3.2].*1e-2);
-axis equal;
+surf(X, Y, Z, D, 'EdgeColor', 'none');
+view([0 -1 0]);
+%axis([-0.5 0.5 -0.5 0.5 0 6].*1e-2);
+shading interp
+colorbar;
+axis image;
+xlabel('x [m]');
+ylabel('y [m]');
+zlabel('z [m]');
 
 %%  contour plot
 figure;

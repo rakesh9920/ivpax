@@ -2,10 +2,11 @@ import beamform.*
 import f2plus.*
 import fieldii.*
 import flow.*
-import imager.*
+import imagevis.*
 import maq.*
 import mexo.*
 import sirm.*
+import sigproc.*
 import tools.*
 import ultrasonix.*
 addpath ./bin/

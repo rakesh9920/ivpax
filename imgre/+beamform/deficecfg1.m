@@ -21,12 +21,15 @@ nWinSample = 201;
 
 r1 = 0.0035/sin(pi/4);
 %rvg = linspace(r1, 0.05 + r1, 50);
-rvg = linspace(0.0035 + 0.025, 0.0035 + 0.035, 100);
-tvg = linspace(0, pi - pi/100, 100);
-pvg = -pi/4:pi/(4^4)/2:pi/4;%linspace(-pi/4, pi/4, 50);
+% rvg = linspace(0.0035 + 0.025, 0.0035 + 0.035, 100);
+% tvg = linspace(0, pi - pi/100, 100);
+% pvg = -pi/4:pi/(4^4)/2:pi/4;
+rvg = r1:0.0001:(0.055 + 0.0035);
+tvg = 0;
+pvg = -pi/4:(pi/(4^4)/2):pi/4;
 org = [0 0 -0.0035];
 
-[X, Y, Z] = sphericalmesh(rvg, tvg, pvg, org, section, nSection, 2);
+[X, Y, Z] = sphericalmesh(rvg, tvg, pvg, org, section, nSection, 3);
 
 FieldPos = [X(:) Y(:) Z(:)];
 end

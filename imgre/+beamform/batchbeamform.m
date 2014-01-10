@@ -33,7 +33,8 @@ BfMat.meta.fieldPosition = FieldPos;
 
 if nargout == 0
     
-    outPath = fullfile(outDir, 'bf_', sprintf('%0.4d', RfMat.meta.fileNumber));
+    outPath = fullfile(outDir, ['bf_' sprintf('%0.4d', RfMat.meta.fileNumber)...
+        '_' sprintf('%0.4d', section)]);
     saveadv(outPath, BfMat);
 end
 
