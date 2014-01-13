@@ -2,7 +2,7 @@ function [BfMat] = batchbeamform(defHandle, rfPath, section, nSection, varargin)
 %BATCHBEAMFORM Runs beamformer using the specified definition file for the
 %inputed RF data and volumetric section.
 
-import beamform.gfbeamform5
+import beamform.gfbeamform6
 import tools.loadadv tools.saveadv tools.advdouble tools.varorfile tools.dirprompt
 
 if isa(defHandle, 'char')
@@ -24,12 +24,13 @@ RxPos = RfMat.meta.receivePosition;
 
 [FieldPos, Prms, nWinSample] = defHandle(section, nSection);
 
-BfMat = advdouble(gfbeamform5(double(RfMat), TxPos, RxPos, FieldPos, ...
+BfMat = advdouble(gfbeamform6(double(RfMat), TxPos, RxPos, FieldPos, ...
     nWinSample, Prms));
 
 BfMat.label = {'sample', 'frame', 'position'};
 BfMat.meta = RfMat.meta;
 BfMat.meta.fieldPosition = FieldPos;
+BfMat.meta.volumeNumber = section;
 
 if nargout == 0
     
@@ -40,25 +41,3 @@ end
 
 end
 
-% if isa(RfFile, 'char')
-%     RfFile = loadadv(RfFile);
-% end
-% if nargin > 4
-%     outPath = varargin{1};
-%     if isempty(outPath)
-%         outPath = uigetdir('','Select an output directory');
-%     end   
-% elseif isa(RfMat, 'char')
-%     outPath = fileparts(RfMat);
-% else
-%     outPath = './';
-% end
-% if outPath(end) == '/'
-%     outPath(end) = [];
-% end
-% if ~exist(outPath, 'dir')
-%     mkdir(outPath);
-% end
-% BfMat.meta.sampleFrequency = RfMat.meta.sampleFrequency;
-% BfMat.meta.startFrame = RfMat.meta.startFrame;
-% BfMat.meta.endFrame = RfMat.meta.endFrame;

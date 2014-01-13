@@ -5,7 +5,7 @@ import sigproc.bandpassdir
 import beamform.batchbeamform beamform.sphericalmesh beamform.makejoblist
 import imagevis.envelope;
 
-PATH_MAIN = './data/icecfg1/psfgrid2/';
+PATH_MAIN = './data/icecfg1/psfgrid3/';
 PATH_SCT = strcat(PATH_MAIN, 'sct/'); 
 PATH_RFRAW = strcat(PATH_MAIN, 'rf/'); 
 PATH_RFF = strcat(PATH_MAIN, 'rff/'); 
@@ -76,7 +76,7 @@ RangeWeight = @(x) x^2;
 AngleWeight = @(x) 1*abs(x) + 1; %0.038952
 W = arrayfun(RangeWeight, Range).*arrayfun(AngleWeight, radtodeg(Angle));
 D = 20.*log10((Env.*W)./max(max((Env.*W)))); 
-D(D < -30) = -30;
+D(D < -20) = -20;
 
 %% mesh plot with 2D view
 figure;

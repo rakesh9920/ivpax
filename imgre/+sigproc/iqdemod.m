@@ -2,7 +2,7 @@ function [I, Q] = iqdemod(Signal, fc, bw, fs)
 %
 %
 
-import tools.lowpass
+import sigproc.lowpass
 
 [nSample, nSig] = size(Signal);
 

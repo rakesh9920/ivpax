@@ -2,6 +2,7 @@ import beamform.*
 import f2plus.*
 import fieldii.*
 import flow.*
+import flow2.*
 import imagevis.*
 import maq.*
 import mexo.*
