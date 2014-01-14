@@ -52,7 +52,7 @@ end
 % create 2-sided frequency vector
 nFreq = 2^nextpow2(nSample + (nWinSample - 1)/2);
 Freq = SAMPLE_FREQUENCY/2*linspace(0, 1, nFreq/2+1);
-Freq2S = [Freq(1:end-1) -Freq(end) -fliplr(Freq(2:(end-1)))];
+Freq2S = [Freq(1:end-1) -Freq(end) -fliplr(Freq(2:(end-1)))].';
 
 % determine number of blocks needed to reduce memory usage
 MEMORY_LIMIT_IN_BYTES = 2*1024*1024*1024;
@@ -89,14 +89,13 @@ for block = 1:nBlock
         end
         Delays(delidx) = [];
         
-        Phase = exp(-2*pi*1i.*(Freq2S.')*Delays);
+        Phase = exp(-2*pi*1i.*(Freq2S)*Delays);
         
         disp(point);
         
-        %BfMatSpect = sum(bsxfun(@times, Phase, RxMatSpect(:,~delidx,:)), 2);
+        BfMatSpect = sum(bsxfun(@times, Phase, RxMatSpect(:,~delidx,:)), 2);
         
-        BfSig = real(ifft(sum(bsxfun(@times, Phase, RxMatSpect(:,~delidx,:)), 2),...
-            [], 1));
+        BfSig = real(ifft(BfMatSpect, [], 1));
         WinBfSig = BfSig(1:nWinSample,1,:);
         
         BfMat(:,blockFront:blockBack,point) = reshape(WinBfSig, nWinSample, [], 1);
