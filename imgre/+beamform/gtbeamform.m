@@ -88,5 +88,6 @@ for point = 1:nFieldPos
     
     BfSigMat(:,point,:) = reshape(BfSig, nWinSample, 1, []);
 end
+
 end
 

@@ -89,9 +89,9 @@ for block = 1:nBlock
         end
         Delays(delidx) = [];
         
-        Phase = exp(-2*pi*1i.*(Freq2S)*Delays);
+        Phase = exp(-2*pi*1i.*Freq2S*Delays);
         
-        disp(point);
+        disp([num2str(block) '/' num2str(nBlock) ',' num2str(point)]);
         
         BfMatSpect = sum(bsxfun(@times, Phase, RxMatSpect(:,~delidx,:)), 2);
         
