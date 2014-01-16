@@ -28,7 +28,7 @@ else
     TxDelay = sqrt(sqdistance(FieldPos, TxPos))./SOUND_SPEED;
 end
 RxDelay = sqrt(sqdistance(FieldPos, RxPos))./SOUND_SPEED;
-TotalDelay = round(bsxfun(@plus, RxDelay, TxDelay).*SAMPLE_FREQUENCY.*interpolate);
+TotalDelay = round(bsxfun(@plus, RxDelay, TxDelay).*SAMPLE_FREQUENCY.*interpolate) - interpolate;
 
 if mod(nWinSample, 2) == 0
     
