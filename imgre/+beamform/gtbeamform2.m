@@ -11,7 +11,7 @@ addOptional(Argsin, 'planetx', false);
 addOptional(Argsin, 'interpolate', 1);
 addOptional(Argsin, 'soundspeed', 1500);
 addOptional(Argsin, 'samplefrequency', 40e6);
-addOptional(Argsin, 'progress', true);
+addOptional(Argsin, 'progress', false);
 parse(Argsin, varargin{:});
 
 planetx = Argsin.Results.planetx;
@@ -19,10 +19,6 @@ interpolate = Argsin.Results.interpolate;
 progress = Argsin.Results.progress;
 SOUND_SPEED = Argsin.Results.soundspeed;
 SAMPLE_FREQUENCY = Argsin.Results.samplefrequency;
-
-if progress
-    [bar, cleanup] = prog('@gtbeamform2');
-end
 
 RxMat = double(RxMat);
 nFieldPos = size(FieldPos, 1);
@@ -49,10 +45,14 @@ end
 nWinSampleHalf = (nWinSample - 1)/2;
 
 % determine number of blocks needed to reduce memory usage
-MEMORY_LIMIT_IN_BYTES = 2*1024*1024*1024;
+MEMORY_LIMIT_IN_BYTES = 4*1024*1024*1024;
 frameSize = nChannel*(nSample + nWinSample)*8*interpolate;
 framesPerBlock = floor(MEMORY_LIMIT_IN_BYTES/frameSize);
 nBlock = ceil(nFrame/framesPerBlock);
+
+if progress
+    [bar, cleanup] = prog('@gtbeamform2');
+end
 
 for block = 1:nBlock
     
@@ -65,9 +65,11 @@ for block = 1:nBlock
     
     if interpolate > 1
         PadRxMat = resample(RxMat(:,:,blockFront:blockBack), interpolate, 1);
+        PadRxMat = reshape(PadRxMat, nSample*interpolate, nChannel, []);
     else
         PadRxMat = RxMat(:,:,blockFront:blockBack);
     end
+    
     
     PadRxMat = padarray(PadRxMat, [nWinSampleHalf 0 0], 'pre');
     PadRxMat = padarray(PadRxMat, [nWinSampleHalf 0 0], 'post');
@@ -86,10 +88,10 @@ for block = 1:nBlock
             continue
         end
         
-        disp([num2str(block) '/' num2str(nBlock) ',' num2str(point)]);
+        %disp([num2str(block) '/' num2str(nBlock) ',' num2str(point)]);
         
         % for each channel, delay, window, and then sum with cumulative sum
-        BfSig = zeros(nWinSample, nFrame);
+        BfSig = zeros(nWinSample, blockBack - blockFront + 1);
         
         for chan = 1:nChannel
             
@@ -97,17 +99,20 @@ for block = 1:nBlock
                 continue
             end
             
-            BfSig = bsxfun(@plus, BfSig, ...
-                PadRxMat(Delays(chan):(Delays(chan) + nWinSample - 1),chan,:));
-            %             BfSig = BfSig + squeeze(...
-            %                    PadRxMat(Delays(chan):(Delays(chan) + nWinSample - 1),chan,:));
+            %BfSig = bsxfun(@plus, BfSig, ...
+            %   PadRxMat(Delays(chan):(Delays(chan) + nWinSample - 1),...
+            %   chan,:));
+            BfSig = BfSig + squeeze(...
+            PadRxMat(Delays(chan):(Delays(chan) + nWinSample - 1),chan,:));
         end
         
         if interpolate > 1
-            BfMat(:,blockFront:blockBack,point) = resample(reshape(BfSig, ...
-                nWinSample, [], 1), 1, interpolate);
+            BfMat(:,blockFront:blockBack,point) = reshape(...
+                resample(squeeze(BfSig), 1, interpolate), ...
+            ceil(nWinSample/interpolate) , [], 1);
         else
-            BfMat(:,blockFront:blockBack,point) = reshape(BfSig, nWinSample, [], 1);
+            BfMat(:,blockFront:blockBack,point) = reshape(BfSig, ...
+                nWinSample, [], 1);
         end
     end
 end
