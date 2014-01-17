@@ -8,12 +8,14 @@ Prms.samplefrequency = 100e6;
 Prms.centerfrequency = 5e6;
 Prms.pulserepititionrate = 1000;
 Prms.soundspeed = 1540;
+Prms.interpolate = 8;
+Prms.progress = true;
 
 nWinSample = 201;
 
 r1 = 0.0035/sin(pi/4);
 rvg = r1:0.0001:(0.055 + 0.0035);
-tvg = pi/2;
+tvg = 0;
 pvg = -pi/4:(pi/(4^4)/2):pi/4;
 org = [0 0 -0.0035];
 

@@ -2,20 +2,27 @@ function [BfMat] = gtbeamform2(RxMat, TxPos, RxPos, FieldPos, ...
     nWinSample, varargin)
 % General time beamformer (for synthetic RF data) with memory limit
 
-import tools.sqdistance
+import tools.sqdistance tools.prog
 
 % set scheme for optional input arguments and parse
 Argsin = inputParser;
+Argsin.KeepUnmatched = true;
 addOptional(Argsin, 'planetx', false);
 addOptional(Argsin, 'interpolate', 1);
 addOptional(Argsin, 'soundspeed', 1500);
 addOptional(Argsin, 'samplefrequency', 40e6);
+addOptional(Argsin, 'progress', true);
 parse(Argsin, varargin{:});
 
 planetx = Argsin.Results.planetx;
 interpolate = Argsin.Results.interpolate;
+progress = Argsin.Results.progress;
 SOUND_SPEED = Argsin.Results.soundspeed;
 SAMPLE_FREQUENCY = Argsin.Results.samplefrequency;
+
+if progress
+    [bar, cleanup] = prog('@gtbeamform2');
+end
 
 RxMat = double(RxMat);
 nFieldPos = size(FieldPos, 1);
@@ -66,6 +73,10 @@ for block = 1:nBlock
     PadRxMat = padarray(PadRxMat, [nWinSampleHalf 0 0], 'post');
     
     for point = 1:nFieldPos
+        
+        if progress
+            prog(bar, (nFieldPos*(block - 1) + point)/(nFieldPos*nBlock));
+        end
         
         % remove delays that exceed signal length
         Delays = TotalDelay(point,:);

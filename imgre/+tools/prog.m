@@ -1,6 +1,12 @@
 function [bar, cleanup] = prog(varargin)
 %PROGWRITE
 
+if isunix
+    tmp = '/home/bshieh/tmp';
+else
+    tmp = tempdir;
+end
+
 if nargin == 1
     
     init = true;
@@ -16,7 +22,7 @@ end
 if init
     
     bar.startTime = clock;
-    progDir = [tempdir 'prog/'];
+    progDir = [tmp 'prog/'];
     bar.filePath = tempname(progDir);
     
     if ~exist(progDir, 'dir')

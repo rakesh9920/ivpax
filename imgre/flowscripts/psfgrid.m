@@ -5,7 +5,7 @@ import sigproc.bandpassdir
 import beamform.batchbeamform beamform.sphericalmesh beamform.makejoblist
 import imagevis.envelope;
 
-PATH_MAIN = './data/icecfg1/psfgrid3/';
+PATH_MAIN = './data/test/psfgrid3/';
 PATH_SCT = strcat(PATH_MAIN, 'sct/'); 
 PATH_RFRAW = strcat(PATH_MAIN, 'rf/'); 
 PATH_RFF = strcat(PATH_MAIN, 'rff/'); 
@@ -49,7 +49,7 @@ bandpassdir(PATH_RFRAW, 1e6, 9e6, sampleFreq, PATH_RFF);
 jobList = makejoblist(@batchbeamform, @beamform.deficecfg1, PATH_RFRAW, 12, PATH_BF);
 job = readjoblist(jobList);
 
-%submit(job{1});
+submit(job{1});
 
 %% plot psf
 import tools.querydir
