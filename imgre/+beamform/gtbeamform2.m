@@ -28,7 +28,7 @@ else
     TxDelay = sqrt(sqdistance(FieldPos, TxPos))./SOUND_SPEED;
 end
 RxDelay = sqrt(sqdistance(FieldPos, RxPos))./SOUND_SPEED;
-TotalDelay = round(bsxfun(@plus, RxDelay, TxDelay).*SAMPLE_FREQUENCY.*interpolate) - interpolate;
+TotalDelay = round(bsxfun(@plus, RxDelay, TxDelay).*SAMPLE_FREQUENCY.*interpolate) - interpolate + 1;
 
 if mod(nWinSample, 2) == 0
     
@@ -56,12 +56,14 @@ for block = 1:nBlock
         blockBack = nFrame;
     end
     
-    PadRxMat = padarray(RxMat(:,:,blockFront:blockBack), [nWinSampleHalf 0 0], 'pre');
-    PadRxMat = padarray(PadRxMat, [nWinSampleHalf 0 0], 'post');
-    
     if interpolate > 1
-        PadRxMat = resample(PadRxMat, interpolate, 1);
+        PadRxMat = resample(RxMat(:,:,blockFront:blockBack), interpolate, 1);
+    else
+        PadRxMat = RxMat(:,:,blockFront:blockBack);
     end
+    
+    PadRxMat = padarray(PadRxMat, [nWinSampleHalf 0 0], 'pre');
+    PadRxMat = padarray(PadRxMat, [nWinSampleHalf 0 0], 'post');
     
     for point = 1:nFieldPos
         

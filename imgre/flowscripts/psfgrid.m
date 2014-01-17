@@ -65,13 +65,13 @@ BfMat = cat(3, BfMat{:});
 EnvMat = envelope(BfMat, 1);
 FieldPos = cat(1, FieldPosCell{:});
 
-X = reshape(FieldPos(:,1), [], 257, 1);
-Y = reshape(FieldPos(:,2), [], 257, 1);
-Z = reshape(FieldPos(:,3), [], 257, 1);
+X = reshape(FieldPos(:,1), [], 52, 1);
+Y = reshape(FieldPos(:,2), [], 52, 1);
+Z = reshape(FieldPos(:,3), [], 52, 1);
 Range = sqrt(X.^2 + Y.^2 + Z.^2);
 Angle = atan(X./Z);
 
-Env = reshape(EnvMat(152,1,:), [], 257, 1);
+Env = reshape(EnvMat(152,1,:), [], 52, 1);
 RangeWeight = @(x) x^2;
 AngleWeight = @(x) 0.038952*abs(x) + 1; %0.038952
 W = arrayfun(RangeWeight, Range).*arrayfun(AngleWeight, radtodeg(Angle));
