@@ -9,16 +9,16 @@ Argsin = inputParser;
 Argsin.KeepUnmatched = true;
 addOptional(Argsin, 'planetx', false);
 addOptional(Argsin, 'interpolate', 1);
-addOptional(Argsin, 'soundspeed', 1500);
-addOptional(Argsin, 'samplefrequency', 40e6);
 addOptional(Argsin, 'progress', false);
+addOptional(Argsin, 'SOUND_SPEED', 1500);
+addOptional(Argsin, 'SAMPLE_FREQUENCY', 40e6);
 parse(Argsin, varargin{:});
 
 planetx = Argsin.Results.planetx;
 interpolate = Argsin.Results.interpolate;
 progress = Argsin.Results.progress;
-SOUND_SPEED = Argsin.Results.soundspeed;
-SAMPLE_FREQUENCY = Argsin.Results.samplefrequency;
+SOUND_SPEED = Argsin.Results.SOUND_SPEED;
+SAMPLE_FREQUENCY = Argsin.Results.SAMPLE_FREQUENCY;
 
 RxMat = double(RxMat);
 nFieldPos = size(FieldPos, 1);

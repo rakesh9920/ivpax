@@ -1,8 +1,12 @@
-function [VelMat] = batchflow(def, inPath, varargin)
+function [VelMat] = batchflow(fun, def, inPath, varargin)
 %BATCHFLOW
 
 import tools.varorfile tools.dirprompt tools.loadadv tools.saveadv tools.advdouble
 import flow2.instflow
+
+if isa(fun, 'char')
+    fun = str2func(fun);
+end
 
 if isa(def, 'char')
     def = str2func(def);
@@ -18,9 +22,9 @@ end
 
 BfMat = varorfile(inPath, @loadadv);
 
-map = def();
+Prms = def();
 
-VelMat = advdouble(instflow(double(BfMat), map));
+VelMat = advdouble(fun(double(BfMat), Prms));
 VelMat.label = {'estimate', 'frame', 'position'};
 VelMat.meta = BfMat.meta;
 

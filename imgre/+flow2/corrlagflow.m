@@ -1,8 +1,8 @@
-function [VelMat] = instflow(BfMat, varargin)
+function [VelMat] = corrlagflow(BfMat, varargin)
 %INSTFLOW
 
 import tools.dirprompt tools.varorfile tools.loadadv tools.advdouble tools.saveadv
-import flow2.instdoppler
+import flow2.lagdoppler
 
 Argsin = inputParser;
 Argsin.KeepUnmatched = true;
@@ -59,7 +59,7 @@ if averaging > 1
     end
 end
 
-VelMat = instdoppler(BfMat, Argsin.Unmatched, Argsin.Results);
+VelMat = lagdoppler(BfMat, Argsin.Unmatched, Argsin.Results);
 
 
 
