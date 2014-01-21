@@ -1,4 +1,4 @@
-function [Prms] = deficecfg1()
+function [Prms] = flowcfg()
 %DEFICECFG1 
 
 

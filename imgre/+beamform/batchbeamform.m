@@ -1,12 +1,16 @@
-function [BfMat] = batchbeamform(defHandle, rfPath, section, nSection, varargin)
+function [BfMat] = batchbeamform(cfgPath, rfPath, section, nSection, varargin)
 %BATCHBEAMFORM Runs beamformer using the specified definition file for the
 %inputed RF data and volumetric section.
 
 import beamform.gtbeamform2
 import tools.loadadv tools.saveadv tools.advdouble tools.varorfile tools.dirprompt
 
-if isa(defHandle, 'char')
-    defHandle = str2func(defHandle);
+if isa(cfgPath, 'char')
+    [cfgDir, cfgName] = fileparts(cfgPath);
+    addpath(cfgDir);
+    cfgHandle = str2func(cfgName);
+else
+    cfgHandle = cfgPath;
 end
 
 RfMat = varorfile(rfPath, @loadadv);
@@ -22,7 +26,7 @@ end
 TxPos = RfMat.meta.transmitPosition;
 RxPos = RfMat.meta.receivePosition;
 
-[FieldPos, Prms, nWinSample] = defHandle(section, nSection);
+[FieldPos, Prms, nWinSample] = cfgHandle(section, nSection);
 
 BfMat = advdouble(gtbeamform2(double(RfMat), TxPos, RxPos, FieldPos, ...
     nWinSample, Prms));
@@ -31,6 +35,7 @@ BfMat.label = {'sample', 'frame', 'position'};
 BfMat.meta = RfMat.meta;
 BfMat.meta.fieldPosition = FieldPos;
 BfMat.meta.volumeNumber = section;
+BfMat.meta.numberOfVolumes = nSection;
 
 if nargout == 0
     

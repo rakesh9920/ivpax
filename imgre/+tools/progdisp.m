@@ -13,11 +13,14 @@ progDir = [tmp 'prog/'];
 
 [progFiles, nFiles] = querydir(progDir, '');
 
+startTime = clock;
 nChars = 0;
 while true
     
-    %     [percentDone, timeLeft, barTitle] = cellfun(@progread, progFiles, ...
-    %         'UniformOutput', false);
+    if etime(clock, startTime) > 60
+        [progFiles, nFiles] = querydir(progDir, '');
+        startTime = clock;
+    end
     
     fullStr = '';
     nLines = 0;

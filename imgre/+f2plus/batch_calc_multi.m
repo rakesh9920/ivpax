@@ -1,4 +1,4 @@
-function [RfMat] = batch_calc_multi(defHandle, sctPath, varargin)
+function [RfMat] = batch_calc_multi(cfgPath, sctPath, varargin)
 %BATCH_CALC_MULTI Runs calc_scat_multi in Field II using the field and transducer
 % definitions and target info.
 
@@ -16,8 +16,12 @@ else
     outDir = './';
 end
 
-if isa(defHandle, 'char')
-    defHandle = str2func(defHandle);
+if isa(cfgPath, 'char')
+    [cfgDir, cfgName] = fileparts(cfgPath);
+    addpath(cfgDir);
+    cfgHandle = str2func(cfgName);
+else
+    cfgHandle = cfgPath;
 end
 
 % run Field II
@@ -25,7 +29,7 @@ field_init(-1);
 
 try
     
-    [Prms, TxArray, RxArray, TxPos, RxPos] = defHandle();
+    [Prms, TxArray, RxArray, TxPos, RxPos] = cfgHandle();
     [RfMat, startTime] = calc_scat_multi(TxArray, RxArray, double(SctMat(:,1:3)), ...
         double(SctMat(:,4)));
 catch err
@@ -54,22 +58,3 @@ if nargout == 0
 end
 
 end
-
-% if nargin > 2
-%     outPath = varargin{1};
-%     if isempty(outPath)
-%         outPath = uigetdir('','Select an output directory');
-%     end
-% else
-%     if isa(SctMat, 'char')
-%         outPath = fileparts(SctMat);
-%     else
-%         outPath = '.';
-%     end
-% end
-% if outPath(end) == '/'
-%     outPath(end) = [];
-% end
-% if ~exist(outPath, 'dir')
-%     mkdir(outPath);
-% end

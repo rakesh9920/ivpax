@@ -1,4 +1,4 @@
-function [FieldPos, Prms, nWinSample] = deficecfg1(section, nSection)
+function [FieldPos, Prms, nWinSample] = bfcfg(section, nSection)
 %DEFICECFG1 Beamformer definition script for CMUT ICE configuration 1.
 
 import beamform.sphericalmesh

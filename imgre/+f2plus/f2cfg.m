@@ -1,4 +1,4 @@
-function [Prms, TxArray, RxArray, TxPos, RxPos] = def_ice_cfg1()
+function [Prms, TxArray, RxArray, TxPos, RxPos] = f2config()
 %DEF_ICE_CFG1 Field II definition script for CMUT ICE configuration 1.
 
 import fieldii.set_field fieldii.xdc_impulse fieldii.xdc_excitation 

@@ -24,17 +24,8 @@ BfMat = double(BfMat);
 
 if resample > 1
     
-    BfMatInterp = zeros(nSample*resample, nPos, nFrame);
-    
-    for pos = 1:nPos
-        
-        for frame = 1:nFrame
-            BfMatInterp(:,frame,pos) = interp(BfMat(:,frame,pos), resample);
-        end
-    end
-    
-    BfMat = BfMatInterp;
-    nSample = nSample*resample;
+    BfMat = reshape(resample(BfMat, resample, 1), [], nFrame, nPos);
+    nSample = size(BfMat, 1);
 end
 
 switch window
@@ -60,6 +51,18 @@ if averaging > 1
 end
 
 VelMat = instdoppler(BfMat, Argsin.Unmatched, Argsin.Results);
+
+%     BfMatInterp = zeros(nSample*resample, nPos, nFrame);
+%     
+%     for pos = 1:nPos
+%         
+%         for frame = 1:nFrame
+%             BfMatInterp(:,frame,pos) = interp(BfMat(:,frame,pos), resample);
+%         end
+%     end
+%     
+%     BfMat = BfMatInterp;
+%     nSample = nSample*resample;
 
 
 
