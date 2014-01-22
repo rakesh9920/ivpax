@@ -3,15 +3,15 @@ import fieldii.calc_hp fieldii.field_init fieldii.field_end
 import beamform.sphericalmesh
 addpath ./bin/
 
-DIR_MAIN = './data/icecfg1/psf_grid_planetx/';
+DIR_MAIN = './data/icecfg1/defocus study/';
 DIR_FIELDII = [DIR_MAIN 'fieldii/'];
 
-PATH_F2CFG = fullfile(DIR_FIELDII, 'ice1_planetx');
+PATH_F2CFG = fullfile(DIR_FIELDII, 'ice1_defocustx');
 
 %% Set field points (full field)
 
 r1 = 0.0035/sin(pi/4);
-rvg = r1:0.0002:(0.055 + 0.0035);
+rvg = r1:0.0003:(0.055 + 0.0035);
 tvg = pi/2;
 pvg = -pi/4:(pi/(4^4)):pi/4;
 org = [0 0 -0.0035];
@@ -19,8 +19,8 @@ org = [0 0 -0.0035];
 FieldPos = sphericalmesh(rvg, tvg, pvg, org, 1, 1, 1);
 
 %% Set field points (line)
-
-focus = 4;
+global focus;
+focus = 0;
 
 r1 = 0.0035/sin(pi/4);
 rvg = 0.00175*focus + 0.03;
@@ -55,7 +55,7 @@ E(E < -40) = -40;
 idx = idx + round(startTime*100e6);
 % MaxPres = [MaxPres squeeze(max(abs(D)))];
 % MaxPresDB = [MaxPresDB squeeze(val)];
-% MaxSample = [MaxSample squeeze(idx)];
+MaxSample = [MaxSample squeeze(idx)];
 
 %%
 
@@ -73,16 +73,15 @@ xlabel('x [m]');
 ylabel('y [m]');
 zlabel('z [m]');
 shading flat
-colorbar;
 
 for t = 1:nTimes
-    surf(X, Z, squeeze(D(t,:,:)))%, %'EdgeColor', 'none');
-    %view([0 -1 0]);
-    %caxis([-40 0]);
-    caxis([minD maxD]./2);
-    axis([-0.02 0.02 0 0.02 minD./2 maxD./2]);
-    %axis image;
-    pause(0.1)
+    surf(X, Y, Z, squeeze(E(t,:,:)), 'EdgeColor', 'none');
+    view([1 0 0]);
+    caxis([-40 0]);
+    %caxis([minD maxD]./2);
+    %axis([-0.02 0.02 0 0.02 minD./2 maxD./2]);
+    axis image;
+    pause(0.01)
 end
 
 
