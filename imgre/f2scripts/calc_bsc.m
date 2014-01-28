@@ -9,9 +9,9 @@ DIR_RF = [DIR_MAIN 'rf/'];
 PATH_CFG = fullfile(DIR_MAIN, 'focused_piston');
 
 %% create target field
-for i = 1:100
+for i = 1:1
     Dim = [0.02 0.02 0.02];
-    Org = [0 0 0.012];
+    Org = [0 0 0.03];
     targetDensity = 5; % in 1/mm^3
     bsc = 1;
     SIGMA = 0.316;
@@ -36,7 +36,7 @@ for i = 1:100
     
     %% run fieldii for single target
     
-    SingleRf = batch_calc_multi(PATH_CFG, advdouble([0 0 0.01 sqrt(1/SIGMA)]), DIR_RF);
+    SingleRf = batch_calc_multi(PATH_CFG, advdouble([0 0 0.03 sqrt(1/SIGMA)]), DIR_RF);
     nPad = round(SingleRf.meta.startTime*SingleRf.meta.sampleFrequency);
     SingleRf = padarray(SingleRf, nPad, 'pre');
     SingleRf = padarray(SingleRf, size(TargetRf,1), 'post');
@@ -44,7 +44,7 @@ for i = 1:100
     
     %%
     
-    focus = 0.01;
+    focus = 0.03;
     A = pi*0.005^2;
     
     focusTime = focus*2/1540;
