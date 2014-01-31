@@ -48,14 +48,32 @@ for i = 1:1
     A = pi*0.005^2;
     
     focusTime = focus*2/1540;
-    gateLength = 15*1540/5e6;
+    gateLength = 10*1540/5e6;
     gateDuration = gateLength*2/1540;
     gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*100e6);
     
     Sig1 = double(TargetRf(gate(1):gate(2)));
     Sig2 = double(SingleRf(gate(1):gate(2)));
     
-    EstimatedBSC(i) = (sum(Sig1.^2)*A) / (sum(Sig2.^2)*0.46*(2*pi)^2*focus^2*gateLength);
+    %NFFT = 2^nextpow2(max(length(Sig1), length(Sig2)));
+    NFFT = 8196;
+    Freq = linspace(0, 100e6/2, NFFT/2 - 1);
+    deltaF = 100e6/NFFT;
+    F1 = round(3.5e6/deltaF);
+    F2 = round(6.5e6/deltaF);
+    
+    Psd1 = fft(Sig1, NFFT)./sqrt(NFFT);
+    Psd2 = fft(Sig2, NFFT)./sqrt(NFFT);
+    Psd1 = 2.*Psd1(1:(NFFT/2-1));
+    Psd2 = 2.*Psd2(1:(NFFT/2-1));
+    
+    BSC1(:,i) = abs(Psd1(F1:F2)).^2*A ./ (abs(Psd2(F1:F2)).^2*0.46*(2*pi)^2*focus^2*gateLength);
+    k = (Freq(F1:F2).*2*pi/1540).';
+    BSC2(:,i) = abs(Psd1(F1:F2)).^2.*k.^2*A ./ (abs(Psd2(F1:F2)).^2*0.46*(2*pi)^2*focus^2*gateLength);
+    
+    %plot(Freq(F1:F2), BSC);
+    
+    %EstimatedBSC(i) = (sum(Sig1.^2)*A) / (sum(Sig2.^2)*0.46*(2*pi)^2*focus^2*gateLength);
     
 %     plot(Sig1);
 %     hold on;
