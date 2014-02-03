@@ -19,6 +19,7 @@ parse(Argsin, varargin{:});
 interleave = Argsin.Results.interleave;
 ensemble = Argsin.Results.ensemble;
 rangegate = Argsin.Results.rangegate;
+progress = Argsin.Results.progress;
 SOUND_SPEED = Argsin.Results.SOUND_SPEED;
 SAMPLE_FREQUENCY = Argsin.Results.SAMPLE_FREQUENCY;
 CENTER_FREQUENCY = Argsin.Results.CENTER_FREQUENCY;
