@@ -25,7 +25,7 @@ xdc_free(Phys);
 % physical element position = Info(24:26,:);
 Rect = [];
 
-%colors = [repmat([10 30], 1, 7) 10];
+colors = [repmat([10 30], 1, 7) 10];
 for elem = 1:15
     
     MathCenters = rectpts(elem);
@@ -36,7 +36,7 @@ for elem = 1:15
     PhysRect(1,:) = elem; % physical element no.
     % rectangle coords
     PhysRect(2:13,:) = repmat(PhysInfo(11:22,:), [1 nMathElements/4]) + repmat(kron(MathCenters, [1 1 1 1]), [4 1]);
-    PhysRect(14,:) = ones(1, nMathElements).*1;%colors(elem).*100;%.*rand*100; % apodization
+    PhysRect(14,:) = ones(1, nMathElements);%.*colors(elem).*100;%.*rand*100; % apodization
     PhysRect(15,:) = repmat(PhysInfo(3,:), [1 nMathElements/4]); % math element width
     PhysRect(16,:) = repmat(PhysInfo(4,:), [1 nMathElements/4]); % math element height
     % math element center
