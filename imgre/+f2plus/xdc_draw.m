@@ -22,7 +22,7 @@ if ~isempty(Info)
         Z = [Info(13,elem) Info(22,elem); Info(16,elem) Info(19,elem)];
         C = repmat(Info(5,elem), 2, 2).*colorMultiplier;
         
-        surf(X, Y, Z, C);
+        surf(X, Y, Z, C, 'EdgeColor', 'none');
         hold on;
     end
     
@@ -48,7 +48,7 @@ else
             Z = [Info(9,elem) Info(12,elem) Info(15,elem)];
             C = repmat(Info(5,elem), 1, 3).*colorMultiplier;
             
-            trisurf([1 2 3], X, Y, Z, C);
+            trisurf([1 2 3], X, Y, Z, C, 'EdgeColor', 'none');
             hold on;
         end
         

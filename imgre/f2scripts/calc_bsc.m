@@ -10,9 +10,9 @@ PATH_CFG = fullfile(DIR_MAIN, 'focused_piston');
 
 %% create target field
 for i = 1:1
-    Dim = [0.02 0.02 0.02];
-    Org = [0 0 0.03];
-    targetDensity = 5; % in 1/mm^3
+    Dim = [0.004 0.004 0.004];
+    Org = [0 0 0.005];
+    targetDensity = 10; % in 1/mm^3
     bsc = 1;
     SIGMA = 0.316;
     

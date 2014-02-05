@@ -9,6 +9,8 @@ DIR_FIELDII = [DIR_MAIN 'fieldii/'];
 PATH_F2CFG = fullfile(DIR_FIELDII, 'ice1_defocustx');
 
 %% Set field points (full field)
+global focus;
+focus = 2;
 
 r1 = 0.0035/sin(pi/4);
 rvg = r1:0.0003:(0.055 + 0.0035);
@@ -20,7 +22,7 @@ FieldPos = sphericalmesh(rvg, tvg, pvg, org, 1, 1, 1);
 
 %% Set field points (line)
 global focus;
-focus = 0;
+focus = 2;
 
 r1 = 0.0035/sin(pi/4);
 rvg = 0.00175*focus + 0.03;
@@ -68,20 +70,24 @@ X = reshape(FieldPos(:,1), [], 129);
 Y = reshape(FieldPos(:,2), [], 129);
 Z = reshape(FieldPos(:,3), [], 129);
 
+clear M;
 figure;
-xlabel('x [m]');
-ylabel('y [m]');
-zlabel('z [m]');
+set(gcf,'renderer','zbuffer');
+% xlabel('x [m]');
+% ylabel('y [m]');
+% zlabel('z [m]');
 shading flat
-
-for t = 1:nTimes
+i = 1;
+for t = 1:4:nTimes
     surf(X, Y, Z, squeeze(E(t,:,:)), 'EdgeColor', 'none');
     view([1 0 0]);
     caxis([-40 0]);
     %caxis([minD maxD]./2);
     %axis([-0.02 0.02 0 0.02 minD./2 maxD./2]);
     axis image;
-    pause(0.01)
+    drawnow;
+    M(i) = getframe; 
+    i = i + 1;
 end
 
 

@@ -1,10 +1,10 @@
-import beamform.gfbeamform4
+import beamform.*
 import fieldii.*
 import f2plus.*
 import tools.*
 addpath ./bin/
 
-field_init(0);
+field_init(-1);
 
 %% set field ii parameters and define apertures
 
@@ -39,8 +39,8 @@ xdc_focus_times(TxArray, 0, zeros(1,100));
 %% 10x10 receive array 
 RxArray = xdc_2d_array(10, 10, 90e-6, 90e-6, 10e-6, 10e-6, ones(10,10), 1, ...
     1, [0 0 0.005]);
-xdc_impulse(RxArray, 5.245934383229829e11.*impulse_response);
-xdc_focus_times(TxArray, 0, zeros(1,100));
+xdc_impulse(RxArray, 1.*impulse_response); %5.245934383229829e11
+xdc_focus_times(RxArray, 0, zeros(1,100));
 
 %% 10x10 receive array (small)
 RxArray2 = xdc_2d_array(10, 10, 45e-6, 45e-6, 5e-6, 5e-6, ones(10,10), 1, ...
@@ -109,13 +109,13 @@ PRefED = abs(hilbert(PRef));
 
 %% make backscatter field
 
-ns = 10; % scatterers per mm^3
-Dim = [0.006 0.006 0.003];
+ns = 200; % scatterers per mm^3
+Dim = [0.001 0.001 0.001];
 BSC = 1; % in 1/(cm*sr)
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
 R = 0.01;
 rxDepth = 0.06;
-nIter = 100;
+nIter = 1000;
 tau = 1e-6;
 
 nSample = ceil(rxDepth/SOUND_SPEED*2*fs);
@@ -129,9 +129,9 @@ for i = 1:nIter
     BSPos = bsxfun(@plus, [PosX PosY PosZ], [-Dim(1)/2 -Dim(2)/2 R]);
     %BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)*1000*1540/(0.0005^2));
     %BSAmp = ones(Ns,1).*sqrt(BSC*100/(ns*1000^3)/0.01^2);
-    BSAmp = ones(Ns,1).*2.*1540^2.*sqrt(BSC*100/(pi*ns*1000^3));
+    BSAmp = ones(Ns,1).*1;%2.*1540^2.*sqrt(BSC*100/(pi*ns*1000^3));
     
-    [scat, t0] = calc_scat_multi(RxArray2, RxArray2, BSPos, BSAmp);
+    [scat, t0] = calc_scat_multi(RxArray, RxArray, BSPos, BSAmp);
     scat = padarray(scat.', [0 round(t0*fs)], 'pre');
     scat = padarray(scat, [0 nSample - size(scat, 2)], 'post');
     
