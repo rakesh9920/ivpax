@@ -50,40 +50,57 @@ A = pi*radius^2;
 impulse_response = Prms.impulse_response.';
 excitation = Prms.excitation.';
 fs = Prms.fs;
+f0 = Prms.f0;
 
 focusTime = focus*2/1540;
-gateLength = 10*1540/5e6;
+gateLength = 10*1540/f0;
 gateDuration = gateLength*2/1540;
-gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*100e6);
+gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs);
 
 % time-domain signals
 Vrx = double(SingleRf(gate(1):gate(2)));
 Prx0 = deconvwnr(Vrx, impulse_response).*fs;
 Ptx0 = conv(excitation, impulse_response)./fs;
-Pi = Pressure(round((gate(1):gate(2))./2));
+%Pi = Pressure([round(gate(1)/2):round(gate(2)/2)]);
+gate2 = round((focusTime/2 + [-gateDuration/2 gateDuration/2]).*fs);
+Pi = Pressure(gate2(1):gate2(2));
 
 NFFT = 8196;
-deltaF = 100e6/NFFT;
-%Freq = linspace(0, 100e6/2, NFFT/2 - 1);
+deltaF = fs/NFFT;
 Freq = (0:(NFFT/2-1)).*deltaF;
 F1 = round(3.5e6/deltaF) + 1;
 F2 = round(6.5e6/deltaF) + 1;
 k = (Freq.*2*pi/1540).';
 
 % power spectra
-EXC = abs(fft(excitation, NFFT)./fs).^2;
-EXC = 2.*EXC(1:NFFT/2);
-IMP = abs(fft(impulse_response, NFFT)./fs).^2;
-IMP = 2.*IMP(1:NFFT/2);
-SIR = abs(fft(Sir, NFFT)./fs).^2;
-SIR = 2.*SIR(1:(NFFT/2-1));
-GP = (k.*radius^2/(2*focus));
-PRX0 = abs(fft(Prx0, NFFT)./fs).^2;
-PRX0 = 2.*PRX0(1:(NFFT/2-1));
-PTX0 = abs(fft(Ptx0, NFFT)./fs).^2;
-PTX0 = 2.*PTX0(1:(NFFT/2-1));
-PI = abs(fft(Pi, NFFT)./fs).^2;
-PI = 2.*PI(1:(NFFT/2-1));
+% EXC = abs(fft(excitation, NFFT)./fs);
+% EXC = sqrt(2).*EXC(1:NFFT/2);
+% IMP = abs(fft(impulse_response, NFFT)./fs);
+% IMP = sqrt(2).*IMP(1:NFFT/2);
+% SIR = abs(fft(Sir, NFFT)./fs);
+% SIR = sqrt(2).*SIR(1:(NFFT/2));
+% DTX = k.*SIR;
+% GP = (k.*radius^2/(2*focus)/fs*sqrt(2));
+% PRX0 = abs(fft(Prx0, NFFT)./fs);
+% PRX0 = sqrt(2).*PRX0(1:(NFFT/2));
+% PTX0 = abs(fft(Ptx0, NFFT)./fs);
+% PTX0 = sqrt(2).*PTX0(1:(NFFT/2));
+% PI = abs(fft(Pi, NFFT)./fs);
+% PI = sqrt(2).*PI(1:(NFFT/2));
+EXC = fft(excitation, NFFT)./fs;
+%EXC = sqrt(2).*EXC(1:NFFT/2);
+IMP = fft(impulse_response, NFFT)./fs;
+%IMP = sqrt(2).*IMP(1:NFFT/2);
+SIR = fft(Sir, NFFT);
+SIR = sqrt(2).*SIR(1:(NFFT/2));
+DTX = k.*SIR;
+GP = k.*radius^2/(2*focus);
+PRX0 = fft(Prx0, NFFT);
+PRX0 = sqrt(2).*PRX0(1:(NFFT/2));
+PTX0 = fft(Ptx0, NFFT);
+PTX0 = sqrt(2).*PTX0(1:(NFFT/2));
+PI = fft(Pi, NFFT);
+PI = sqrt(2).*PI(1:(NFFT/2));
 
 
 %BSC1 = Psd1(F1:F2)*A ./ (Psd2(F1:F2).*0.46*(2*pi)^2*focus^2*gateLength);
