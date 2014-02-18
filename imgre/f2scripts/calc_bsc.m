@@ -76,25 +76,3 @@ for i = 1:20
     BSC2(:,i) = PSD1.*k.^2*A ./ (PSD2.*0.46*(2*pi)^2*focus^2*gateLength);
     
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%
