@@ -14,28 +14,22 @@ cfg = str2func(filename);
 
 %% create target field
 
-for i = 1:50
+for i = 1:500
     Dim = [0.004 0.004 0.004];
     Org = [0 0 0.03];
-    targetDensity = 50; % in 1/mm^3
-    bsc = 10;
+    targetDensity = 25.*1000^3; % in 1/mm^3
+    bsc = 1;
     rho = 1000;
     fc = 5e6;
     SR = pi*0.005^2;
     
-    Sigma = (rho*SR/(2*pi)^2)^2/fc^2;
+    %Sigma = (rho*SR/(2*pi)^2)^2/fc^2;
     
-    nTargets = round(Dim(1)*Dim(2)*Dim(3)*targetDensity.*1000^3);
+    nTargets = round(Dim(1)*Dim(2)*Dim(3)*targetDensity);
     
     TargetPos = bsxfun(@plus, bsxfun(@minus, [rand(nTargets,1).*Dim(1) rand(nTargets,1).*Dim(2) ...
         rand(nTargets,1).*Dim(3)], Dim./2), Org);
-    
-    Amp = ones(nTargets, 1).*2*sqrt(2*bsc/targetDensity/Sigma);
-    
-    SctMat = advdouble([TargetPos Amp], {'target','info'});
-    SctMat.meta.numberOfTargets = nTargets;
-    SctMat.meta.fileNumber = 1;
-    
+      
     %%
     
     field_init(-1);
@@ -53,11 +47,21 @@ for i = 1:50
     %phi_mag = sqrt(2/pi*bsc/ns)
     
     if i == 1;
+        
         bsc_one = pi/2*targetDensity;
         [SingleRf, startTime] = calc_scat_multi_bsc(Tx, Rx, [0 0 0.03], bsc_one, Prms);
         nPad = round(startTime*Prms.fs);
         SingleRf = padarray(SingleRf, nPad, 'pre');
         SingleRf = padarray(SingleRf, 1000, 'post');
+        
+        [Pi, startTime] = calc_hp(Tx, [0 0 0.03]);
+        nPad = round(startTime*Prms.fs);
+        Pi = padarray(Pi, nPad, 'pre');
+        
+        [Sir, startTime] = calc_h(Tx, [0 0 0.03]);
+        nPad = round(startTime*Prms.fs);
+        Sir = padarray(Sir, nPad, 'pre').*Prms.fs;
+        
     end
     xdc_free(Tx); xdc_free(Rx); field_end;
     
@@ -65,11 +69,12 @@ for i = 1:50
     
     focus = 0.03;
     fs = Prms.fs;
+    c = Prms.c;
     
-    focusTime = focus*2/1540;
-    gateLength = 5*1540/5e6;
-    gateDuration = gateLength*2/1540;
-    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*100e6) + 1050;
+    focusTime = focus*2/c;
+    gateLength = 7*c/fc;
+    gateDuration = gateLength*2/c;
+    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 1050;
     
     Sig1 = double(MultiRf(gate(1):gate(2)));%.*hanning(gate(2)-gate(1)+1);
     Sig2 = double(SingleRf(gate(1):gate(2)));%.*hanning(gate(2)-gate(1)+1);
