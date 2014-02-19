@@ -6,7 +6,7 @@ DIR_MAIN = './data/bsc/fieldii/';
 DIR_SCT = [DIR_MAIN 'sct/'];
 DIR_RF = [DIR_MAIN 'rf/'];
 
-PATH_CFG = fullfile(DIR_MAIN, 'focused_piston');
+PATH_CFG = fullfile(DIR_MAIN, 'focused_piston_mod');
 
 [dir, filename] = fileparts(PATH_CFG);
 addpath(dir);
@@ -14,7 +14,7 @@ cfg = str2func(filename);
 
 %% create target field
 
-for i = 1:500
+for i = 1:20
     Dim = [0.004 0.004 0.004];
     Org = [0 0 0.03];
     targetDensity = 25.*1000^3; % in 1/mm^3
@@ -74,7 +74,7 @@ for i = 1:500
     focusTime = focus*2/c;
     gateLength = 7*c/fc;
     gateDuration = gateLength*2/c;
-    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 1050;
+    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs);
     
     Sig1 = double(MultiRf(gate(1):gate(2)));%.*hanning(gate(2)-gate(1)+1);
     Sig2 = double(SingleRf(gate(1):gate(2)));%.*hanning(gate(2)-gate(1)+1);

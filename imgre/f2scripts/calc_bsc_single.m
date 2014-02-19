@@ -39,10 +39,8 @@ Sir = padarray(Sir, nPad, 'pre').*Prms.fs;
 [Sir2, startTime] = calc_hhp(Tx, Rx, Pos);
 nPad = round(startTime*Prms.fs);
 Sir2 = padarray(Sir2, nPad, 'pre');
-xdc_free(Tx); 
-xdc_free(Rx);
 
-field_end;
+xdc_free(Tx); xdc_free(Rx); field_end;
 
 %%
 

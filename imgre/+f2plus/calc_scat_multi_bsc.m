@@ -7,30 +7,33 @@ import sigproc.*
 % Points = [0 0 0.03];
 nPoints = size(Points, 1);
 
-[RfMat, startTime] = calc_scat_multi(Tx, Rx, Points, ones(nPoints));
-
-RfCell = num2cell(RfMat, 1);
-
 c = Prms.c;
 rho = Prms.rho;
 SR = Prms.SR;
 ns = Prms.ns;
-fs = Prms.fs;
+% fs = Prms.fs;
 
 phi_mag = sqrt(2/pi*bsc/ns);
+amp = 2*pi*phi_mag/(rho*c*SR);
+
+[RfMat, startTime] = calc_scat_multi(Tx, Rx, Points, ones(nPoints, 1).*amp);
+
+% RfCell = num2cell(RfMat, 1);
+
+out = RfMat;
 
 % phi = zeros(6, 1);
 % phi(4) = -2*pi*phi_mag/c/rho/SR*fs;
 phi = zeros(2000, 1);
 phi(1000) = -2*pi*phi_mag/c/rho/SR*fs;
+% % 
+% % A = (diff(phi).*fs);
+PHI = ffts(phi, 16384, fs);
+A = fftdiff(PHI, fs);
 
-%A = (diff(phi).*fs);
-PHI = ffts(phi, 2048, fs);
-A = iffts(fftdiff(PHI, fs), 'symmetric', fs);
-
-out = cellfun(@(x) conv(x, A)./fs, RfCell, 'UniformOutput', false);
-
-out = cat(2, out{:});
+% out = cellfun(@(x) conv(x, A)./fs, RfCell, 'UniformOutput', false);
+% 
+% out = cat(2, out{:});
 
 % Z = ffts(z, nfft, fs);
 % A = iffts(fftdiff(Z, fs, 2), 'symmetric', fs);
