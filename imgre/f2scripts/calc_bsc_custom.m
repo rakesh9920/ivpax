@@ -14,7 +14,7 @@ cfg = str2func(filename);
 
 %% create target field
 
-for i = 1:20
+for i = 1:1
     Dim = [0.004 0.004 0.004];
     Org = [0 0 0.03];
     targetDensity = 25.*1000^3; % in 1/mm^3
@@ -48,8 +48,8 @@ for i = 1:20
     
     if i == 1;
         
-        bsc_one = pi/2*targetDensity;
-        [SingleRf, startTime] = calc_scat_multi_bsc(Tx, Rx, [0 0 0.03], bsc_one, Prms);
+        %bsc_one = pi/2*targetDensity;
+        [SingleRf, startTime] = calc_scat_multi_bsc(Tx, Rx, [0 0 0.03], bsc, Prms);
         nPad = round(startTime*Prms.fs);
         SingleRf = padarray(SingleRf, nPad, 'pre');
         SingleRf = padarray(SingleRf, 1000, 'post');

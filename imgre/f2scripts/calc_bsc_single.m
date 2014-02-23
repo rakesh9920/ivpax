@@ -36,9 +36,12 @@ Pressure = padarray(Pressure, 2*length(Pressure), 'post');
 [Sir, startTime] = calc_h(Tx, Pos);
 nPad = round(startTime*Prms.fs);
 Sir = padarray(Sir, nPad, 'pre').*Prms.fs;
-[Sir2, startTime] = calc_hhp(Tx, Rx, Pos);
+[Sir1, startTime] = calc_h(Rx, Pos);
 nPad = round(startTime*Prms.fs);
-Sir2 = padarray(Sir2, nPad, 'pre');
+Sir1 = padarray(Sir1, nPad, 'pre').*Prms.fs;
+% [Sir2, startTime] = calc_hhp(Tx, Rx, Pos);
+% nPad = round(startTime*Prms.fs);
+% Sir2 = padarray(Sir2, nPad, 'pre');
 
 xdc_free(Tx); xdc_free(Rx); field_end;
 

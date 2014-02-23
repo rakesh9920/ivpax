@@ -24,8 +24,9 @@ out = RfMat;
 
 % phi = zeros(6, 1);
 % phi(4) = -2*pi*phi_mag/c/rho/SR*fs;
+fs = 100e6;
 phi = zeros(2000, 1);
-phi(1000) = -2*pi*phi_mag/c/rho/SR*fs;
+phi(1000) = 2*pi*phi_mag/c/rho/SR*fs;
 % % 
 % % A = (diff(phi).*fs);
 PHI = ffts(phi, 16384, fs);
