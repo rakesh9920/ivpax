@@ -1,6 +1,7 @@
 function [varargout] = sphericalmesh(rvg, tvg, pvg, org, section, nSection, sliceDim)
 %SPHERICALMESH Creates a spherical mesh and subdivides the mesh into sections
-%along the specified dimension.
+%along the specified dimension.  Spherical coordinates are defined with
+%theta (tvg) as the azimuth angle and phi (pvg) as the polar angle.
 
 dimSize = [numel(rvg) numel(tvg) numel(pvg)];
 

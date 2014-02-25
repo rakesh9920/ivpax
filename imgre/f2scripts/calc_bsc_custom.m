@@ -1,6 +1,6 @@
 %%
 
-import f2plus.batch_calc_multi tools.advdouble
+import f2plus.batch_calc_multi tools.advdouble f2plus.sct_spherical
 
 DIR_MAIN = './data/bsc/fieldii/';
 DIR_SCT = [DIR_MAIN 'sct/'];
@@ -14,21 +14,28 @@ cfg = str2func(filename);
 
 %% create target field
 
-for i = 1:500
-    Dim = [0.004 0.004 0.004];
-    Org = [0 0 0.03];
-    targetDensity = 25.*1000^3; % in 1/mm^3
+for i = 1:20
+%     Dim = [0.03 0.03 0.015];
+%     Org = [0 0 0.0085];
+    targetDensity = 20.*1000^3; % in 1/mm^3
     bsc = 1;
     rho = 1000;
     fc = 5e6;
     SR = pi*0.005^2;
     
+    rvg = [0.007 0.013];
+    tvg = [0 2*pi];
+    pvg = [0 pi/2];
+    org = [0 0 0];
+    
+    TargetPos = sct_spherical(rvg, tvg, pvg, org, targetDensity);
+    
     %Sigma = (rho*SR/(2*pi)^2)^2/fc^2;
     
-    nTargets = round(Dim(1)*Dim(2)*Dim(3)*targetDensity);
-    
-    TargetPos = bsxfun(@plus, bsxfun(@minus, [rand(nTargets,1).*Dim(1) rand(nTargets,1).*Dim(2) ...
-        rand(nTargets,1).*Dim(3)], Dim./2), Org);
+%     nTargets = round(Dim(1)*Dim(2)*Dim(3)*targetDensity);
+%     
+%     TargetPos = bsxfun(@plus, bsxfun(@minus, [rand(nTargets,1).*Dim(1) rand(nTargets,1).*Dim(2) ...
+%         rand(nTargets,1).*Dim(3)], Dim./2), Org);
       
     %%
     
@@ -48,8 +55,9 @@ for i = 1:500
     
     if i == 1;
         
-        bsc_one = pi/2*targetDensity;
-        [SingleRf, startTime] = calc_scat_multi_bsc(Tx, Rx, [0 0 0.03], bsc_one, Prms);
+        bsc_one = pi/2*targetDensity; % from pressure equation
+        %bsc_one = 2/pi*targetDensity; % from intensity equation
+        [SingleRf, startTime] = calc_scat_multi_bsc(Tx, Rx, [0 0 Prms.focus], bsc_one, Prms);
         nPad = round(startTime*Prms.fs);
         SingleRf = padarray(SingleRf, nPad, 'pre');
         SingleRf = padarray(SingleRf, 1000, 'post');
@@ -67,26 +75,29 @@ for i = 1:500
     
     %%
     
-    focus = 0.03;
+    focus = Prms.focus;
     fs = Prms.fs;
     c = Prms.c;
     
     focusTime = focus*2/c;
-    gateLength = 7*c/fc;
+    gateLength = 5*c/fc;
     gateDuration = gateLength*2/c;
-    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs);
+    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
     
     Sig1 = double(MultiRf(gate(1):gate(2)));%.*hanning(gate(2)-gate(1)+1);
     Sig2 = double(SingleRf(gate(1):gate(2)));%.*hanning(gate(2)-gate(1)+1);
+    
+    Sigs1(:,i) = Sig1;
     
     NFFT = 8196;
     deltaF = fs/NFFT;
     Freq = (-NFFT/2-1:NFFT/2).*deltaF;
     F1 = round(3.5e6/deltaF) + NFFT/2 + 1;
-    F2 = round(6.5e6/deltaF) + NFFT/2 + 1;
+    F2 = round(8.5e6/deltaF) + NFFT/2 + 1;
     
     SIG1 = ffts(Sig1, NFFT, fs);
     SIG2 = ffts(Sig2, NFFT, fs);
+    
     PSD1 = 2.*abs(SIG1(F1:F2)).^2;
     PSD2 = 2.*abs(SIG2(F1:F2)).^2;
     

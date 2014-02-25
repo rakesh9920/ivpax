@@ -12,7 +12,8 @@ SR = Prms.SR;
 ns = Prms.ns;
 % fs = Prms.fs;
 
-phi_mag = sqrt(2/pi*bsc/ns);
+phi_mag = sqrt(2/pi*bsc/ns); % from pressure equation
+%phi_mag = sqrt(pi/2*bsc/ns); % from intensity equation
 amp = 2*pi*phi_mag/(rho*c*SR);
 
 [RfMat, startTime] = calc_scat_multi(Tx, Rx, Points, ones(nPoints, 1).*amp);
