@@ -14,8 +14,8 @@ cfg = str2func(filename);
 
 %% create target field
 
-for i = 1:20
-%     Dim = [0.03 0.03 0.015];
+for i = 1:15
+%     Dim = [0.004 0.004 0.004];
 %     Org = [0 0 0.0085];
     targetDensity = 20.*1000^3; % in 1/mm^3
     bsc = 1;
@@ -23,17 +23,14 @@ for i = 1:20
     fc = 5e6;
     SR = pi*0.005^2;
     
-    rvg = [0.007 0.013];
+    rvg = [0.017 0.023];
     tvg = [0 2*pi];
     pvg = [0 pi/2];
     org = [0 0 0];
     
     TargetPos = sct_spherical(rvg, tvg, pvg, org, targetDensity);
     
-    %Sigma = (rho*SR/(2*pi)^2)^2/fc^2;
-    
-%     nTargets = round(Dim(1)*Dim(2)*Dim(3)*targetDensity);
-%     
+%     nTargets = round(Dim(1)*Dim(2)*Dim(3)*targetDensity);     
 %     TargetPos = bsxfun(@plus, bsxfun(@minus, [rand(nTargets,1).*Dim(1) rand(nTargets,1).*Dim(2) ...
 %         rand(nTargets,1).*Dim(3)], Dim./2), Org);
       
@@ -55,8 +52,9 @@ for i = 1:20
     
     if i == 1;
         
-        bsc_one = pi/2*targetDensity; % from pressure equation
+        %bsc_one = pi/2*targetDensity; % from pressure equation
         %bsc_one = 2/pi*targetDensity; % from intensity equation
+        bsc_one = targetDensity; % from Chen et al.
         [SingleRf, startTime] = calc_scat_multi_bsc(Tx, Rx, [0 0 Prms.focus], bsc_one, Prms);
         nPad = round(startTime*Prms.fs);
         SingleRf = padarray(SingleRf, nPad, 'pre');
