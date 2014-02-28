@@ -1,6 +1,25 @@
 
-PATH_FILE = './var';
-load PATH_FILE;
+DIR_RAW = './data/bsc/fieldii/rf/';
+
+Sigs1 = [];
+for file = 1:12
+    
+   filename = fullfile(DIR_RAW, ['bsc_raw' num2str(file)]);
+   load(filename);
+   
+   Sigs1 = [Sigs1 MultiSigs];
+end
+
+%%
+
+import sigproc.*
+
+PATH_FILE = './data/bsc/fieldii/rf/bsc_sim_data';
+load(PATH_FILE);
+
+Sig2 = SingleSig;
+
+%%
 
 focus = Prms.Focus;
 fs = Prms.SampleFrequency;
@@ -37,8 +56,10 @@ BSC = RAT.*SR ./ (0.46*(2*pi)^2*focus^2*gateLength);
 B = BSC(1:F3,:);
 
 figure;
-plot(mean(BSC, 2));
-axis([0 450 0 2])
+plot(Freq(F1:F2), mean(BSC, 2)); hold on;
+plot(Freq(F1:F2), mean(BSC, 2) + 1.96/sqrt(504),'r:');
+plot(Freq(F1:F2), mean(BSC, 2) - 1.96/sqrt(504),'r:');
+axis([Freq(F1) Freq(F2) 0 2]);
 figure;
 hist(sqrt(BSC(:)), 30);
 figure;
