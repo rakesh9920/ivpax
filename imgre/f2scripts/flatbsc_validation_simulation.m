@@ -77,8 +77,8 @@ for inst = 1:nInstances
     Sig1 = double(MultiRf(gate(1):gate(2)));
     Sig2 = double(SingleRf(gate(1):gate(2)));
     
-    MultiSigs(:,inst) = Sig1;
-    SingleSig = Sig2;
+    MultiSigs(:,inst) = MultiRf;
+    SingleSig = SingleRf;
 end
 
 save(tempname(pwd),'MultiSigs', 'SingleSig', 'Prms');

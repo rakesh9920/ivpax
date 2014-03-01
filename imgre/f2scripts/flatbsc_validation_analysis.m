@@ -12,7 +12,7 @@ end
 
 %%
 
-import sigproc.*
+import sigproc.* f2plus.*
 
 PATH_FILE = './data/bsc/fieldii/rf/bsc_sim_data';
 load(PATH_FILE);
@@ -33,7 +33,8 @@ gateDuration = gateLength*2/c;
 gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
 NFFT = 2^13;
 deltaF = fs/NFFT;
-Freq = (-NFFT/2-1:NFFT/2).*deltaF;
+%Freq = (-NFFT/2-1:NFFT/2).*deltaF;
+Freq = (-NFFT/2:NFFT/2-1).*deltaF;
 F1 = round(3.5e6/deltaF) + NFFT/2 + 1;
 F2 = round(8.5e6/deltaF) + NFFT/2 + 1;
 F3 = round(6.5e6/deltaF) + NFFT/2 + 1 - F1;
@@ -52,15 +53,27 @@ PSD1 = 2.*abs(WINSIGS1(F1:F2,:)).^2.*energyCorrection;
 PSD2 = 2.*abs(SIG2(F1:F2)).^2;
 
 RAT = bsxfun(@rdivide, PSD1, PSD2./(k.^2));
-BSC = RAT.*SR ./ (0.46*(2*pi)^2*focus^2*gateLength);
-B = BSC(1:F3,:);
+
+% CAM
+CAM = RAT.*SR ./ (0.46*(2*pi)^2*focus^2*gateLength);
+mfe = sum(abs(mean(CAM,2) - 1)*100/size(CAM,1));
+
+% CM
+r1 = focus - gateLength/2;
+r2 = focus + gateLength/2;
+DS = (integral(@dsapprox, r1, r2, 'ArrayValued', true)./gateLength).';
+
+CM = bsxfun(@rdivide, RAT.*SR^2 ./ ((2*pi)^2*focus^4*gateLength), DS(F1:F2));
+
+
+%%
 
 figure;
-plot(Freq(F1:F2), mean(BSC, 2)); hold on;
-plot(Freq(F1:F2), mean(BSC, 2) + 1.96/sqrt(504),'r:');
-plot(Freq(F1:F2), mean(BSC, 2) - 1.96/sqrt(504),'r:');
+plot(Freq(F1:F2), mean(CAM, 2),'r'); hold on;
+plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(504),'g:');
+plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(504),'g:');
 axis([Freq(F1) Freq(F2) 0 2]);
 figure;
-hist(sqrt(BSC(:)), 30);
+hist(sqrt(CAM(:)), 30);
 figure;
-probplot('rayleigh', sqrt(BSC(:)));
+probplot('rayleigh', sqrt(CAM(:)));
