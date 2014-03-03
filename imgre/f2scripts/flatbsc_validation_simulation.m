@@ -21,6 +21,9 @@ fc = 5e6;
 % Dim = [0.008 0.008 0.008];
 % Org = [0 0 0.02];
 
+pause(rand*60);
+rng('shuffle');
+
 for inst = 1:nInstances
     
     rvg = [0.015 0.025];

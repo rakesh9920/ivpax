@@ -1,23 +1,23 @@
 
-DIR_RAW = './data/bsc/fieldii/rf/';
+DIR_RAW = './data/bsc/fieldii/rf/focused_piston_1000_full2';
 
-Sigs1 = [];
-for file = 1:12
+MultiSigs1 = [];
+for file = 1:48
     
    filename = fullfile(DIR_RAW, ['bsc_raw' num2str(file)]);
    load(filename);
    
-   Sigs1 = [Sigs1 MultiSigs];
+   MultiSigs1 = [MultiSigs1 MultiSigs];
 end
 
 %%
 
 import sigproc.* f2plus.*
 
-PATH_FILE = './data/bsc/fieldii/rf/bsc_sim_data';
+PATH_FILE = './data/bsc/fieldii/rf/focused_piston_1000_full2/bsc_sim_data';
 load(PATH_FILE);
 
-Sig2 = SingleSig;
+%Sig2 = SingleSig;
 
 %%
 
@@ -28,7 +28,7 @@ fc = Prms.CenterFrequency;
 SR = Prms.Area;
 
 focusTime = focus*2/c;
-gateLength = 5*c/fc;
+gateLength = 3*c/fc;
 gateDuration = gateLength*2/c;
 gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
 NFFT = 2^13;
@@ -40,7 +40,10 @@ F2 = round(8.5e6/deltaF) + NFFT/2 + 1;
 F3 = round(6.5e6/deltaF) + NFFT/2 + 1 - F1;
 k = (Freq(F1:F2).*2*pi/1540).';
 
-Win = rectwin(gate(2)-gate(1)+1);
+Sigs1 = MultiSigs1(gate(1):gate(2),:);
+Sig2 = SingleSig(gate(1):gate(2));
+
+Win = hanning(gate(2)-gate(1)+1);
 WinSigs1 = bsxfun(@times, Sigs1, Win);
 % Energy = sum(Sigs1.^2, 1);
 % winEnergy = sum(Win.^2, 1);
@@ -57,21 +60,24 @@ RAT = bsxfun(@rdivide, PSD1, PSD2./(k.^2));
 % CAM
 CAM = RAT.*SR ./ (0.46*(2*pi)^2*focus^2*gateLength);
 mfe = sum(abs(mean(CAM,2) - 1)*100/size(CAM,1));
+%figure; hist(sqrt(CAM(:)),25);
 
 % CM
 r1 = focus - gateLength/2;
 r2 = focus + gateLength/2;
-DS = (integral(@dsapprox, r1, r2, 'ArrayValued', true)./gateLength).';
+DS = (integral(@dsfocused, r1, r2, 'ArrayValued', true)./gateLength).';
 
 CM = bsxfun(@rdivide, RAT.*SR^2 ./ ((2*pi)^2*focus^4*gateLength), DS(F1:F2));
+plot(Freq(F1:F2), mean(CM,2));
 
 
 %%
 
 figure;
-plot(Freq(F1:F2), mean(CAM, 2),'r'); hold on;
-plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(504),'g:');
-plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(504),'g:');
+plot(Freq(F1:F2), mean(CAM, 2), 'b'); hold on;
+plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(size(CAM, 2)), 'r:');
+plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'r:');
+plot(Freq(F1:F2), ones(1, size(CAM, 1)), 'g:');
 axis([Freq(F1) Freq(F2) 0 2]);
 figure;
 hist(sqrt(CAM(:)), 30);

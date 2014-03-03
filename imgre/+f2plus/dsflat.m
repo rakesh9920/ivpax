@@ -1,42 +1,29 @@
-function [ds] = dsapprox(r)
+function [ds] = dsflat(r)
 %DSAPPROX
 
 fs = 100e6;
 nfft = 2^13;
-deltaF =fs/nfft;
+deltaF = fs/nfft;
 f = (-nfft/2:nfft/2-1).*deltaF;
 
-nrat = length(r);
+nr = length(r);
 nf = length(f);
 
-ds = zeros(nrat, nf);
+ds = zeros(nr, nf);
 
-for ridx = 1:nrat
+for ridx = 1:nr
     for fidx = 1:nf
         
         ds(ridx, fidx) = approx(r(ridx), f(fidx)); 
     end
 end
 
-
-%ds = arrayfun(@approx, ratf);
-
-% ds = zeros(size(rat,2), size(f, 2));
-%
-% for i = 1:size(rat,2)
-%     if ~isscalar(f)
-%         ds(i,:) = arrayfun(@approx, repmat(rat(i), size(f)), f);
-%     else
-%         ds(i,:) = approx(rat, f);
-%     end
-% end
-
 end
 
 function [ds] = approx(r, f)
 
 Einf = 0.46;
-a = 0.0025;
+a = 0.002512917929410;
 c = 1540;
 
 k = 2*pi*f/c;
