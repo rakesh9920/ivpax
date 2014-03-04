@@ -15,7 +15,7 @@ addpath(filedir);
 cfg = str2func(filename);
 
 nInstances = 1;
-targetDensity = 1.*1000^3; % in 1/mm^3
+targetDensity = 20.*1000^3; % in 1/mm^3
 bsc = 1;
 fc = 5e6;
 % Dim = [0.008 0.008 0.008];

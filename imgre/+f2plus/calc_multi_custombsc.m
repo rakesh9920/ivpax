@@ -1,6 +1,29 @@
-function [ output_args ] = calc_multi_custombsc( input_args )
-%CALC_SCAT_MULTI_CUSTOM Summary of this function goes here
-%   Detailed explanation goes here
+function [RfMat, startTime] = calc_multi_custombsc(Tx, Rx, Points, bsc, varargin)
+%CALC_SCAT_MULTI_CUSTOM 
+
+import fieldii.calc_scat_multi
+
+Parser = inputParser();
+Parser.KeepUnmatched = true;
+Parser.addOptional('SoundSpeed', 1540);
+Parser.addOptional('FluidDensity', 1000);
+Parser.addOptional('Area', 1);
+Parser.addOptional('TargetDensity', 10*1000^3);
+
+Parser.parse(varargin{:});
+Prms = Parser.Results;
+SoundSpeed = Prms.SoundSpeed;
+FluidDensity = Prms.FluidDensity;
+Area = Prms.Area;
+TargetDensity = Prms.TargetDensity;
+
+nPoints = size(Points, 1);
+
+phi = sqrt(bsc/TargetDensity);
+amp = 2*pi*phi/(FluidDensity*SoundSpeed*Area);
+
+[RfMat, startTime] = calc_scat_multi(Tx, Rx, Points, ones(nPoints, 1).*amp);
+
 
 % RfCell = num2cell(RfMat, 1);
 % 

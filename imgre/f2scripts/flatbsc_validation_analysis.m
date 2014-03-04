@@ -28,7 +28,7 @@ fc = Prms.CenterFrequency;
 SR = Prms.Area;
 
 focusTime = focus*2/c;
-gateLength = 3*c/fc;
+gateLength = 15*c/fc;
 gateDuration = gateLength*2/c;
 gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
 NFFT = 2^13;
@@ -63,12 +63,12 @@ mfe = sum(abs(mean(CAM,2) - 1)*100/size(CAM,1));
 %figure; hist(sqrt(CAM(:)),25);
 
 % CM
-r1 = focus - gateLength/2;
-r2 = focus + gateLength/2;
-DS = (integral(@dsfocused, r1, r2, 'ArrayValued', true)./gateLength).';
-
-CM = bsxfun(@rdivide, RAT.*SR^2 ./ ((2*pi)^2*focus^4*gateLength), DS(F1:F2));
-plot(Freq(F1:F2), mean(CM,2));
+% r1 = focus - gateLength/2;
+% r2 = focus + gateLength/2;
+% DS = (integral(@dsfocused, r1, r2, 'ArrayValued', true)./gateLength).';
+% 
+% CM = bsxfun(@rdivide, RAT.*SR^2 ./ ((2*pi)^2*focus^4*gateLength), DS(F1:F2));
+% plot(Freq(F1:F2), mean(CM,2));
 
 
 %%
@@ -76,10 +76,19 @@ plot(Freq(F1:F2), mean(CM,2));
 figure;
 plot(Freq(F1:F2), mean(CAM, 2), 'b'); hold on;
 plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(size(CAM, 2)), 'r:');
-plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'r:');
 plot(Freq(F1:F2), ones(1, size(CAM, 1)), 'g:');
-axis([Freq(F1) Freq(F2) 0 2]);
+plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'r:');
+axis([Freq(F1) Freq(F2) 0.5 1.5]);
+legend('mean value','95% confidence interval','expected value');
+xlabel('frequency [Hz]');
+ylabel('backscattering coefficient [m^-1]');
+title('backscattering coefficient measured with CAM/point reference, hanning window and 15\lambda gate length');
+
 figure;
 hist(sqrt(CAM(:)), 30);
+xlabel('\eta^{1/2} [m^{-1/2}]');
+ylabel('number of occurences');
+title('histogram for the square root backscattering coefficient');
+
 figure;
 probplot('rayleigh', sqrt(CAM(:)));
