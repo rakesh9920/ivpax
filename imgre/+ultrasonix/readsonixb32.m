@@ -1,10 +1,10 @@
-function [rfcube uHeader] = readsonixb32(filename)
-
-% NEEDS FIXING
+function [RfCube, uHeader] = readsonixb32(filename)
+%READSONIXB32 Reads *.b32 ultrasonix files containing 8-bit XRGB data into
+%a matrix with dimensions height, width, R:G:B, frame.
 
 fid = fopen(filename, 'r');
 uFileHeader = fread(fid, 19, 'int32');
-rfdata = fread(fid, inf, 'uint32');
+RfStream = fread(fid, inf, 'uint8=>uint8');
 fclose(fid);
 
 fields = {'type', 'frames', 'w', 'h', 'ss','ulx','uly','urx','ury','brx'...
@@ -14,22 +14,19 @@ for f = 1:19
     uHeader.(char(fields(f))) = uFileHeader(f);
 end
 
-numOfFrames = uHeader.frames;
-samplesPerLine = uHeader.w;
-linesPerFrame = uHeader.h;
-frameSize = samplesPerLine*linesPerFrame;
+nFrames = uHeader.frames;
+width = uHeader.w;
+height = uHeader.h;
 
-rfcube = zeros(linesPerFrame, samplesPerLine, 3, numOfFrames,'uint32');
+% reshape data stream
+RfCube = reshape(RfStream, [4 width height nFrames]);
 
-for frame = 1:numOfFrames
-    
-    front = (frame-1)*frameSize + 1;
-    for line = 1:linesPerFrame
-        back =  front + samplesPerLine - 1;
-        rfcube(line,:,frame) = rfdata(front:back);
-        front = back + 1;
-    end
-end
+% permute dimensions into the order: height, width, color channel, frame
+% normalize RGB values so that 0.0 <= value <= 1.0
+RfCube = permute(RfCube, [3 2 1 4]);
+
+% remove last color channel (X) which is unused
+RfCube(:,:,4,:) = [];
 
 
 

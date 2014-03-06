@@ -22,7 +22,7 @@ Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
 % fc = 5e6;
 
 pt = rand*60;
-disp(sprintf('pausing for %0.0f seconds...', pt));
+fprintf('pausing for %0.0f seconds...', pt);
 pause(pt);
 rng('shuffle');
 

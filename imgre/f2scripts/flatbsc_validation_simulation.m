@@ -5,8 +5,6 @@ import fieldii.field_init fieldii.field_end fieldii.xdc_free
 addpath ./bin/
 
 DIR_MAIN = './data/bsc/fieldii/';
-DIR_SCT = [DIR_MAIN 'sct/'];
-DIR_RF = [DIR_MAIN 'rf/'];
 
 PATH_CFG = fullfile(DIR_MAIN, 'focused_piston_mod');
 
@@ -22,7 +20,7 @@ bsc = 1;
 % Org = [0 0 0.02];
 
 pt = rand*60;
-disp(sprintf('pausing for %0.0f seconds...', pt));
+fprintf('pausing for %0.0f seconds...', pt);
 pause(pt);
 rng('shuffle');
 
