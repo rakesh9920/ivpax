@@ -1,4 +1,4 @@
-function [RfMatOut, startTime] = calc_multi_custombsc(Tx, Rx, Points, Filt)
+function [RfMatOut, startTime] = calc_multi_custombsc(Tx, Rx, Points, Filt, fs)
 %CALC_SCAT_MULTI_CUSTOM 
 
 import fieldii.calc_scat_multi
@@ -12,7 +12,7 @@ Filt = shiftdata(Filt, []);
 RfMatOut = zeros(size(RfMat));
 
 for sig = 1:size(RfMat, 2);
-    RfMatOut(:,sig) = conv(RfMat(:,sig), Filt, 'same');
+    RfMatOut(:,sig) = conv(RfMat(:,sig), Filt, 'same')./fs;
 end
 
 % RfCell = num2cell(RfMat, 1);

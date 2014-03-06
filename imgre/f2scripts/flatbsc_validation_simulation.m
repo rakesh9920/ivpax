@@ -15,13 +15,15 @@ addpath(filedir);
 cfg = str2func(filename);
 
 nInstances = 1;
-targetDensity = 20.*1000^3; % in 1/mm^3
+targetDensity = 1.*1000^3; % in 1/mm^3
 bsc = 1;
-fc = 5e6;
+% fc = 5e6;
 % Dim = [0.008 0.008 0.008];
 % Org = [0 0 0.02];
 
-pause(rand*60);
+pt = rand*60;
+disp(sprintf('pausing for %0.0f seconds...', pt));
+pause(pt);
 rng('shuffle');
 
 for inst = 1:nInstances
@@ -68,17 +70,17 @@ for inst = 1:nInstances
     field_end;
     %%%%%%%%%%%%%%% End Field II %%%%%%%%%%%%%%%%%
     
-    focus = Prms.Focus;
-    fs = Prms.SampleFrequency;
-    c = Prms.SoundSpeed;
-    
-    focusTime = focus*2/c;
-    gateLength = 5*c/fc;
-    gateDuration = gateLength*2/c;
-    gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
-    
-    Sig1 = double(MultiRf(gate(1):gate(2)));
-    Sig2 = double(SingleRf(gate(1):gate(2)));
+%     focus = Prms.Focus;
+%     fs = Prms.SampleFrequency;
+%     c = Prms.SoundSpeed;
+%     
+%     focusTime = focus*2/c;
+%     gateLength = 5*c/fc;
+%     gateDuration = gateLength*2/c;
+%     gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
+%     
+%     Sig1 = double(MultiRf(gate(1):gate(2)));
+%     Sig2 = double(SingleRf(gate(1):gate(2)));
     
     MultiSigs(:,inst) = MultiRf;
     SingleSig = SingleRf;

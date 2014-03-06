@@ -19,7 +19,7 @@ nfft = 2^13;
 Bsc = zeros(1, nfft);
 Bsc(1:nfft/2+1) = linspace(10, 0, nfft/2+1);
 Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
-fc = 5e6;
+% fc = 5e6;
 
 pt = rand*60;
 disp(sprintf('pausing for %0.0f seconds...', pt));
@@ -45,10 +45,11 @@ for inst = 1:nInstances
     
     Prms.TargetDensity = targetDensity;
     Prms.Area = xdc_area(Rx);
+    fs = Prms.SampleFrequency;
     
     Filt = bsc2filt(Bsc, Prms);
     
-    [MultiRf, startTime] = calc_multi_custombsc(Tx, Rx, TargetPos, Filt);
+    [MultiRf, startTime] = calc_multi_custombsc(Tx, Rx, TargetPos, Filt, fs);
     nPad = round(startTime*Prms.SampleFrequency);
     MultiRf = padarray(MultiRf, nPad, 'pre');
     MultiRf = padarray(MultiRf, 1000, 'post');
@@ -59,7 +60,7 @@ for inst = 1:nInstances
         %         bsc_one = 2/pi*targetDensity; % from intensity equation
         bsc_one = targetDensity; % from Chen et al.
         [SingleRf, startTime] = calc_multi_custombsc(Tx, Rx, [0 0 Prms.Focus], ...
-            bsc2filt(ones(1, nfft).*bsc_one));
+            bsc2filt(ones(1, nfft).*bsc_one), fs);
         nPad = round(startTime*Prms.SampleFrequency);
         SingleRf = padarray(SingleRf, nPad, 'pre');
         SingleRf = padarray(SingleRf, 1000, 'post');
