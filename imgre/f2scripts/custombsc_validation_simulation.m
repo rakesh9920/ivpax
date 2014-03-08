@@ -60,7 +60,7 @@ for inst = 1:nInstances
         %         bsc_one = 2/pi*targetDensity; % from intensity equation
         bsc_one = targetDensity; % from Chen et al.
         [SingleRf, startTime] = calc_multi_custombsc(Tx, Rx, [0 0 Prms.Focus], ...
-            bsc2filt(ones(1, nfft).*bsc_one), fs);
+            bsc2filt(ones(1, nfft).*bsc_one, Prms), fs);
         nPad = round(startTime*Prms.SampleFrequency);
         SingleRf = padarray(SingleRf, nPad, 'pre');
         SingleRf = padarray(SingleRf, 1000, 'post');

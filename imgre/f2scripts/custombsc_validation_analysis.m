@@ -2,7 +2,7 @@
 DIR_RAW = './data/bsc/fieldii/rf/custom1_run1';
 
 MultiSigs1 = [];
-for file = 1:12
+for file = 1:36
     
    filename = fullfile(DIR_RAW, ['bsc_raw' num2str(file)]);
    load(filename);
@@ -26,6 +26,10 @@ fs = Prms.SampleFrequency;
 c = Prms.SoundSpeed;
 fc = Prms.CenterFrequency;
 SR = Prms.Area;
+
+Bsc = zeros(1, nfft);
+Bsc(1:nfft/2+1) = linspace(10, 0, nfft/2+1);
+Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
 
 focusTime = focus*2/c;
 gateLength = 15*c/fc;
@@ -62,9 +66,7 @@ CAM = RAT.*SR ./ (0.46*(2*pi)^2*focus^2*gateLength);
 mfe = sum(abs(mean(CAM,2) - Bsc(F1:F2).')*100/size(CAM,1))
 %figure; hist(sqrt(CAM(:)),25);
 
-Bsc = zeros(1, nfft);
-Bsc(1:nfft/2+1) = linspace(10, 0, nfft/2+1);
-Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
+
 
 % CM
 % r1 = focus - gateLength/2;
@@ -79,13 +81,13 @@ Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
 
 figure;
 plot(Freq(F1:F2), mean(CAM, 2), 'b'); hold on;
-plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(size(CAM, 2)), 'r:');
-plot(Freq(F1:F2), Bsc(F1:F2), 'g:');
-plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'r:');
-axis([Freq(F1) Freq(F2) 0.5 1.5]);
+plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(size(CAM, 2)), 'b:');
+plot(Freq(F1:F2), Bsc(F1:F2), 'r');
+plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'b:');
+axis([Freq(F1) Freq(F2) 0.5 2]);
 legend('mean value','95% confidence interval','expected value');
 xlabel('frequency [Hz]');
-ylabel('backscattering coefficient [m^-1]');
+ylabel('backscattering coefficient [m^{-1}sr^{-1}]');
 title('backscattering coefficient measured with CAM/point reference, hanning window and 15\lambda gate length');
 
 figure;
