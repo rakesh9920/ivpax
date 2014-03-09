@@ -1,8 +1,8 @@
 
-DIR_RAW = './data/bsc/fieldii/rf/custom1_run1';
+DIR_RAW = './data/bsc/fieldii/rf/custombsc_linear_run1';
 
 MultiSigs1 = [];
-for file = 1:36
+for file = 1:48
     
    filename = fullfile(DIR_RAW, ['bsc_raw' num2str(file)]);
    load(filename);
@@ -27,12 +27,8 @@ c = Prms.SoundSpeed;
 fc = Prms.CenterFrequency;
 SR = Prms.Area;
 
-Bsc = zeros(1, nfft);
-Bsc(1:nfft/2+1) = linspace(10, 0, nfft/2+1);
-Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
-
 focusTime = focus*2/c;
-gateLength = 15*c/fc;
+gateLength = 10*c/fc;
 gateDuration = gateLength*2/c;
 gate = round((focusTime + [-gateDuration/2 gateDuration/2]).*fs) + 30;
 nfft = 2^13;
@@ -44,10 +40,14 @@ F2 = round(8.5e6/deltaF) + nfft/2 + 1;
 F3 = round(6.5e6/deltaF) + nfft/2 + 1 - F1;
 k = (Freq(F1:F2).*2*pi/1540).';
 
+Bsc = zeros(1, nfft);
+Bsc(1:nfft/2+1) = linspace(10, 0, nfft/2+1);
+Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
+
 Sigs1 = MultiSigs1(gate(1):gate(2),:);
 Sig2 = SingleSig(gate(1):gate(2));
 
-Win = hanning(gate(2)-gate(1)+1);
+Win = blackmanharris(gate(2)-gate(1)+1);
 WinSigs1 = bsxfun(@times, Sigs1, Win);
 % Energy = sum(Sigs1.^2, 1);
 % winEnergy = sum(Win.^2, 1);

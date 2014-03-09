@@ -1,47 +1,47 @@
 function [RfMatOut] = alignsumrf(varargin)
-% Aligns (by zero-padding) and sums RF matrices based on their start times
-% and frames.
+%ALIGNSUMRF Aligns (by zero-padding) and sums RF matrices based on their
+%start times and frames.
 
 nMats = size(varargin, 2);
 
 % set output matrix to the first input rf matrix.
 RfMatOut = varargin{1};
-sampleFrequency = RfMatOut.meta.sampleFrequency;
+sampleFrequency = RfMatOut.meta.SampleFrequency;
 
 for mat = 2:nMats
     
     RfMat = varargin{mat};
-    startTime = RfMat.meta.startTime;
-    startFrame = RfMat.meta.startFrame;
+    startTime = RfMat.meta.StartTime;
+    startFrame = RfMat.meta.StartFrame;
     endFrame = RfMat.meta.endFrame;
     
     % determine frame padding and which matrix to pad (if necessary)
-    frontFramePad =  startFrame - RfMatOut.meta.startFrame;
+    frontFramePad =  startFrame - RfMatOut.meta.StartFrame;
     
     if frontFramePad > 0
         RfMat = padarray(RfMat, [0 0 frontFramePad], 'pre');
     elseif frontFramePad < 0
         RfMatOut = padarray(RfMatOut, [0 0 -frontFramePad], 'pre');
-        RfMatOut.meta.startFrame = startFrame;
+        RfMatOut.meta.StartFrame = startFrame;
     end
     
-    backFramePad = RfMatOut.meta.endFrame - endFrame;
+    backFramePad = RfMatOut.meta.EndFrame - endFrame;
     
     if backFramePad > 0
         RfMat = padarray(RfMat, [0 0 backFramePad], 'post');
     elseif backFramePad < 0
         RfMatOut = padarray(RfMatOut, [0 0 -backFramePad], 'post');
-        RfMatOut.meta.endFrame = endFrame;
+        RfMatOut.meta.EndFrame = endFrame;
     end
     
     % determine sample padding and which matrix to pad (if necessary)
-    frontPad = round((startTime - RfMatOut.meta.startTime)*sampleFrequency);
+    frontPad = round((startTime - RfMatOut.meta.StartTime)*sampleFrequency);
     
     if frontPad > 0
         RfMat = padarray(RfMat, [frontPad 0 0], 'pre');
     elseif frontPad < 0
         RfMatOut = padarray(RfMatOut, [-frontPad 0 0], 'pre');
-        RfMatOut.meta.startTime = startTime;
+        RfMatOut.meta.StartTime = startTime;
     end
     
     backPad = size(RfMatOut, 1) - size(RfMat, 1);
