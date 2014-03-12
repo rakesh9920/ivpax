@@ -1,11 +1,17 @@
 function [RfMatOut, startTime] = calc_multi_custombsc(Tx, Rx, Points, Filt, fs)
-%CALC_SCAT_MULTI_CUSTOM 
+%CALC_SCAT_MULTI_CUSTOM
 
-import fieldii.calc_scat_multi
+import fieldii.calc_scat_multi fieldii.calc_scat
 
 nPoints = size(Points, 1);
 
 [RfMat, startTime] = calc_scat_multi(Tx, Rx, Points, ones(nPoints, 1));
+
+%     if startTime < 0.001
+%         break
+%     else
+%         pause
+%     end
 
 Filt = shiftdata(Filt, []);
 

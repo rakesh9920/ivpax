@@ -13,7 +13,7 @@ for mat = 2:nMats
     RfMat = varargin{mat};
     startTime = RfMat.meta.StartTime;
     startFrame = RfMat.meta.StartFrame;
-    endFrame = RfMat.meta.endFrame;
+    endFrame = RfMat.meta.EndFrame;
     
     % determine frame padding and which matrix to pad (if necessary)
     frontFramePad =  startFrame - RfMatOut.meta.StartFrame;
