@@ -1,5 +1,5 @@
 
-DIR_RAW = './data/bsc/fieldii/rf/focused_piston_1000_full2';
+DIR_RAW = './data/bsc/fieldii/rf/flatbsc_run1/data/';
 
 MultiSigs1 = [];
 for file = 1:48
@@ -14,7 +14,7 @@ end
 
 import sigproc.* f2plus.*
 
-PATH_FILE = './data/bsc/fieldii/rf/focused_piston_1000_full2/bsc_sim_data';
+PATH_FILE = './data/bsc/fieldii/rf/flatbsc_run3/data/bsc_raw_full';
 load(PATH_FILE);
 
 %Sig2 = SingleSig;
@@ -75,14 +75,14 @@ mfe = sum(abs(mean(CAM,2) - 1)*100/size(CAM,1));
 
 figure;
 plot(Freq(F1:F2), mean(CAM, 2), 'b'); hold on;
-plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(size(CAM, 2)), 'r:');
-plot(Freq(F1:F2), ones(1, size(CAM, 1)), 'g:');
-plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'r:');
+plot(Freq(F1:F2), mean(CAM, 2) + 1.96/sqrt(size(CAM, 2)), 'b:');
+plot(Freq(F1:F2), ones(1, size(CAM, 1)), 'r');
+plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'b:');
 axis([Freq(F1) Freq(F2) 0.5 1.5]);
 legend('mean value','95% confidence interval','expected value');
-xlabel('frequency [Hz]');
-ylabel('backscattering coefficient [m^-1]');
-title('backscattering coefficient measured with CAM/point reference, hanning window and 15\lambda gate length');
+xlabel('Frequency [Hz]');
+ylabel('Backscattering coefficient [m^{-1}sr^{-1}]');
+title('Backscattering coefficient measured with CAM/point reference');
 
 figure;
 hist(sqrt(CAM(:)), 30);

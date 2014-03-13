@@ -94,7 +94,6 @@ RfMat.meta.NumberOfSamples = size(RfMat, 1);
 RfMat.meta.NumberOfChannels = size(RfMat, 2);
 RfMat.meta.SampleFrequency = Prms.SampleFrequency;
 RfMat.meta.SoundSpeed = Prms.SoundSpeed;
-RfMat.meta.StartTime = startTime;
 RfMat.meta.TxPositions = Prms.TxPositions;
 RfMat.meta.RxPositions = Prms.RxPositions;
 

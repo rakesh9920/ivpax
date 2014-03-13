@@ -14,7 +14,7 @@ end
 
 import sigproc.* f2plus.*
 
-PATH_FILE = './data/bsc/fieldii/rf/focused_piston_1000_full2/bsc_sim_data';
+PATH_FILE = './data/bsc/fieldii/rf/custombsc_linear_run1/data/bsc_raw_full';
 load(PATH_FILE);
 
 %Sig2 = SingleSig;
@@ -47,7 +47,7 @@ Bsc(nfft/2+1:end) = Bsc(nfft/2:-1:1);
 Sigs1 = MultiSigs1(gate(1):gate(2),:);
 Sig2 = SingleSig(gate(1):gate(2));
 
-Win = blackmanharris(gate(2)-gate(1)+1);
+Win = hanning(gate(2)-gate(1)+1);
 WinSigs1 = bsxfun(@times, Sigs1, Win);
 % Energy = sum(Sigs1.^2, 1);
 % winEnergy = sum(Win.^2, 1);
@@ -86,9 +86,9 @@ plot(Freq(F1:F2), Bsc(F1:F2), 'r');
 plot(Freq(F1:F2), mean(CAM, 2) - 1.96/sqrt(size(CAM, 2)), 'b:');
 axis([Freq(F1) Freq(F2) 0.5 2]);
 legend('mean value','95% confidence interval','expected value');
-xlabel('frequency [Hz]');
-ylabel('backscattering coefficient [m^{-1}sr^{-1}]');
-title('backscattering coefficient measured with CAM/point reference, hanning window and 15\lambda gate length');
+xlabel('Frequency [Hz]');
+ylabel('Backscattering coefficient [m^{-1}sr^{-1}]');
+title('Backscattering coefficient measured with CAM/point reference');
 
 figure;
 hist(sqrt(CAM(:)), 30);

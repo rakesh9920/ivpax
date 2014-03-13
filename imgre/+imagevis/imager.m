@@ -5,7 +5,7 @@ function [ImgMat] = imager(BfMat, dynRange, height, width)
 import imagevis.envelope
 
 ImgMat = envelope(double(BfMat), 1);
-ImgMat = medfilt2(ImgMat,[2 2]);
+%ImgMat = medfilt2(ImgMat,[2 2]);
 
 % compression
 ref = max(max(ImgMat));
