@@ -12,26 +12,24 @@ ref = max(max(ImgMat));
 ImgMat = 20*log10(ImgMat./ref);
 ImgMat(ImgMat < -200) = -200; % cap DR to -200
 ImgMat = imresize(ImgMat, [height width]);
-
+label = true;
 % display
 if nargout < 1
-    imtool(ImgMat, 'InitialMagnification', 200, 'DisplayRange', [-dynRange 0]);
-end
 
-%     if label
-%         
-%         iptsetpref('ImshowAxesVisible', 'on');
-%         
-%         imshow(ImgMat, [-dynRange 0],'XData',[0 width*pxwidth*1000],'YData',...
-%             [0 height*pxheight*1000],'InitialMagnification',200);
-%         
-%         colormap(cmap);
-%         xlabel('lateral [mm]');
-%         ylabel('axial [mm]');
-%         axis image 
-%     else
-%         
-%         
-%     end
+    if label
+        
+        iptsetpref('ImshowAxesVisible', 'on');
+        
+        imshow(ImgMat, [-dynRange 0],'XData',[0 width*100e-6*1000],'YData',...
+            [0 height*100e-6*1000],'InitialMagnification',200);
+        colormap('gray');
+        xlabel('lateral [mm]');
+        ylabel('axial [mm]');
+        axis image
+    else
+        
+        imtool(ImgMat, 'InitialMagnification', 200, 'DisplayRange', [-dynRange 0]);
+    end
+end
 
 end
