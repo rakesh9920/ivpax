@@ -1,6 +1,5 @@
-function [BfMat] = gtbeamform2(RxMat, TxPos, RxPos, FieldPos, ...
-    nWinSample, varargin)
-% General time beamformer (for synthetic RF data) with memory limit
+function [BfMat] = gtbeamform2(RxMat, TxPos, RxPos, FieldPos, nWinSample, varargin)
+%GTBEAMFORM2 General time beamformer (for synthetic RF data) with memory limit
 
 import tools.sqdistance tools.prog
 
@@ -10,15 +9,15 @@ Argsin.KeepUnmatched = true;
 addOptional(Argsin, 'planetx', false);
 addOptional(Argsin, 'interpolate', 1);
 addOptional(Argsin, 'progress', false);
-addOptional(Argsin, 'SOUND_SPEED', 1500);
-addOptional(Argsin, 'SAMPLE_FREQUENCY', 40e6);
+addOptional(Argsin, 'SoundSpeed', 1500);
+addOptional(Argsin, 'SampleFrequency', 40e6);
 parse(Argsin, varargin{:});
 
 planetx = Argsin.Results.planetx;
 interpolate = Argsin.Results.interpolate;
 progress = Argsin.Results.progress;
-SOUND_SPEED = Argsin.Results.SOUND_SPEED;
-SAMPLE_FREQUENCY = Argsin.Results.SAMPLE_FREQUENCY;
+soundSpeed = Argsin.Results.SoundSpeed;
+sampleFrequency = Argsin.Results.SampleFrequency;
 
 RxMat = double(RxMat);
 nFieldPos = size(FieldPos, 1);
@@ -26,12 +25,12 @@ nFieldPos = size(FieldPos, 1);
 
 % calculate delays
 if planetx
-    TxDelay = abs(FieldPos(:,3))./SOUND_SPEED;
+    TxDelay = abs(FieldPos(:,3))./soundSpeed;
 else
-    TxDelay = sqrt(sqdistance(FieldPos, TxPos))./SOUND_SPEED;
+    TxDelay = sqrt(sqdistance(FieldPos, TxPos))./soundSpeed;
 end
-RxDelay = sqrt(sqdistance(FieldPos, RxPos))./SOUND_SPEED;
-TotalDelay = round(bsxfun(@plus, RxDelay, TxDelay).*SAMPLE_FREQUENCY.*interpolate) - interpolate + 1;
+RxDelay = sqrt(sqdistance(FieldPos, RxPos))./soundSpeed;
+TotalDelay = round(bsxfun(@plus, RxDelay, TxDelay).*sampleFrequency.*interpolate) - interpolate + 1;
 
 if mod(nWinSample, 2) == 0
     

@@ -1,18 +1,24 @@
-function [ImgMat] = imager(BfMat, dynRange, height, width)
+function [ImgMat] = imager(BfMat, dynRange, height, width, varargin)
 %IMAGER envelope detect, compression, resize, smoothing
 % nxpixels, nypixels, pitch
 
 import imagevis.envelope
 
+if nargin > 4
+    label = varargin{1};
+else
+    label = false;
+end
+
 ImgMat = envelope(double(BfMat), 1);
-%ImgMat = medfilt2(ImgMat,[2 2]);
+ImgMat = medfilt2(ImgMat,[2 2]);
 
 % compression
 ref = max(max(ImgMat));
 ImgMat = 20*log10(ImgMat./ref);
 ImgMat(ImgMat < -200) = -200; % cap DR to -200
 ImgMat = imresize(ImgMat, [height width]);
-label = true;
+
 % display
 if nargout < 1
 
