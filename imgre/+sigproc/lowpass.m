@@ -23,7 +23,7 @@ end
 
 % design chebyshev type 2 lowpass filter
 %[b, a] = cheby2(18, 120, fh/(fs/2)); % 60dB attenuation, 12th order
-[z, p, k] = butter(28, fh/(fs/2), 'low');
+[z, p, k] = butter(6, fh/(fs/2), 'low');
 %[z, p, k] = cheby2(18, 120, fh/(fs/2), 'low');
 [sos,g] = zp2sos(z,p,k);
 

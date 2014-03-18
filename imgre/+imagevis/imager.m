@@ -21,13 +21,15 @@ ImgMat = imresize(ImgMat, [height width]);
 
 % display
 if nargout < 1
-
+    
     if label
         
         iptsetpref('ImshowAxesVisible', 'on');
         
-        imshow(ImgMat, [-dynRange 0],'XData',[0 width*100e-6*1000],'YData',...
-            [0 height*100e-6*1000],'InitialMagnification',200);
+        %         imshow(ImgMat, [-dynRange 0],'XData',[0 width*100e-6*1000],'YData',...
+        %             [0 height*100e-6*1000],'InitialMagnification',200);
+        imshow(ImgMat, [-dynRange 0],'XData',[-10 10],'YData',...
+            [10 30],'InitialMagnification',200);
         colormap('gray');
         xlabel('lateral [mm]');
         ylabel('axial [mm]');
