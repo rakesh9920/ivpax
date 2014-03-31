@@ -1,8 +1,8 @@
 import f2plus.batch_calc_multi_materials tools.loadadv
 
-PATH_CFG = './data/bsc/fieldii/linear_array_320_20mhz';
-PATH_SCT = './data/bsc/miniphantom2_run2/data/sct_0001';
-DIR_RF = './data/bsc/miniphantom2_run2/data/';
+PATH_CFG = './data/bsc/miniphantom2_run3/linear_array_128_5mhz';
+PATH_SCT = './data/bsc/miniphantom2_run3/data/sct_0001';
+DIR_RF = './data/bsc/miniphantom2_run3/data/';
 
 Prms.OutputDirectory = DIR_RF;
 
