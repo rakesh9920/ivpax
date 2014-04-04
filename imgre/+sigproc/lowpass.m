@@ -41,7 +41,8 @@ for ind = 1:nInd
     sub = cell(1,3);
     [sub{:}] = ind2sub(cellSize, ind);
     
-    FiltData{ind} = filtfilt(sos, g, double(CellData{ind})); 
+     FiltData{ind} = filtfilt(sos, g, double(CellData{ind})); 
+%    FiltData{ind} = sosfilt(sos, double(CellData{ind})); 
     
     if progress
         upicbar(upic, ind/nInd);
