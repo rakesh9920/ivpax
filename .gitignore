@@ -5,7 +5,10 @@
 *.xml
 *.suo
 *.mat
-*.dll
+/imgre/**/*.dll
+/imgre/*.dll
+/ultrasonix/**/*.dll
+/ultrasonix/*.dll
 *.bit
 *.fig
 *.bmp
