@@ -4,11 +4,11 @@ import numpy as np
 _c_double_p = ct.POINTER(ct.c_double)
 
 class _ArrayInfo(ct.Structure):
-    _fields_ = [("ptr", _c_double_p),
-                ("nrows", ct.c_int),
-                ("ncols", ct.c_int),
-                ("t0", ct.c_double)]
-                
+        _fields_ = [("ptr", _c_double_p),
+                    ("nrows", ct.c_int),
+                    ("ncols", ct.c_int),
+                    ("t0", ct.c_double)]
+
 def _getArrayInfo(array):
     
     ptr = array.ctypes.data_as(_c_double_p)
@@ -30,7 +30,7 @@ def _copyArray(info):
     return (array, t0)
 
 def _checkArray(array, orient="row"):
-     
+    
     # distinguish between row or column vectors if ndim == 1
     if array.ndim == 1:
         if orient.lower() == "row":
@@ -44,8 +44,8 @@ def _checkArray(array, orient="row"):
         array = np.asfortranarray(array, dtype="double")
     
     return array
-
-class field:
+        
+class Field:
     
     def __init__(self, f2=None):
         self.libf2 = f2
@@ -110,7 +110,7 @@ class field:
         self.libf2 = f2
         
         return success
-    
+             
     def _shutdown(self):
         self.libf2.shutdown()
         

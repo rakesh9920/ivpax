@@ -12,7 +12,7 @@ impulse_response = impulse_response*(sp.hanning(np.size(impulse_response)))
 impulse_response.shape = (1, np.size(impulse_response)) # force row vector
 excitation = impulse_response.copy()
 
-f2 = pyfield.field()
+f2 = pyfield.Field()
 libf2 = f2.libf2
 
 f2.field_init(0, diarypath="test.txt")

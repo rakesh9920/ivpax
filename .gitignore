@@ -16,6 +16,8 @@
 *.daq
 *.tif
 *.txt
+*.pyc
+*.hdf5
 /dat/*
 /ultrasonix/bin/*
 /ultrasonix/bin/**/*
