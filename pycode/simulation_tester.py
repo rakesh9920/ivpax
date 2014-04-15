@@ -16,6 +16,10 @@ data.close()
 sim.set_script('linear_array_128_5mhz')
 sim.set_dataset('testdata.hdf5')
 
-res = sim.start(nproc=1)
+sim.jobs = []
+res = sim.start_sim(nproc=1)
+#print(outq.empty())
+#while not outq.empty():
+#    print(outq.get())
 
 
