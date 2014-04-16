@@ -3,13 +3,6 @@ import numpy as np
 import scipy as sp
 from pyfield import Field
 import h5py
-from itertools import izip_longest
-
-def grouper(iterable, n, fillvalue=None):
-    "Collect data into fixed-length chunks or blocks"
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-    args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
 
 def work(in_queue, out_queue, script):
     
@@ -40,13 +33,20 @@ def work(in_queue, out_queue, script):
 
 def collect(out_queue, res_queue, fs):
     
-    (scat_t, t0_t) = out_queue.get()
+    try:
     
-    for scat, t0 in iter(out_queue.get, 'STOP'):
+        (scat_t, t0_t) = out_queue.get()
         
-        (scat_t, t0_t) = align_and_sum(scat_t, t0_t, scat, t0, fs)
+        for scat, t0 in iter(out_queue.get, 'STOP'):
+            
+            (scat_t, t0_t) = align_and_sum(scat_t, t0_t, scat, t0, fs)
+        
+        res_queue.put((scat_t, t0_t))
     
-    res_queue.put((scat_t, t0_t))
+    except Exception, e:
+        
+        res_queue.put("failed on %s with: %s" % (current_process().name,
+            e.message))
         
 def align_and_sum(array1, t1, array2, t2, fs):
     
@@ -74,82 +74,114 @@ def align_and_sum(array1, t1, array2, t2, fs):
         np.pad(array2, ((fpad2, bpad2),(0, 0)), mode='constant') 
     
     return (sum_array, min(t1, t2))
+
+def chunks(items, nitems):
+    
+    if nitems < 1:
+        nitems = 1
+    return [slice(i, i + nitems) for i in xrange(0, len(items), nitems)]
+    
             
 class Simulation():
     
-    def __init__(self, script="", dataset=""):
+    def __init__(self, script=None, indata=(), outdata=()):
         self.jobs = []
         self.script = script
-        self.dataset = dataset
+        self.indata = indata
+        self.outdata = outdata
     
-    def set_script(self, script):   
-        self.script = script
-        
-    def set_dataset(self, dataset):
-        self.dataset = dataset
-     
     def start_sim(self, nproc=1, ndiv=None):
         
         if ndiv is None:
             ndiv = nproc
         
-        if self.script is None or self.dataset is None:
+        # check that script and dataset are defined
+        if self.script is None or not self.indata or not self.outdata:
             raise Exception
         
         try:
             
-            in_queue = Queue()
-            out_queue = Queue()
-            res_queue = Queue()
+            in_queue = Queue() # queue that sends data to workers
+            out_queue = Queue() # queue that sends data to collector
+            res_queue = Queue() # queue that sends data to main process
             
-            h5file = h5py.File(self.dataset, 'r')
-            targets = h5file['targets']
+            # open input file and read dataset
+            infile = h5py.File(self.indata[0], 'r')
+            targets = infile[self.indata[1]]
+            
+            # get metadata from dataset
+            fs = targets.attrs.get('sample_frequency', 100e6)
+            frame_no = targets.attrs.get('frame_no', 1)
+            
             ntargets = targets.shape[0]
-            end = np.floor(ntargets/ndiv).astype(int)
+            targets_per_group = np.floor(ntargets/ndiv).astype(int)
             
+            # start collector process
             collector = Process(target=collect, args=(out_queue, res_queue, 
-                100e6))
+                fs))
             collector.start()
             
-            for idx in grouper(range(ntargets), end):
-                
-                idx = [x for x in idx if x is not None]
-                in_queue.put(targets[(idx),:])
-    
+            # start worker processes
             for j in xrange(nproc):
-                
-                in_queue.put('STOP')
                 worker = Process(target=work, args=(in_queue, out_queue, 
-                    'linear_array_128_5mhz'))
+                    self.script))
                 worker.start()
                 self.jobs.append(worker)
             
+            # put data chunks into the input queue
+            for idx in chunks(range(ntargets), targets_per_group):
+                in_queue.put(targets[idx,:])
+            
+            # put poison pills into the input queue
+            for j in self.jobs:
+                in_queue.put('STOP')
+    
             in_queue.close()
             
+            # wait for workers to join--input and output queues will be flushed
             for j in self.jobs:
                 j.join()
-                
-            #in_queue.join_thread()
-            #out_queue.put('STOP')
-            #out_queue.close()
-            #out_queue.join_thread()
             
+            # put poison pill for collector
             out_queue.put('STOP')
             out_queue.close()
             
-            res = res_queue.get()
+            # get result from collector and close input file
+            (res, t0) = res_queue.get()
             collector.join()
-            
-            h5file.close()
-            
-            return res
-            
+            infile.close()
+
         except:
             
-            #out_queue.put('STOP')
-            h5file.close()
+            collector.terminate()            
+            for j in self.jobs:
+                j.terminate()
+            infile.close()
             raise
 
+        try:
+            
+            # open output file and write results
+            outfile = h5py.File(self.outdata[0], 'a')
+            path = self.outdata[1]
+            
+            # delete current dataset, if it exists
+            if path in outfile:
+                del outfile['path']
+                
+            data = outfile.create_dataset(path, data=res, compression='lzf')
+
+            # copy over target attrs
+            data.attrs.create('frame_no', frame_no)
+            data.attrs.create('start_time', t0)
+            # all field ii parameters
+            
+            outfile.close()
+                
+        except:
+            
+            outfile.close()
+            raise
         
             
             
