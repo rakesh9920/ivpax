@@ -11,7 +11,6 @@ targ[:,0:2] = np.zeros((100,2))
 targ[:,2] = np.linspace(0.001, 0.05, 100)
 targ[:,3] = np.ones((100,))
 targ.attrs.create('frame_no', 1)
-targ.attrs.create('sample_frequency', 100e6)
 
 data.close()
 

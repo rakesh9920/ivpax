@@ -1,6 +1,5 @@
 from multiprocessing import Process, Queue, current_process
 import numpy as np
-import scipy as sp
 from pyfield import Field
 import h5py
 
@@ -12,7 +11,7 @@ def work(in_queue, out_queue, script):
         
         f2 = Field()
         f2.field_init(-1)
-        (tx_aperture, rx_aperture) = def_script.run(f2)
+        (tx_aperture, rx_aperture) = def_script.get_apertures(f2)
         
         for data in iter(in_queue.get, 'STOP'):
             
@@ -110,15 +109,20 @@ class Simulation():
             targets = infile[self.indata[1]]
             
             # get metadata from dataset
-            fs = targets.attrs.get('sample_frequency', 100e6)
-            frame_no = targets.attrs.get('frame_no', 1)
+            target_prms = dict()
+            for key, val in targets.attrs.iteritems():
+                target_prms[key] = val
+            
+            # get field ii parameters
+            def_script = __import__(self.script)
+            field_prms = def_script.get_prms()
             
             ntargets = targets.shape[0]
             targets_per_group = np.floor(ntargets/ndiv).astype(int)
             
             # start collector process
             collector = Process(target=collect, args=(out_queue, res_queue, 
-                fs))
+                field_prms['sample_frequency']))
             collector.start()
             
             # start worker processes
@@ -169,12 +173,19 @@ class Simulation():
             if path in outfile:
                 del outfile['path']
                 
-            data = outfile.create_dataset(path, data=res, compression='lzf')
-
-            # copy over target attrs
-            data.attrs.create('frame_no', frame_no)
+            data = outfile.create_dataset(path, data=res, dtype='double',
+                compression='lzf')
+            
+            # set data attributes
             data.attrs.create('start_time', t0)
-            # all field ii parameters
+            
+            # copy target parameters to data attributes
+            for key, val in target_prms.iteritems():
+                data.attrs.create(key, val)
+            
+            # copy field ii parameters to data attributes
+            for key, val in field_prms.iteritems():
+                data.attrs.create(key, val)
             
             outfile.close()
                 
