@@ -1,10 +1,9 @@
-
 import numpy as np
 import scipy as sp
 
 def get_prms():
     
-    fc = 5e6
+    fc = 6e6
     fs = 100e6
     impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));
     impulse_response = impulse_response*(sp.hanning(np.size(impulse_response)))
@@ -14,11 +13,11 @@ def get_prms():
     prms['density'] = 1000
     prms['sound_speed'] = 1540
     prms['sample_frequency'] = 100e6
-    prms['center_frequency'] = 5e6
+    prms['center_frequency'] = 6e6
     prms['use_attenuation'] = 0
     prms['attenuation'] = 0
     prms['frequency_attenuation'] = 0
-    prms['attenuation_center_frequency'] = 5e6
+    prms['attenuation_center_frequency'] = 6e6
     prms['tx_impulse_response'] = impulse_response
     prms['rx_impulse_response'] = impulse_response
     prms['tx_excitation'] = excitation
@@ -37,9 +36,10 @@ def get_apertures(f2):
     f2.set_field('att_f0', prms['attenuation_center_frequency'])
     f2.set_field('use_att', prms['use_attenuation'])
     
-    Th = f2.xdc_piston(0.01, 0.001)
-    f2.xdc_impulse(Th, prms['impulse_response'])
-    f2.xdc_excitation(Th, prms['excitation'])
-    f2.xdc_focus_times(Th, np.zeros((1,1)), np.zeros((1,1)))
+    Th = f2.xdc_linear_array(128, 290e-6, 0.003, 10e-6, 1, 1, 
+        np.array([0, 0, 300])) 
+    f2.xdc_impulse(Th, prms['tx_impulse_response'])
+    f2.xdc_excitation(Th, prms['tx_excitation'])
+    f2.xdc_focus_times(Th, np.zeros((1,1)), np.zeros((1,128)))
     
     return (Th, Th)
