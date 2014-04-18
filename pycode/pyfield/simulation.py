@@ -69,7 +69,8 @@ def align_write(dataset, array1, t1, frame):
     
     # determine depth backpad for dim 2 (frame no)
     dpad0 = frame + 1 - dims0[2]
-    if dpad0 < 0: dpad0 = 0
+    if dpad0 < 0: 
+        dpad0 = 0
     
     # resize dataset if necessary
     dataset.resize(dataset.shape[0] + fpad0 + bpad0, axis=0)
@@ -78,10 +79,13 @@ def align_write(dataset, array1, t1, frame):
     pad_width0 = [(fpad0, bpad0), (0, 0), (0, dpad0)]
     pad_width1 = [(fpad1, bpad1), (0, 0)]
 
-    dataset[:] = np.pad(dataset[0:dims0[0],:,0:dims0[2]], pad_width0, 
+    #array0 = dataset[:dims0[0],:,:dims0[2]].copy()
+    dataset[:] = np.pad(dataset[:dims0[0],:,:dims0[2]], pad_width0, 
         mode='constant')
+    #dataset[:dims0[0],:,:dims0[2]] = np.pad(array0, pad_width0, 
+    #    mode='constant')
     
-    dataset[:,:,frame] = np.pad(array1, pad_width1, mode='constant')
+    dataset[:,:,frame] = np.pad(array1.copy(), pad_width1, mode='constant')
     dataset.attrs.create('start_time', min(t0, t1))
     
 def collect(out_queue, res_queue, fs):
@@ -199,7 +203,7 @@ class Simulation():
         self.input_path = path
         
     def write_data(self, path=(), frame=None):
-        
+
         if frame is None:
             frame = self.frame_no
             
@@ -215,11 +219,11 @@ class Simulation():
                 
                 rfdata = root.create_dataset(dataset, 
                     shape=(dims[0], dims[1], frame+1),
-                    maxshape=(None, dims[1], None), dtype='double', 
-                    compression='lzf')
-                
-                rfdata[0:dims[0],:,frame] = self.result[0]
-                
+                    maxshape=(None, dims[1], None), dtype='double',
+                    compression='gzip')
+                     
+                rfdata[:,:,frame] = self.result[0].copy()
+               
             else:
                 
                 rfdata = root[dataset]

@@ -22,8 +22,9 @@ fs = Prms.SampleFrequency;
 [Bsc, perm, nshifts] = shiftdata(Bsc, []);
 
 Phi = sqrt(abs(Bsc)./ns);
-Amp = fftdiff(Phi, fs).*(2*pi/(rho*c*SR));
-Filt = ifftshift(iffts(Amp, 'symmetric', fs));
+%Amp = fftdiff(Phi, fs).*(2*pi/(rho*c*SR));
+Amp = Phi.*(2*pi/(rho*c*SR));
+Filt = gradient(ifftshift(iffts(Amp, 'symmetric', fs))).*fs;
 
 Filt = unshiftdata(Filt, perm, nshifts);
 
