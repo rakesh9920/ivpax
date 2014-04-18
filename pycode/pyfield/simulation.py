@@ -39,6 +39,51 @@ def work(in_queue, out_queue, script):
         #out_queue.put("failed on %s with: %s" % (current_process().name,
         #    e.message))
 
+def align_write(dataset, array1, t1, frame):
+    
+    fs = dataset.attrs.get('sample_frequency')
+    t0 = dataset.attrs.get('start_time')
+    dims0 = dataset.shape
+    
+    # determine frontpad for dim 0 (time sample)
+    s0 = round(t0*fs)
+    s1 = round(t1*fs)
+    
+    if s0 > s1:
+        fpad1, fpad0 = 0, s0 - s1             
+    elif s0 < s1:
+        fpad1, fpad0 = s1 - s0, 0
+    else:
+        fpad1, fpad0 = 0, 0
+    
+    # determine backpad for dim 0 (time sample)
+    nsample0 = dims0[0] + fpad0    
+    nsample1 = array1.shape[0] + fpad1
+
+    if nsample1 > nsample0:
+        bpad1, bpad0 = 0, nsample1 - nsample0
+    elif nsample1 < nsample0:
+        bpad1, bpad0 = nsample0 - nsample1, 0
+    else:
+        bpad1, bpad0 = 0, 0
+    
+    # determine depth backpad for dim 2 (frame no)
+    dpad0 = frame + 1 - dims0[2]
+    if dpad0 < 0: dpad0 = 0
+    
+    # resize dataset if necessary
+    dataset.resize(dataset.shape[0] + fpad0 + bpad0, axis=0)
+    dataset.resize(dataset.shape[2] + dpad0, axis=2)
+    
+    pad_width0 = [(fpad0, bpad0), (0, 0), (0, dpad0)]
+    pad_width1 = [(fpad1, bpad1), (0, 0)]
+
+    dataset[:] = np.pad(dataset[0:dims0[0],:,0:dims0[2]], pad_width0, 
+        mode='constant')
+    
+    dataset[:,:,frame] = np.pad(array1, pad_width1, mode='constant')
+    dataset.attrs.create('start_time', min(t0, t1))
+    
 def collect(out_queue, res_queue, fs):
     
     try:
@@ -77,12 +122,13 @@ class Simulation():
         self.workers = []
         self.collector = []
     
-    def start(self, nproc=1, maxtargetsperchunk=5000):
-        
+    def start(self, nproc=1, maxtargetsperchunk=5000, frame=None):
+            
         # check that script and dataset are defined
         if self.script is None:
             raise Exception('Simulation script not set')
-            
+        
+        self.reset()
         in_queue = Queue() # queue that sends data to workers
         out_queue = Queue() # queue that sends data to collector
         res_queue = Queue() # queue that sends data to main process
@@ -101,6 +147,16 @@ class Simulation():
         field_prms = def_script.get_prms()
         
         ntargets = targets.shape[0]
+        
+        if frame is None:
+            frame = 0
+            self.frame_no = 0
+        else:
+            self.frame_no = frame
+            
+        if len(targets.shape) < 3:
+            frame = Ellipsis
+        
         targets_per_chunk = min(np.floor(ntargets/nproc).astype(int), 
             maxtargetsperchunk)
             
@@ -121,7 +177,7 @@ class Simulation():
             
             # put data chunks into the input queue
             for idx in cm.chunks(range(ntargets), targets_per_chunk):
-                in_queue.put(targets[(idx),:])
+                in_queue.put(targets[(idx),:,frame])
             
             # put poison pills into the input queue
             for w in self.workers:
@@ -142,19 +198,32 @@ class Simulation():
     def load_data(self, path=()):
         self.input_path = path
         
-    def write_data(self, path=()):
+    def write_data(self, path=(), frame=None):
         
+        if frame is None:
+            frame = self.frame_no
+            
         try:
             # open output file and write results
             root = h5py.File(path[0], 'a')
             dataset = path[1]
             
-            # delete current dataset, if it exists
-            if dataset in root:
-                del root[dataset]
+            dims = self.result[0].shape
+            
+            # if dataset doesn't exist, create a new dataset
+            if dataset not in root:
                 
-            rfdata = root.create_dataset(dataset, data=self.result[0], 
-                dtype='double', compression='lzf')
+                rfdata = root.create_dataset(dataset, 
+                    shape=(dims[0], dims[1], frame+1),
+                    maxshape=(None, dims[1], None), dtype='double', 
+                    compression='lzf')
+                
+                rfdata[0:dims[0],:,frame] = self.result[0]
+                
+            else:
+                
+                rfdata = root[dataset]
+                align_write(rfdata, self.result[0], self.result[1], frame)
             
             # set data attributes
             rfdata.attrs.create('start_time', self.result[1])
@@ -202,14 +271,6 @@ class Simulation():
             c.terminate()
             c.join()
     
-    
-    
-        
-            
-            
-            
-        
-        
         
         
         

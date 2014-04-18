@@ -23,7 +23,7 @@ def main():
     sim.script = 'linear_array_128_5mhz'
     sim.load_data(('testdata.hdf5', 'field/targets/set0'))
     
-    for f in xrange(4):
+    for f in xrange(10):
         sim.start(nproc=2, frame=f)
         sim.join()
         sim.write_data(('testdata.hdf5', 'field/rf/set1'))
