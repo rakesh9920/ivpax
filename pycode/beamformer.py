@@ -20,12 +20,14 @@ def distance(a, b):
 
 def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
     
+    fs = kwargs.get('fs', 100e6)
+    c = kwargs.get('c', 1500)
+    resample = kwargs.get('resample', 1)
+    planetx = kwargs.get('planetx', False)
+    chmask = kwargs.get('chmask', False)
+    t0 = kwargs.get('t0', 0)
+        
     for rfdata, fieldpos in iter(in_queue, 'STOP'):
-        fs = kwargs.get('fs', 100e6)
-        c = kwargs.get('c', 1500)
-        resample = kwargs.get('resample', 1)
-        planetx = kwargs.get('planetx', False)
-        chmask = kwargs.get('chmask', False)
         
         npos = fieldpos.shape[0]
         nsample, nchannel, nframe = rfdata.shape
@@ -40,7 +42,7 @@ def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
             txdelay = distance(fieldpos, txpos)/c
             
         rxdelay = distance(fieldpos, txpos)/c
-        sdelay = np.round((txdelay + rxdelay)*fs*resample)
+        sdelay = np.round((txdelay + rxdelay - t0)*fs*resample)
         
         # resample data
         if resample != 1:
@@ -51,15 +53,19 @@ def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
         # pad data
         if nwin % 2:
             nwin += 1
-    
-        pad_width = (((nwin - 1)/2, (nwin - 1)/2), (0, 0), (0, 0))
+        
+        nwinhalf = (nwin - 1)/2
+        
+        #pad_width = (((nwin - 1)/2, (nwin - 1)/2), (0, 0), (0, 0))
+        pad_width = ((nwin, nwin), (0, 0), (0, 0))
         rfdata = np.pad(rfdata, pad_width, mode='constant')
         
         # apply delays in loop over field points and channels
         for pos in xrange(npos):
             
             pdelay = sdelay[pos,:]
-            valid_delay = pdelay <= nsample - 1
+            valid_delay = pdelay <= nsample + nwinhalf or \
+                -(nwinhalf + 1)
             
             if not np.any(valid_delay):
                 continue
@@ -76,8 +82,10 @@ def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
                 if not chmask(ch):
                     continue
                 
-                bfsig += rfdata[pdelay[ch]:(pdelay[ch] + nwin),ch,:]
-
+                delay = pdelay[ch] + nwin + 1 - nwinhalf
+                bfsig += rfdata[delay:(delay + nwin),ch,:]
+        
+        out_queue.put(bfsig)
     
 class Beamformer():
     
@@ -104,7 +112,7 @@ class Beamformer():
         
         
         
-        pass
+        
     
     def join(self):
         pass
