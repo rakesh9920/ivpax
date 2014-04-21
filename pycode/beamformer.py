@@ -18,14 +18,25 @@ def distance(a, b):
     
     return np.sqrt(np.sum(b*b, 0) + np.sum(a*a,0) - 2*np.dot(a.T, b))
 
-def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
+def delegate(in_queue, out_queue, input_path, output_path, maxframesperchunk):
     
-    fs = kwargs.get('fs', 100e6)
-    c = kwargs.get('c', 1500)
-    resample = kwargs.get('resample', 1)
-    planetx = kwargs.get('planetx', False)
-    chmask = kwargs.get('chmask', False)
-    t0 = kwargs.get('t0', 0)
+    inroot = h5py.File(input_path[0], 'a')
+    rfdata = inroot[input_path[1]]
+    
+    nframe = rfdata.shape[2]
+    
+
+def work(in_queue, out_queue, attrs):
+    
+    txpos = attrs.get('txpos')
+    rxpos = attrs.get('rxpos')
+    nwin = attrs.get('nwin')
+    fs = attrs.get('fs')
+    c = attrs.get('c')
+    resample = attrs.get('resample')
+    planetx = attrs.get('planetx')
+    chmask = attrs.get('chmask')
+    t0 = attrs.get('t0', 0)
         
     for rfdata, fieldpos in iter(in_queue, 'STOP'):
         
@@ -41,7 +52,7 @@ def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
         else:
             txdelay = distance(fieldpos, txpos)/c
             
-        rxdelay = distance(fieldpos, txpos)/c
+        rxdelay = distance(fieldpos, rxpos)/c
         sdelay = np.round((txdelay + rxdelay - t0)*fs*resample)
         
         # resample data
@@ -90,17 +101,25 @@ def work(in_queue, out_queue, txpos, rxpos, nwin, **kwargs):
 class Beamformer():
     
     workers = []
+    delegator = None
     input_path = ''
     output_path = ''
-    
+    options = dict.fromkeys(['nwin','resample', 'planetx', 'chmask'])
     
     def __init__(self):
         pass
     
     def load_data(self, path):
         self.input_path = path
+    
+    def set_options(self, **kwargs):
         
-    def start(self, nproc=1):
+        self.options['nwin'] = kwargs.get('nwin')
+        self.options['resample'] = kwargs.get('resample')
+        self.options['planetx'] = kwargs.get('planetx')
+        self.options['chmask'] = kwargs.get('chmask')
+        
+    def start(self, nproc=1, maxframesperchunk=1000):
         
         in_queue = Queue()
         out_queue = Queue()
@@ -108,11 +127,24 @@ class Beamformer():
         inroot = h5py.File(self.input_path[0], 'a')
         rfdata = inroot[self.input_path[1]]
         
-        nframe = rfdata.shape[2]
+        attrs = {'c': rfdata.attrs.get('sound_speed'),
+                 'fs': rfdata.attrs.get('sample_frequency'),
+                 't0': rfdata.attrs.get('start_time'),
+                 'txpos': rfdata.attrs.get('transmit_positions'),
+                 'rxpos': rfdata.attrs.get('receive_positions')}
+                    
+        attrs.update(self.options)
         
+        inroot.close()
         
+        for x in range(nproc):
+            w = Process(target=work, args=(in_queue, out_queue, attrs))
+            self.workers.append(w)
+            
+        self.delegator = Process(target=delegate, args=(in_queue, out_queue, 
+            self.input_path, self.output_path, maxframesperchunk))      
         
-        
+
     
     def join(self):
         pass

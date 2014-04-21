@@ -126,7 +126,7 @@ class Simulation():
         self.workers = []
         self.collector = []
     
-    def start(self, nproc=1, maxtargetsperchunk=5000, frame=None):
+    def start(self, nproc=1, maxtargetsperchunk=10000, frame=None):
             
         # check that script and dataset are defined
         if self.script is None:
