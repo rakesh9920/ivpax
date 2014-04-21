@@ -51,13 +51,16 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
     else:
         outroot = h5py.File(outfile, 'a')
     
-    if write:
-        if outkey in outroot:
-            del outroot[outkey]
-        
+    
+    if outkey not in outroot:
+
         outdata = outroot.create_dataset(outkey, dtype='double',
             shape=(npos, nwin, nframe), compression='gzip')
     else:
+        
+        if write: 
+            del outroot[outkey]
+            
         outdata = outroot[outkey]
 
     framespergroup = min(nframe, maxframespergroup)
@@ -105,7 +108,7 @@ def work(in_queue, out_queue, attrs):
     resample = attrs.get('resample')
     planetx = attrs.get('planetx')
     chmask = attrs.get('chmask')
-    t0 = attrs.get('t0', 0)
+    t0 = attrs.get('t0')
     
     # read rf data and field positions from input queue
     for rfdata, frame_idx, fieldpos, pos_idx in iter(in_queue, 'STOP'):
@@ -210,12 +213,14 @@ class Beamformer():
         
         for x in range(nproc):
             w = Process(target=work, args=(in_queue, out_queue, attrs))
+            #w.start()
             self.workers.append(w)
             
         self.delegator = Process(target=delegate, args=(in_queue, out_queue, 
             self.input_path, self.view_path, self.output_path, 
             maxpointsperchunk, maxframespergroup, self.options['nwin'], 
-            nproc, write))      
+            nproc, write))     
+        #self.delegator.start() 
         
     def join(self):
         
