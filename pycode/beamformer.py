@@ -16,86 +16,96 @@ def distance(a, b):
     a = a.T
     b = b.T
     
-    return np.sqrt(np.sum(b*b, 0) + np.sum(a*a,0) - 2*np.dot(a.T, b))
+    return np.sqrt(np.sum(b*b, 0)[None,:] + np.sum(a*a, 0)[:,None] - \
+        2*np.dot(a.T, b))
 
 def delegate(in_queue, out_queue, input_path, view_path, output_path,
     maxpointsperchunk, maxframespergroup, nwin, nproc, write):
     
-    infile = input_path[0]
-    inkey = input_path[1]
-    viewfile = view_path[0]
-    viewkey = view_path[1]
-    outfile = output_path[0]
-    outkey = output_path[1]
-    
-    # open input file and get rf data
-    inroot = h5py.File(infile, 'a')
-    rfdata = inroot[inkey]
-    nframe = rfdata.shape[2]
-    
-    # open view file and get field positions
-    if viewfile == infile:
-        viewroot = inroot
-    else:
-        viewroot = h5py.File(viewfile, 'a')
-    
-    fieldpos = viewroot[viewkey]
-    npos = fieldpos.shape[0]
-    
-    # open output file and create dataset 
-    # check if output file is already open
-    if outfile == infile:
-        outroot = inroot
-    elif outfile == viewfile:
-        outroot = viewroot
-    else:
-        outroot = h5py.File(outfile, 'a')
-    
-    
-    if outkey not in outroot:
-
-        outdata = outroot.create_dataset(outkey, dtype='double',
-            shape=(npos, nwin, nframe), compression='gzip')
-    else:
+    try:
         
-        if write: 
-            del outroot[outkey]
+        infile = input_path[0]
+        inkey = input_path[1]
+        viewfile = view_path[0]
+        viewkey = view_path[1]
+        outfile = output_path[0]
+        outkey = output_path[1]
+        
+        # open input file and get rf data
+        inroot = h5py.File(infile, 'a')
+        rfdata = inroot[inkey]
+        nframe = rfdata.shape[2]
+        
+        # open view file and get field positions
+        if viewfile == infile:
+            viewroot = inroot
+        else:
+            viewroot = h5py.File(viewfile, 'a')
+        
+        fieldpos = viewroot[viewkey]
+        npos = fieldpos.shape[0]
+        
+        # open output file and create dataset 
+        # check if output file is already open
+        if outfile == infile:
+            outroot = inroot
+        elif outfile == viewfile:
+            outroot = viewroot
+        else:
+            outroot = h5py.File(outfile, 'a')
+        
+        if outkey not in outroot:
+    
+            outdata = outroot.create_dataset(outkey, dtype='double',
+                shape=(npos, nwin, nframe), compression='gzip')
+        else:
             
-        outdata = outroot[outkey]
-
-    framespergroup = min(nframe, maxframespergroup)
-    #nchunk = np.ceil(nframe/maxframespergroup)
-    pointsperchunk = min(np.floor(npos/nproc).astype(int), maxpointsperchunk)
+            if write: 
+                del outroot[outkey]
+                
+            outdata = outroot[outkey]
     
-    # divide rf data into groups of frames for processing
-    for group in iter(chunks(range(nframe), framespergroup)):
+        framespergroup = min(nframe, maxframespergroup)
+        #nchunk = np.ceil(nframe/maxframespergroup)
+        pointsperchunk = min(np.floor(npos/nproc).astype(int), maxpointsperchunk)
         
-        rfgroup = rfdata[:,:,group]
-        
-        nchunk = 0
-        
-        # divide field positions into chunks for processing
-        for chunk in iter(chunks(range(npos), pointsperchunk)):
+        # divide rf data into groups of frames for processing
+        for group in iter(chunks(range(nframe), framespergroup)):
             
-            poschunk = fieldpos[chunk,:]
-            in_queue.put((rfgroup, group, poschunk, chunk))
-            nchunk += 1
-        
-        for x in xrange(nchunk):
+            rfgroup = rfdata[:,:,group]
             
-            bfdata, group, chunk = out_queue.get()
-            outdata[group,:,chunk] = bfdata
-    
-    for w in xrange(nproc):
-        in_queue.put('STOP')
-    
-    inroot.close()
-    
-    if viewfile != infile:
-        viewroot.close()
+            nchunk = 0
+            
+            # divide field positions into chunks for processing
+            for chunk in iter(chunks(range(npos), pointsperchunk)):
+                
+                poschunk = fieldpos[chunk,:]
+                in_queue.put((rfgroup, group, poschunk, chunk))
+                nchunk += 1
+            
+            #for x in xrange(nchunk):
+            #    
+            #    item = out_queue.get()
+            #    if isinstance(item, Exception):
+            #        raise item
+            #        
+            #    bfdata, frame_idx, pos_idx = item
+            #    outdata[pos_idx,:,frame_idx] = bfdata
         
-    if outfile != viewfile or outfile != infile:
-        outroot.close()
+        for w in xrange(nproc):
+            in_queue.put('STOP')
+        
+        inroot.close()
+        
+        if viewfile != infile:
+            viewroot.close()
+            
+        if outfile != viewfile or outfile != infile:
+            outroot.close()
+    
+    except Exception as e:
+        out_queue.put(e)
+    
 
 def work(in_queue, out_queue, attrs):
     
@@ -111,64 +121,72 @@ def work(in_queue, out_queue, attrs):
     t0 = attrs.get('t0')
     
     # read rf data and field positions from input queue
-    for rfdata, frame_idx, fieldpos, pos_idx in iter(in_queue, 'STOP'):
-        
-        npos = fieldpos.shape[0]
-        nsample, nchannel, nframe = rfdata.shape
-        
-        if not chmask:
-            chmask = np.ones(nchannel)
-        
-        # calculate delays
-        if planetx:
-            txdelay = np.abs(fieldpos[:,3])/c
-        else:
-            txdelay = distance(fieldpos, txpos)/c
+    for rfdata, frame_idx, fieldpos, pos_idx in iter(in_queue.get, 'STOP'):
+
+        try:
             
-        rxdelay = distance(fieldpos, rxpos)/c
-        sdelay = np.round((txdelay + rxdelay - t0)*fs*resample)
-        
-        # resample data
-        if resample != 1:
+            npos = fieldpos.shape[0]
+            nsample, nchannel, nframe = rfdata.shape
             
-            rfdata = sp.signal.resample(rfdata, nsample*resample)
-            nsample = rfdata.shape[0]
-        
-        # pad data
-        if nwin % 2:
-            nwin += 1
-        
-        nwinhalf = (nwin - 1)/2
-        #pad_width = (((nwin - 1)/2, (nwin - 1)/2), (0, 0), (0, 0))
-        pad_width = ((nwin, nwin), (0, 0), (0, 0))
-        rfdata = np.pad(rfdata, pad_width, mode='constant')
-        
-        # apply delays in loop over field points and channels
-        for pos in xrange(npos):
+            if chmask is False:
+                chmask = np.ones(nchannel)
             
-            pdelay = sdelay[pos,:]
-            valid_delay = pdelay <= nsample + nwinhalf or \
-                -(nwinhalf + 1)
+            # calculate delays
+            if planetx:
+                txdelay = np.abs(fieldpos[:,2,None])/c
+            else:
+                txdelay = distance(fieldpos, txpos)/c
             
-            if not np.any(valid_delay):
-                continue
+            rxdelay = distance(fieldpos, rxpos)/c
+            sdelay = np.round((txdelay + rxdelay - t0)*fs*resample)
+            
+            # resample data
+            if resample != 1:
                 
-            #idx = [i for (i,x) in enumerate(pdelay) if x <= nsample - 1] 
+                rfdata = sp.signal.resample(rfdata, nsample*resample)
+                nsample = rfdata.shape[0]
             
-            bfsig = np.zeros((nwin, nframe))
+            # pad data
+            if not nwin % 2:
+                nwin += 1
             
-            for ch in xrange(nchannel):
+            nwinhalf = (nwin - 1)/2
+            pad_width = ((nwin, nwin), (0, 0), (0, 0))
+            rfdata = np.pad(rfdata, pad_width, mode='constant')
+            
+            bfdata = np.zeros((nwin, nframe, npos))
+            
+            # apply delays in loop over field points and channels
+            for pos in xrange(npos):
                 
-                if not valid_delay(ch):
+                pdelay = sdelay[pos,:]
+                valid_delay = (pdelay <= (nsample + nwinhalf)) & \
+                    (pdelay >= -(nwinhalf + 1))
+                
+                if not np.any(valid_delay):
                     continue
                 
-                if not chmask(ch):
-                    continue
+                bfsig = np.zeros((nwin, nframe))
                 
-                delay = pdelay[ch] + nwin + 1 - nwinhalf
-                bfsig += rfdata[delay:(delay + nwin),ch,:]
+                for ch in xrange(nchannel):
+                    
+                    if not valid_delay[ch]:
+                        continue
+                    
+                    if not chmask[ch]:
+                        continue
+                    
+                    delay = pdelay[ch] + nwin + 1 - nwinhalf
         
-        out_queue.put(bfsig, frame_idx, pos_idx)
+                    bfsig += rfdata[delay:(delay + nwin),ch,:]
+                
+                bfdata[:,:,pos] = bfsig
+            
+            out_queue.put((bfdata, frame_idx, pos_idx))
+        
+        except Exception as e:
+            
+            out_queue.put(e)
     
 class Beamformer():
     
@@ -201,8 +219,8 @@ class Beamformer():
         attrs = {'c': rfdata.attrs.get('sound_speed'),
                  'fs': rfdata.attrs.get('sample_frequency'),
                  't0': rfdata.attrs.get('start_time'),
-                 'txpos': rfdata.attrs.get('transmit_positions'),
-                 'rxpos': rfdata.attrs.get('receive_positions')}
+                 'txpos': rfdata.attrs.get('tx_positions'),
+                 'rxpos': rfdata.attrs.get('rx_positions')}
                     
         attrs.update(self.options)
         
@@ -213,14 +231,17 @@ class Beamformer():
         
         for x in range(nproc):
             w = Process(target=work, args=(in_queue, out_queue, attrs))
-            #w.start()
+            w.start()
             self.workers.append(w)
             
         self.delegator = Process(target=delegate, args=(in_queue, out_queue, 
             self.input_path, self.view_path, self.output_path, 
             maxpointsperchunk, maxframespergroup, self.options['nwin'], 
             nproc, write))     
-        #self.delegator.start() 
+        self.delegator.start() 
+        
+        self.in_queue = in_queue
+        self.out_queue = out_queue
         
     def join(self):
         

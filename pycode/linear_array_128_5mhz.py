@@ -22,7 +22,7 @@ def get_prms():
     prms['rx_impulse_response'] = impulse_response
     prms['tx_excitation'] = excitation
     
-    centers = (np.arange(0,128) - 64.5)*300e-6
+    centers = (np.arange(0,128) - 63.5)*300e-6
     prms['tx_positions'] = np.zeros((1,3))
     prms['rx_positions'] = np.hstack((centers[:,None], np.zeros((128,2))))
     
