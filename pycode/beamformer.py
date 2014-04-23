@@ -5,6 +5,18 @@ import scipy as sp
 from multiprocessing import Process, Queue
 import h5py
 
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   END = '\033[0m'
+   
 def chunks(items, nitems):
     
     if nitems < 1:
@@ -20,93 +32,132 @@ def distance(a, b):
         2*np.dot(a.T, b))
 
 def delegate(in_queue, out_queue, input_path, view_path, output_path,
-    maxpointsperchunk, maxframespergroup, nwin, nproc, write):
+    nproc, frames, options):
     
     try:
         
-        infile = input_path[0]
-        inkey = input_path[1]
-        viewfile = view_path[0]
-        viewkey = view_path[1]
-        outfile = output_path[0]
-        outkey = output_path[1]
+        maxpointsperchunk = options['maxpointsperchunk']
+        maxframesperchunk = options['maxframesperchunk']
+        nwin = options['nwin']
+        overwrite = options['overwrite']
         
+        input_file = input_path[0]
+        input_key = input_path[1]
+        view_file = view_path[0]
+        view_key = view_path[1]
+        output_file = output_path[0]
+        output_key = output_path[1]
+
         # open input file and get rf data
-        inroot = h5py.File(infile, 'a')
-        rfdata = inroot[inkey]
-        nframe = rfdata.shape[2]
+        input_root = h5py.File(input_file, 'a')
+        rfdata = input_root[input_key]
+        
+        if frames is None:          
+            
+            nframe = rfdata.shape[2]
+            start_frame = 0      
+            
+        elif isinstance(frames, tuple):
+            
+            nframe = min(frames[1] - frames[0], rfdata.shape[2])
+            start_frame = frames[0]
+            
+        else:
+            
+            nframe = 1
+            start_frame = frames
         
         # open view file and get field positions
-        if viewfile == infile:
-            viewroot = inroot
+        if view_file == input_file:
+            view_root = input_root
         else:
-            viewroot = h5py.File(viewfile, 'a')
+            view_root = h5py.File(view_file, 'a')
         
-        fieldpos = viewroot[viewkey]
+        fieldpos = view_root[view_key]
         npos = fieldpos.shape[0]
         
         # open output file and create dataset 
-        # check if output file is already open
-        if outfile == infile:
-            outroot = inroot
-        elif outfile == viewfile:
-            outroot = viewroot
+        if output_file == input_file:
+            output_root = input_root
+        elif output_file == view_file:
+            output_root = view_root
         else:
-            outroot = h5py.File(outfile, 'a')
+            output_root = h5py.File(output_file, 'a')
         
-        if outkey not in outroot:
-    
-            outdata = outroot.create_dataset(outkey, dtype='double',
-                shape=(npos, nwin, nframe), compression='gzip')
+        if output_key not in output_root:
+            
+            bfdata = output_root.create_dataset(output_key, dtype='double',
+                shape=(npos, nwin, nframe), compression='gzip')   
+                
         else:
             
-            if write: 
-                del outroot[outkey]
+            if overwrite: 
                 
-            outdata = outroot[outkey]
-    
-        framespergroup = min(nframe, maxframespergroup)
-        #nchunk = np.ceil(nframe/maxframespergroup)
-        pointsperchunk = min(np.floor(npos/nproc).astype(int), maxpointsperchunk)
+                del output_root[output_key]
+                bfdata = output_root.create_dataset(output_key, dtype='double',
+                    shape=(npos, nwin, nframe), compression='gzip')
+            
+            bfdata = output_root[output_key]
+        
+        framesperchunk = min(nframe, maxframesperchunk)
+        pointsperchunk = min(np.ceil(npos/nproc).astype(int), 
+            maxpointsperchunk)
         
         # divide rf data into groups of frames for processing
-        for group in iter(chunks(range(nframe), framespergroup)):
+        for frame_idx in iter(chunks(range(nframe), framesperchunk)):
             
-            rfgroup = rfdata[:,:,group]
-            
+            adjusted_idx = slice(start_frame + frame_idx.start, 
+                start_frame + frame_idx.stop)
+                
+            rf = rfdata[:,:,adjusted_idx]
             nchunk = 0
             
-            # divide field positions into chunks for processing
-            for chunk in iter(chunks(range(npos), pointsperchunk)):
+            # divide field positions into chunks and send to workers
+            for pos_idx in iter(chunks(range(npos), pointsperchunk)):
                 
-                poschunk = fieldpos[chunk,:]
-                in_queue.put((rfgroup, group, poschunk, chunk))
+                pos = fieldpos[pos_idx,:]
+                in_queue.put((rf, frame_idx, pos, pos_idx))
                 nchunk += 1
             
-            #for x in xrange(nchunk):
-            #    
-            #    item = out_queue.get()
-            #    if isinstance(item, Exception):
-            #        raise item
-            #        
-            #    bfdata, frame_idx, pos_idx = item
-            #    outdata[pos_idx,:,frame_idx] = bfdata
+            # write bf data for each chunk to file
+            for x in xrange(nchunk):
+                
+                item = out_queue.get()
+                if isinstance(item, Exception):
+                    raise item
+                    
+                bf, frame_idx, pos_idx = item
+                bfdata[pos_idx,:,frame_idx] = bf
         
         for w in xrange(nproc):
             in_queue.put('STOP')
         
-        inroot.close()
+        # write data attributes for beamformed data
+        for key, val in input_root[input_key].attrs.iteritems():
+            bfdata.attrs.create(key, val)
         
-        if viewfile != infile:
-            viewroot.close()
-            
-        if outfile != viewfile or outfile != infile:
-            outroot.close()
-    
+        bfdata.attrs.create('resample', options['resample'])
+        bfdata.attrs.create('plane_transmit', options['planetx'])
+        bfdata.attrs.create('channel_mask', options['chmask'])
+        
+        bfdata.dims[0].label = 'position_no'
+        bfdata.dims[1].label = 'sample_no'
+        bfdata.dims[2].label = 'frame_no'
+        
     except Exception as e:
+        
         out_queue.put(e)
+        
+    finally:
+        
+        input_root.close()
+        
+        if view_file != input_file:
+            view_root.close()
+            
+        if output_file != view_file or output_file != input_file:
+            output_root.close()
     
-
 def work(in_queue, out_queue, attrs):
     
     # get data attribtues and beamforming options
@@ -138,7 +189,7 @@ def work(in_queue, out_queue, attrs):
                 txdelay = distance(fieldpos, txpos)/c
             
             rxdelay = distance(fieldpos, rxpos)/c
-            sdelay = np.round((txdelay + rxdelay - t0)*fs*resample)
+            sdelay = np.round((txdelay + rxdelay - t0)*fs*resample).astype(int)
             
             # resample data
             if resample != 1:
@@ -154,7 +205,7 @@ def work(in_queue, out_queue, attrs):
             pad_width = ((nwin, nwin), (0, 0), (0, 0))
             rfdata = np.pad(rfdata, pad_width, mode='constant')
             
-            bfdata = np.zeros((nwin, nframe, npos))
+            bfdata = np.zeros((npos, nwin, nframe))
             
             # apply delays in loop over field points and channels
             for pos in xrange(npos):
@@ -176,11 +227,11 @@ def work(in_queue, out_queue, attrs):
                     if not chmask[ch]:
                         continue
                     
-                    delay = pdelay[ch] + nwin + 1 - nwinhalf
-        
+                    delay = pdelay[ch] + nwin - nwinhalf
+                    
                     bfsig += rfdata[delay:(delay + nwin),ch,:]
                 
-                bfdata[:,:,pos] = bfsig
+                bfdata[pos,:,:] = bfsig
             
             out_queue.put((bfdata, frame_idx, pos_idx))
         
@@ -191,30 +242,60 @@ def work(in_queue, out_queue, attrs):
 class Beamformer():
     
     workers = []
-    delegator = None
-    input_path = ''
-    output_path = ''
-    view_path = ''
-    options = dict.fromkeys(['nwin','resample', 'planetx', 'chmask'])
+    delegator = []
+    input_path = ('', '')
+    output_path = ('', '')
+    view_path = ('', '')
+    options = dict()
     
     def __init__(self):
-        pass
+        self.set_options()
     
-    def load_data(self, path):
-        self.input_path = path
-    
+    def __str__(self):
+        string = []
+        string.append(repr(self) + '\n')
+        
+        string.append('\nOPTIONS:\n')
+        for k, v in self.options.iteritems():
+            string.append('{0}: {1}\n'.format(k, v))
+            
+        string.append('\nDATA PATHS: \n')
+        string.append('input data in {0} at {1}\n'.format(self.input_path[0], 
+            self.input_path[1]))
+        string.append('view data in {0} at {1}\n'.format(self.view_path[0], 
+            self.view_path[1]))
+        string.append('output data in {0} at {1}\n'.format(self.output_path[0], 
+            self.output_path[1]))
+        
+        string.append('\nWORKERS: \n')
+        for w in self.workers:
+            string.append(repr(w) + '\n')
+        
+        string.append('\nDELEGATOR: \n')
+        for d in self.delegator:
+            string.append(repr(d) + '\n')
+        
+        return ''.join(string)
+        
     def set_options(self, **kwargs):
         
         self.options['nwin'] = kwargs.get('nwin')
-        self.options['resample'] = kwargs.get('resample')
-        self.options['planetx'] = kwargs.get('planetx')
-        self.options['chmask'] = kwargs.get('chmask')
+        self.options['resample'] = kwargs.get('resample', 1)
+        self.options['planetx'] = kwargs.get('planetx', False)
+        self.options['chmask'] = kwargs.get('chmask', False)
+        self.options['maxframesperchunk'] = kwargs.get('maxframesperchunk', 
+            1000)
+        self.options['maxpointsperchunk'] = kwargs.get('maxpointsperchunk',
+            10000)
+        self.options['overwrite'] = kwargs.get('overwrite', False) 
         
-    def start(self, nproc=1, maxframespergroup=1000, maxpointsperchunk=1000,
-        write=False):
+    def start(self, nproc=1, frames=None):
         
-        inroot = h5py.File(self.input_path[0], 'a')
-        rfdata = inroot[self.input_path[1]]
+        self.reset()
+        
+        # open input file and get needed attributes
+        input_root = h5py.File(self.input_path[0], 'a')
+        rfdata = input_root[self.input_path[1]]
         
         attrs = {'c': rfdata.attrs.get('sound_speed'),
                  'fs': rfdata.attrs.get('sample_frequency'),
@@ -224,38 +305,49 @@ class Beamformer():
                     
         attrs.update(self.options)
         
-        inroot.close()
+        input_root.close()
         
         in_queue = Queue()
         out_queue = Queue()
         
+        # start worker processes
         for x in range(nproc):
             w = Process(target=work, args=(in_queue, out_queue, attrs))
             w.start()
             self.workers.append(w)
-            
-        self.delegator = Process(target=delegate, args=(in_queue, out_queue, 
-            self.input_path, self.view_path, self.output_path, 
-            maxpointsperchunk, maxframespergroup, self.options['nwin'], 
-            nproc, write))     
-        self.delegator.start() 
+        
+        # start delegator process
+        delegator = Process(target=delegate, args=(in_queue, out_queue, 
+            self.input_path, self.view_path, self.output_path, nproc, frames,
+            self.options))     
+        delegator.start() 
+        self.delegator.append(delegator)
         
         self.in_queue = in_queue
         self.out_queue = out_queue
-        
-    def join(self):
+         
+    def join(self, timeout=None):
         
         for w in self.workers:
-            w.join()
+            w.join(timeout)
         
-        self.delegator.join()
+        for d in self.delegator:
+            d.join(timeout)
     
     def terminate(self):
         
         for w in self.workers:
             w.terminate()
         
-        self.delegator.terminate()
+        for d in self.delegator:
+            d.terminate()
+        
+        self.join()
+    
+    def reset(self):
+        
+        self.workers = []
+        self.delegator = []
         
 class View():
     
