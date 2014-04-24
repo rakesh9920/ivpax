@@ -32,13 +32,14 @@ if __name__ == '__main__':
             'resample': 1,
             'chmask': False,
             'planetx': True,
-            'overwrite': True }  
+            'overwrite': True,
+            'maxpointsperchunk': 1000 }  
     bf.set_options(**opt)
     
     bf.input_path = ('testfile.hdf5', 'field/rfdata/rf0')
     bf.output_path = ('testfile.hdf5', 'bfdata/bf0')
     bf.view_path = ('testfile.hdf5', 'views/view0')
     
-    bf.start(nproc=4, frames=(0,15))
+    bf.start(nproc=2)
     
     print bf

@@ -2,21 +2,53 @@
 
 import numpy as np
 import scipy as sp
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Value
 import h5py
+import time
 
-class color:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
-   
+class Progress():
+    
+    def __init__(self, total=None):
+        self.counter = Value('i', 0)
+        self.total = None
+        self.init_time = None
+        self.elapsed_time = Value('f', 0)
+        self.fraction_done = Value('f', 0)
+    
+    def increment(self):
+        
+        with self.counter.get_lock():
+            self.counter.value += 1
+        
+        with self.fraction_done.get_lock():
+            self.fraction_done.value = self.counter.value/float(self.total)
+        
+        with self.elapsed_time.get_lock():
+            self.elapsed_time.value = time.time() - self.init_time
+            
+    def time_remaining(self):
+        
+        if self.fraction_done.value == 0:
+            rtime = (np.inf, np.inf, np.inf, np.inf)
+        else:
+            rtime = self.sec_to_dhms((1/self.fraction_done.value - 1) * \
+                self.elapsed_time.value)
+            
+        return rtime
+    
+    def sec_to_dhms(self, seconds):
+        
+        m, s = divmod(seconds, 60)
+        h, m = divmod(m, 60)
+        d, h = divmod(h, 24)
+        
+        return (d, h, m, s)
+    
+    def reset(self):
+        self.init_time = time.time()
+        self.counter.value = 0
+        self.fraction_done.value = 0
+
 def chunks(items, nitems):
     
     if nitems < 1:
@@ -32,7 +64,7 @@ def distance(a, b):
         2*np.dot(a.T, b))
 
 def delegate(in_queue, out_queue, input_path, view_path, output_path,
-    nproc, frames, options):
+    nproc, frames, options, progress):
     
     try:
         
@@ -103,6 +135,10 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         pointsperchunk = min(np.ceil(npos/nproc).astype(int), 
             maxpointsperchunk)
         
+        progress.total = np.ceil(nframe/framesperchunk) * \
+            np.ceil(npos/pointsperchunk) + 1
+        progress.reset()
+        
         # divide rf data into groups of frames for processing
         for frame_idx in iter(chunks(range(nframe), framesperchunk)):
             
@@ -128,6 +164,8 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
                     
                 bf, frame_idx, pos_idx = item
                 bfdata[pos_idx,:,frame_idx] = bf
+                
+                progress.increment()
         
         for w in xrange(nproc):
             in_queue.put('STOP')
@@ -250,10 +288,18 @@ class Beamformer():
     
     def __init__(self):
         self.set_options()
+        self.progress = Progress()
     
     def __str__(self):
         string = []
         string.append(repr(self) + '\n')
+        
+        rem_time = self.progress.time_remaining()
+        string.append('\nPROGRESS:\n')
+        string.append('percent done: {0:.0f}%\n'. \
+            format(self.progress.fraction_done.value*100))
+        string.append(('time remaining: {0:.0f}d {1:.0f}h {2:.0f}m {3:.0f}s\n')\
+            .format(*rem_time))
         
         string.append('\nOPTIONS:\n')
         for k, v in self.options.iteritems():
@@ -319,7 +365,7 @@ class Beamformer():
         # start delegator process
         delegator = Process(target=delegate, args=(in_queue, out_queue, 
             self.input_path, self.view_path, self.output_path, nproc, frames,
-            self.options))     
+            self.options, self.progress))     
         delegator.start() 
         self.delegator.append(delegator)
         

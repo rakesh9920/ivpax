@@ -7,7 +7,7 @@ import scipy as sp
     
 if __name__ == '__main__': 
     
-    data = h5py.File('testfile.hdf5', 'w')
+    data = h5py.File('testfile.hdf5', 'a')
     
     targ = data.create_dataset('field/targets/tar0', (1, 4, 20), 
         dtype='double', compression='gzip')
