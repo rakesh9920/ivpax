@@ -2,8 +2,7 @@
 
 import numpy as np
 import h5py
-import scipy as sp
-from beamformer import Beamformer
+from pyfield.beamform import Beamformer
 
 def write_view():
     
@@ -34,6 +33,7 @@ if __name__ == '__main__':
             'planetx': True,
             'overwrite': True,
             'maxpointsperchunk': 1000 }  
+            
     bf.set_options(**opt)
     
     bf.input_path = ('testfile.hdf5', 'field/rfdata/rf0')

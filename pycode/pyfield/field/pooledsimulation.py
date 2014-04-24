@@ -4,8 +4,8 @@ from multiprocessing import Pool, current_process
 import numpy as np
 import h5py
 from functools import partial
-from pyfield import Field
-import common as cm
+from . import Field
+from pyfield.util import chunks, align_and_sum
    
 def work(targets, script):
     
@@ -67,7 +67,7 @@ class PooledSimulation():
             pool = Pool(nproc, maxtasksperchild=1)
             
             results = pool.imap_unordered(work_abbr, 
-                [targets[x,:] for x in cm.chunks(range(ntargets), 
+                [targets[x,:] for x in chunks(range(ntargets), 
                 targets_per_group)])
 
             infile.close()
@@ -84,7 +84,7 @@ class PooledSimulation():
         
         (scat_t, t0_t) = results.next()
         for scat, t0 in results:
-            (scat_t, t0_t) = cm.align_and_sum(scat_t, t0_t, scat, t0, fs)
+            (scat_t, t0_t) = align_and_sum(scat_t, t0_t, scat, t0, fs)
     
         # open output file and write results
         root = h5py.File(self.outdata[0], 'a')

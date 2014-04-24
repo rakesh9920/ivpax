@@ -1,10 +1,10 @@
-# pyfield / simulation.py
+# pyfield / field / simulation.py
 
 from multiprocessing import Process, Queue, current_process
 import numpy as np
 import h5py
-from pyfield import Field
-import common as cm
+from . import Field
+from pyfield.util import chunks
 
 def work(in_queue, out_queue, script):
     
@@ -180,7 +180,7 @@ class Simulation():
                 self.workers.append(worker)
             
             # put data chunks into the input queue
-            for idx in cm.chunks(range(ntargets), targets_per_chunk):
+            for idx in chunks(range(ntargets), targets_per_chunk):
                 in_queue.put(targets[(idx),:,frame])
             
             # put poison pills into the input queue
