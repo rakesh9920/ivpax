@@ -316,8 +316,8 @@ class Beamformer():
         delegator.start() 
         self.delegator.append(delegator)
         
-        self.in_queue = in_queue
-        self.out_queue = out_queue
+        #self.in_queue = in_queue
+        #self.out_queue = out_queue
          
     def join(self, timeout=None):
         

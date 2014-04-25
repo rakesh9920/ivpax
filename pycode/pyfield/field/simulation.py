@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue, current_process
 import numpy as np
 import h5py
 from . import Field
-from pyfield.util import chunks
+from pyfield.util import chunks, align_and_sum, Progress
 
 def work(in_queue, out_queue, script):
     
@@ -88,34 +88,34 @@ def align_write(dataset, array1, t1, frame):
     dataset[:,:,frame] = np.pad(array1.copy(), pad_width1, mode='constant')
     dataset.attrs.create('start_time', min(t0, t1))
     
-def collect(out_queue, res_queue, fs):
-    
-    try:
-        
-        item = out_queue.get()
-        
-        if isinstance(item, Exception):
-            raise item
-        
-        (scat_t, t0_t) = item
-        
-        for item in iter(out_queue.get, 'STOP'):
-            
-            if isinstance(item, Exception):
-                raise item
-            
-            (scat, t0) = item
-            
-            (scat_t, t0_t) = cm.align_and_sum(scat_t, t0_t, scat, t0, fs)
-            
-        res_queue.put((scat_t, t0_t))
-    
-    except Exception as e:
-        
-        res_queue.put(e)
+#def collect(out_queue, res_queue, fs):
+#    
+#    try:
+#        
+#        item = out_queue.get()
+#        
+#        if isinstance(item, Exception):
+#            raise item
+#        
+#        (scat_t, t0_t) = item
+#        
+#        for item in iter(out_queue.get, 'STOP'):
+#            
+#            if isinstance(item, Exception):
+#                raise item
+#            
+#            (scat, t0) = item
+#            
+#            (scat_t, t0_t) = align_and_sum(scat_t, t0_t, scat, t0, fs)
+#            
+#        res_queue.put((scat_t, t0_t))
+#    
+#    except Exception as e:
+#        
+#        res_queue.put(e)
 
-def delegate(in_queue, res_queue, input_path, script_path, output_path, 
-    options, nproc, frames):
+def delegate(in_queue, out_queue, input_path, script_path, output_path, 
+    options, nproc, frames, progress):
     
     input_file = input_path[0]
     input_key = input_path[1]
@@ -131,6 +131,7 @@ def delegate(in_queue, res_queue, input_path, script_path, output_path,
     # get parameters from field ii script
     field_prms = __import__(script_path).get_prms()
     nchannel = field_prms['rx_positions'].shape[0]
+    fs = field_prms['sample_frequency']
     
     # open output file
     if output_file == input_file:
@@ -176,6 +177,9 @@ def delegate(in_queue, res_queue, input_path, script_path, output_path,
             
         nchunk = np.ceil(ntarget/targetsperchunk).astype(int)
         
+        progress.total = nchunk * (start_frame - stop_frame) + 1
+        progress.reset()
+        
         for frame in xrange(start_frame, stop_frame):
             
             for targ_idx in chunks(range(ntarget), targetsperchunk):
@@ -185,10 +189,27 @@ def delegate(in_queue, res_queue, input_path, script_path, output_path,
                 else:
                     in_queue.put(targdata[targ_idx,:])
             
+            item = out_queue.get()
+            if isinstance(item, Exception):
+                raise item
+            
+            scat_t, t0_t = item
+            
+            for chunk in xrange(nchunk - 1):
+                
+                item = out_queue.get()
+                if isinstance(item, Exception):
+                    raise item
+            
+                scat, t0 = item
+                scat_t, t0_t = align_and_sum(scat_t, t0_t, scat, t0, fs)
+                
+                progress.increment()
+                
+            align_write(rfdata, scat_t, t0_t, frame)
         
-        
-        
-        
+        for proc in xrange(nproc):
+            in_queue.put('STOP')
         
         # write rf data attributes
         for key, val in targdata.attrs.iteritems():
@@ -197,192 +218,224 @@ def delegate(in_queue, res_queue, input_path, script_path, output_path,
         for key, val in field_prms.iteritems():
             rfdata.attrs.create(key, val)
     
+    except Exception as e:
+        out_queue.put(e)
+        
     finally:
         
         input_root.close()
         
         if output_file != input_file:
             output_root.close()
-    
-    
-    
-        
-        
-            
-    
-    
-        
-    
-    
-                  
+
+             
 class Simulation():
     
     workers = []
-    collector = []
     delegator = []
     script_path = ''
     input_path = ''
     output_path = ''
+    options = dict()
     
     def __init__(self):
-        self.result = None
+        self.set_options()
     
     def __str__(self):
-        pass
+        string = []
+        string.append(repr(self) + '\n')
         
-    def reset(self):
-        self.workers = []
-        self.collector = []
-        self.delegator = []
+        rem_time = self.progress.time_remaining()
+        string.append('\nPROGRESS:\n')
+        string.append('percent done: {0:.0f}%\n'. \
+            format(self.progress.fraction_done.value*100))
+        string.append(('time remaining: {0:.0f}d {1:.0f}h {2:.0f}m {3:.0f}s\n')\
+            .format(*rem_time))
+        
+        string.append('\nOPTIONS:\n')
+        for k, v in self.options.iteritems():
+            string.append('{0}: {1}\n'.format(k, v))
+            
+        string.append('\nDATA PATHS: \n')
+        string.append('input data in {0} at {1}\n'.format(self.input_path[0], 
+            self.input_path[1]))
+        string.append('script in {0}\n'.format(self.script_path))
+        string.append('output data in {0} at {1}\n'.format(self.output_path[0], 
+            self.output_path[1]))
+        
+        string.append('\nWORKERS: \n')
+        for w in self.workers:
+            string.append(repr(w) + '\n')
+        
+        string.append('\nDELEGATOR: \n')
+        for d in self.delegator:
+            string.append(repr(d) + '\n')
+        
+        return ''.join(string)
     
-    def start(self, nproc=1, maxtargetsperchunk=10000, frames=None):
-            
-        # check that script and dataset are defined
-        if self.script is None:
-            raise Exception('Simulation script not set')
+    def set_options(self, **kwargs):
         
-        self.reset()
-        in_queue = Queue() # queue that sends data to workers
-        out_queue = Queue() # queue that sends data to collector
-        res_queue = Queue() # queue that sends data to delegator
+        self.options['maxtargetsperchunk'] = kwargs.get('maxtargetsperchunk',
+            10000)
+        self.options['overwrite'] = kwargs.get('overwrite', False) 
+    
+    def start(self, nproc=1, frames=None):
         
-        # open input file and read dataset
-        root = h5py.File(self.input_path[0], 'r')
-        targets = root[self.input_path[1]]
+        in_queue = Queue();
+        out_queue = Queue();
         
-        # get metadata from dataset
-        target_prms = dict()
-        for key, val in targets.attrs.iteritems():
-            target_prms[key] = val
+        progress = Progress()
+        # start worker processes
+        for w in xrange(nproc):
+            w = Process(target=work, args(in_queue, out_queue, 
+                self.script_path))
+            w.start()
+            self.workers.append(w)        
         
-        # get field ii parameters
-        def_script = __import__(self.script)
-        field_prms = def_script.get_prms()
+        # start delegator
+        delegator = Process(target=delegate, args=(in_queue, out_queue,
+            self.input_path, self.script_path, self.output_path, self.options, 
+            nproc, frames, progress))
+        delegator.start()
+        self.delegator.append(delegator)
         
-        ntargets = targets.shape[0]
-        
-        if frames is None:
-            frames = 0
-            self.frame_no = 0
-        else:
-            self.frame_no = frames
-            
-        if len(targets.shape) < 3:
-            frames = Ellipsis
-        
-        targets_per_chunk = min(np.floor(ntargets/nproc).astype(int), 
-            maxtargetsperchunk)
-            
-        try: 
-            
-            # start collector process
-            collector = Process(target=collect, args=(out_queue, res_queue, 
-                field_prms['sample_frequency']), name='collector')
-            collector.start()
-            self.collector.append(collector)
-            
-            # start worker processes
-            for j in xrange(nproc):
-                worker = Process(target=work, args=(in_queue, out_queue, 
-                    self.script), name=('worker'+str(j)))
-                worker.start()
-                self.workers.append(worker)
-            
-            # put data chunks into the input queue
-            for idx in chunks(range(ntargets), targets_per_chunk):
-                in_queue.put(targets[(idx),:,frames])
-            
-            # put poison pills into the input queue
-            for w in self.workers:
-                in_queue.put('STOP')
-            
-            root.close()
-            
-            self.out_queue = out_queue
-            self.res_queue = res_queue
-            self.field_prms = field_prms
-            self.target_prms = target_prms
-     
-        except:
-            
-            root.close()           
-            raise
-        
-    def write_data(self, path=(), frame=None):
-
-        if frame is None:
-            frame = self.frame_no
-            
-        try:
-            # open output file and write results
-            root = h5py.File(path[0], 'a')
-            dataset = path[1]
-            
-            dims = self.result[0].shape
-            
-            # if dataset doesn't exist, create a new dataset
-            if dataset not in root:
-                
-                rfdata = root.create_dataset(dataset, 
-                    shape=(dims[0], dims[1], frame+1),
-                    maxshape=(None, dims[1], None), dtype='double',
-                    compression='gzip')
-                     
-                rfdata[:,:,frame] = self.result[0].copy()
-               
-            else:
-                
-                rfdata = root[dataset]
-                align_write(rfdata, self.result[0], self.result[1], frame)
-            
-            # set data attributes
-            rfdata.attrs.create('start_time', self.result[1])
-            
-            # copy target parameters to data attributes
-            for key, val in self.target_prms.iteritems():
-                rfdata.attrs.create(key, val)
-            
-            # copy field ii parameters to data attributes
-            for key, val in self.field_prms.iteritems():
-                rfdata.attrs.create(key, val)
-            
-            root.close()
-            
-        except:
-            
-            root.close()
-            raise
-            
+        self.progress = progress
+                    
     def join(self, timeout=None):
         
         # wait for workers to join--input and output queues will be flushed
         for w in self.workers:
             w.join(timeout)
         
-        # put poison pill for collector
-        self.out_queue.put('STOP')
-        
-        # get result from collector and close input file
-        item = self.res_queue.get()
-        
-        if isinstance(item, Exception):
-            raise item
-        
-        self.result = item
-        self.collector[0].join(timeout)
+        for d in self.delegator:
+            d.join(timeout)
     
     def terminate(self):
         
         for w in self.workers:
             w.terminate()
-            w.join()
         
-        for c in self.collector:
-            c.terminate()
-            c.join()
+        for d in self.delegator:
+            d.terminate()
+
+        self.join()
     
-        
-        
+    def reset(self):
+        self.workers = []
+        self.delegator = []
+ 
+    #def start(self, nproc=1, maxtargetsperchunk=10000, frames=None):
+    #        
+    #    # check that script and dataset are defined
+    #    if self.script is None:
+    #        raise Exception('Simulation script not set')
+    #    
+    #    self.reset()
+    #    in_queue = Queue() # queue that sends data to workers
+    #    out_queue = Queue() # queue that sends data to collector
+    #    res_queue = Queue() # queue that sends data to delegator
+    #    
+    #    # open input file and read dataset
+    #    root = h5py.File(self.input_path[0], 'r')
+    #    targets = root[self.input_path[1]]
+    #    
+    #    # get metadata from dataset
+    #    target_prms = dict()
+    #    for key, val in targets.attrs.iteritems():
+    #        target_prms[key] = val
+    #    
+    #    # get field ii parameters
+    #    def_script = __import__(self.script)
+    #    field_prms = def_script.get_prms()
+    #    
+    #    ntargets = targets.shape[0]
+    #    
+    #    if frames is None:
+    #        frames = 0
+    #        self.frame_no = 0
+    #    else:
+    #        self.frame_no = frames
+    #        
+    #    if len(targets.shape) < 3:
+    #        frames = Ellipsis
+    #    
+    #    targets_per_chunk = min(np.floor(ntargets/nproc).astype(int), 
+    #        maxtargetsperchunk)
+    #        
+    #    try: 
+    #        
+    #        # start collector process
+    #        collector = Process(target=collect, args=(out_queue, res_queue, 
+    #            field_prms['sample_frequency']), name='collector')
+    #        collector.start()
+    #        self.collector.append(collector)
+    #        
+    #        # start worker processes
+    #        for j in xrange(nproc):
+    #            worker = Process(target=work, args=(in_queue, out_queue, 
+    #                self.script), name=('worker'+str(j)))
+    #            worker.start()
+    #            self.workers.append(worker)
+    #        
+    #        # put data chunks into the input queue
+    #        for idx in chunks(range(ntargets), targets_per_chunk):
+    #            in_queue.put(targets[(idx),:,frames])
+    #        
+    #        # put poison pills into the input queue
+    #        for w in self.workers:
+    #            in_queue.put('STOP')
+    #        
+    #        root.close()
+    #        
+    #        self.out_queue = out_queue
+    #        self.res_queue = res_queue
+    #        self.field_prms = field_prms
+    #        self.target_prms = target_prms
+   
+#    def write_data(self, path=(), frame=None):
+#
+#        if frame is None:
+#            frame = self.frame_no
+#            
+#        try:
+#            # open output file and write results
+#            root = h5py.File(path[0], 'a')
+#            dataset = path[1]
+#            
+#            dims = self.result[0].shape
+#            
+#            # if dataset doesn't exist, create a new dataset
+#            if dataset not in root:
+#                
+#                rfdata = root.create_dataset(dataset, 
+#                    shape=(dims[0], dims[1], frame+1),
+#                    maxshape=(None, dims[1], None), dtype='double',
+#                    compression='gzip')
+#                     
+#                rfdata[:,:,frame] = self.result[0].copy()
+#               
+#            else:
+#                
+#                rfdata = root[dataset]
+#                align_write(rfdata, self.result[0], self.result[1], frame)
+#            
+#            # set data attributes
+#            rfdata.attrs.create('start_time', self.result[1])
+#            
+#            # copy target parameters to data attributes
+#            for key, val in self.target_prms.iteritems():
+#                rfdata.attrs.create(key, val)
+#            
+#            # copy field ii parameters to data attributes
+#            for key, val in self.field_prms.iteritems():
+#                rfdata.attrs.create(key, val)
+#            
+#            root.close()
+#            
+#        except:
+#            
+#            root.close()
+#            raise  
         
         
         
