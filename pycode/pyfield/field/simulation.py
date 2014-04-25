@@ -85,7 +85,7 @@ def align_write(dataset, array1, t1, frame):
     #dataset[:dims0[0],:,:dims0[2]] = np.pad(array0, pad_width0, 
     #    mode='constant')
     
-    dataset[:,:,frame] = np.pad(array1.copy(), pad_width1, mode='constant')
+    dataset[:,:,frame] = np.pad(array1, pad_width1, mode='constant')
     dataset.attrs.create('start_time', min(t0, t1))
     
 #def collect(out_queue, res_queue, fs):
@@ -140,19 +140,8 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
         output_root = h5py.File(output_file)
     
     try:
-        
-        if options['write']:
-            
-            if output_key in output_root:
-                del output_root[output_key]
-            
-            rfdata = output_root.create_dataset(output_key, dtype='double',
-                shape=(None, nchannel, None), compression='gzip')
-                
-        else:
-            rfdata = output_root[output_key]
-        
-        if targdata.ndim == 3:
+     
+        if len(targdata.shape) == 3:
             nframe = targdata.shape[2]
         else:
             nframe = 1
@@ -184,7 +173,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
             
             for targ_idx in chunks(range(ntarget), targetsperchunk):
                 
-                if targdata.ndim == 3:
+                if len(targdata.shape) == 3:
                     in_queue.put(targdata[targ_idx,:,frame])
                 else:
                     in_queue.put(targdata[targ_idx,:])
@@ -194,6 +183,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
                 raise item
             
             scat_t, t0_t = item
+            progress.increment()
             
             for chunk in xrange(nchunk - 1):
                 
@@ -205,9 +195,46 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
                 scat_t, t0_t = align_and_sum(scat_t, t0_t, scat, t0, fs)
                 
                 progress.increment()
+            
+            # behavior for first frame is special since dataset needs to be 
+            # seeded
+            if frame == start_frame:
+                    
+                if options['overwrite']:
+                    
+                    if output_key in output_root:
+                        del output_root[output_key]
+                    
+                    rfdata = output_root.create_dataset(output_key, 
+                        dtype='double', 
+                        shape=(scat_t.shape[0], nchannel, frame + 1), 
+                        maxshape=(None, nchannel, None), compression='gzip')
                 
-            align_write(rfdata, scat_t, t0_t, frame)
-        
+                    rfdata[:,:,frame] = scat_t
+                    rfdata.attrs.create('start_time', t0_t)
+                    rfdata.attrs.create('sample_frequency', fs)
+                    
+                else:
+                    
+                    if output_key in output_root:
+                        
+                        rfdata = output_root[output_key]
+                        align_write(rfdata, scat_t, t0_t, frame)
+                    
+                    else:
+                        
+                        rfdata = output_root.create_dataset(output_key, 
+                            dtype='double', 
+                            shape=(scat_t.shape[0], nchannel, frame + 1), 
+                            maxshape=(None, nchannel, None), compression='gzip')
+                    
+                        rfdata[:,:,frame] = scat_t
+                        rfdata.attrs.create('start_time', t0_t)
+                        rfdata.attrs.create('sample_frequency', fs)
+  
+            else:
+                align_write(rfdata, scat_t, t0_t, frame)
+ 
         for proc in xrange(nproc):
             in_queue.put('STOP')
         
@@ -240,6 +267,7 @@ class Simulation():
     
     def __init__(self):
         self.set_options()
+        self.progress = Progress()
     
     def __str__(self):
         string = []
@@ -281,13 +309,15 @@ class Simulation():
     
     def start(self, nproc=1, frames=None):
         
+        self.reset()
+        
         in_queue = Queue();
         out_queue = Queue();
         
         progress = Progress()
         # start worker processes
         for w in xrange(nproc):
-            w = Process(target=work, args(in_queue, out_queue, 
+            w = Process(target=work, args=(in_queue, out_queue, 
                 self.script_path))
             w.start()
             self.workers.append(w)        
@@ -300,6 +330,8 @@ class Simulation():
         self.delegator.append(delegator)
         
         self.progress = progress
+        self.in_queue = in_queue
+        self.out_queue = out_queue
                     
     def join(self, timeout=None):
         
