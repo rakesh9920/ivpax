@@ -29,7 +29,11 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         
         if frames is None:          
             
-            nframe = rfdata.shape[2]
+            if rfdata.ndim == 3:
+                nframe = rfdata.shape[2]
+            else:
+                nframe = 1
+            
             start_frame = 0      
             
         elif isinstance(frames, tuple):

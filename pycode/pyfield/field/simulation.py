@@ -113,20 +113,129 @@ def collect(out_queue, res_queue, fs):
     except Exception as e:
         
         res_queue.put(e)
+
+def delegate(in_queue, res_queue, input_path, script_path, output_path, 
+    options, nproc, frames):
+    
+    input_file = input_path[0]
+    input_key = input_path[1]
+    output_file = output_path[0]
+    output_key = output_path[1]
+    
+    # open input file
+    input_root = h5py.File(input_file, 'a')
+    targdata = input_root[input_key]
+    ntarget = targdata.shape[0]
+    nframe = targdata.shape[2]
+    
+    # get parameters from field ii script
+    field_prms = __import__(script_path).get_prms()
+    nchannel = field_prms['rx_positions'].shape[0]
+    
+    # open output file
+    if output_file == input_file:
+        output_root = input_root
+    else:
+        output_root = h5py.File(output_file)
+    
+    try:
+        
+        if options['write']:
+            
+            if output_key in output_root:
+                del output_root[output_key]
+            
+            rfdata = output_root.create_dataset(output_key, dtype='double',
+                shape=(None, nchannel, None), compression='gzip')
+                
+        else:
+            rfdata = output_root[output_key]
+        
+        if targdata.ndim == 3:
+            nframe = targdata.shape[2]
+        else:
+            nframe = 1
+        
+        if frames is None:
+            
+            start_frame = 0
+            stop_frame = nframe
+            
+        elif isinstance(frames, tuple):
+            
+            start_frame = frames[0]
+            stop_frame = min(frames[1], nframe)
+            
+        else:
+            
+            start_frame = frames
+            stop_frame = frames + 1
+        
+        targetsperchunk = min(np.ceil(ntarget/nproc).astype(int), 
+            options['maxtargetsperchunk'])
+            
+        nchunk = np.ceil(ntarget/targetsperchunk).astype(int)
+        
+        for frame in xrange(start_frame, stop_frame):
+            
+            for targ_idx in chunks(range(ntarget), targetsperchunk):
+                
+                if targdata.ndim == 3:
+                    in_queue.put(targdata[targ_idx,:,frame])
+                else:
+                    in_queue.put(targdata[targ_idx,:])
+            
+        
+        
+        
+        
+        
+        # write rf data attributes
+        for key, val in targdata.attrs.iteritems():
+            rfdata.attrs.create(key, val)
+        
+        for key, val in field_prms.iteritems():
+            rfdata.attrs.create(key, val)
+    
+    finally:
+        
+        input_root.close()
+        
+        if output_file != input_file:
+            output_root.close()
+    
+    
+    
+        
+        
+            
+    
+    
+        
+    
+    
                   
 class Simulation():
     
-    def __init__(self, script=None):
-        self.workers = []
-        self.collector = []
-        self.script = script
+    workers = []
+    collector = []
+    delegator = []
+    script_path = ''
+    input_path = ''
+    output_path = ''
+    
+    def __init__(self):
         self.result = None
     
+    def __str__(self):
+        pass
+        
     def reset(self):
         self.workers = []
         self.collector = []
+        self.delegator = []
     
-    def start(self, nproc=1, maxtargetsperchunk=10000, frame=None):
+    def start(self, nproc=1, maxtargetsperchunk=10000, frames=None):
             
         # check that script and dataset are defined
         if self.script is None:
@@ -135,7 +244,7 @@ class Simulation():
         self.reset()
         in_queue = Queue() # queue that sends data to workers
         out_queue = Queue() # queue that sends data to collector
-        res_queue = Queue() # queue that sends data to main process
+        res_queue = Queue() # queue that sends data to delegator
         
         # open input file and read dataset
         root = h5py.File(self.input_path[0], 'r')
@@ -152,14 +261,14 @@ class Simulation():
         
         ntargets = targets.shape[0]
         
-        if frame is None:
-            frame = 0
+        if frames is None:
+            frames = 0
             self.frame_no = 0
         else:
-            self.frame_no = frame
+            self.frame_no = frames
             
         if len(targets.shape) < 3:
-            frame = Ellipsis
+            frames = Ellipsis
         
         targets_per_chunk = min(np.floor(ntargets/nproc).astype(int), 
             maxtargetsperchunk)
@@ -181,7 +290,7 @@ class Simulation():
             
             # put data chunks into the input queue
             for idx in chunks(range(ntargets), targets_per_chunk):
-                in_queue.put(targets[(idx),:,frame])
+                in_queue.put(targets[(idx),:,frames])
             
             # put poison pills into the input queue
             for w in self.workers:
@@ -198,9 +307,6 @@ class Simulation():
             
             root.close()           
             raise
-    
-    def load_data(self, path=()):
-        self.input_path = path
         
     def write_data(self, path=(), frame=None):
 
