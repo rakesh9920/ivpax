@@ -284,7 +284,10 @@ ArrayInfo f2_xdc_get(int Th_, char * opt_)
     mwArray dims = res.GetDimensions();
     data.nrows = (int) dims.Get(2,1,1);
     data.ncols = (int) dims.Get(2,1,2);
-
+    
+    std::cout << data.nrows << " " << data.ncols << "\n";
+    std::cout.flush()
+    
     data.ptr = new double [data.nrows*data.ncols];
     res.GetData(data.ptr, data.nrows*data.ncols);
     
