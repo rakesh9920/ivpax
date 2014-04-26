@@ -8,7 +8,7 @@ class Progress():
     
     def __init__(self, total=None):
         self.counter = Value('i', 0)
-        self.total = None
+        self.total = Value('i', 0)
         self.init_time = None
         self.elapsed_time = Value('f', 0)
         self.fraction_done = Value('f', 0)
@@ -19,7 +19,7 @@ class Progress():
             self.counter.value += 1
         
         with self.fraction_done.get_lock():
-            self.fraction_done.value = self.counter.value/float(self.total)
+            self.fraction_done.value = self.counter.value/float(self.total.value)
         
         with self.elapsed_time.get_lock():
             self.elapsed_time.value = time.time() - self.init_time

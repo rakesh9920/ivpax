@@ -79,11 +79,11 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
             bfdata = output_root[output_key]
         
         framesperchunk = min(nframe, maxframesperchunk)
-        pointsperchunk = min(np.ceil(npos/nproc).astype(int), 
+        pointsperchunk = min(np.ceil(float(npos)/nproc).astype(int), 
             maxpointsperchunk)
         
-        progress.total = np.ceil(nframe/framesperchunk) * \
-            np.ceil(npos/pointsperchunk) + 1
+        progress.total.value = np.ceil(float(nframe)/framesperchunk) * \
+            np.ceil(float(npos)/pointsperchunk)
         progress.reset()
         
         # divide rf data into groups of frames for processing

@@ -161,12 +161,12 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
             start_frame = frames
             stop_frame = frames + 1
         
-        targetsperchunk = min(np.ceil(ntarget/nproc).astype(int), 
+        targetsperchunk = min(np.ceil(float(ntarget)/nproc).astype(int), 
             options['maxtargetsperchunk'])
             
-        nchunk = np.ceil(ntarget/targetsperchunk).astype(int)
+        nchunk = np.ceil(float(ntarget)/targetsperchunk).astype(int)
         
-        progress.total = nchunk * (start_frame - stop_frame) + 1
+        progress.total.value = nchunk * (stop_frame - start_frame)
         progress.reset()
         
         for frame in xrange(start_frame, stop_frame):

@@ -3,7 +3,7 @@ import h5py
 import numpy as np
 import scipy as sp
 
-def cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None, 
+def sct_cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None, 
     prf=None):
     
     center = np.array(center)
@@ -33,5 +33,39 @@ def cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None,
         
         new_pos = pos + vel/prf*f
         dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
+
+def sct_sphere(rrange, trange, prange, origin, ns):
     
+    length = 2*rrange[1]
+    ntarget = np.round((length)**3*ns)
     
+    xpos = sp.rand(ntarget, 1)*length
+    ypos = sp.rand(ntarget, 1)*length
+    zpos = sp.rand(ntarget, 1)*length
+    
+    target_pos = np.concatenate((xpos, ypos, zpos), axis=1) - length/2
+    
+    # remove points outside radius range
+    r = np.sqrt(target_pos[:,0]**2 + target_pos[:,1]**2 + target_pos[:,2]**2)
+    mask = (r >= rrange[0]) & (r <= rrange[1])
+    
+    target_pos = target_pos[mask,:]
+    r = r[mask]
+    
+    # remove points outside theta range
+    theta = sp.arctan2(target_pos[:,1], target_pos[:,0])
+    theta[theta < 0] = theta[theta < 0] + 2*np.pi
+    mask = (theta >= trange[0]) & (theta <= trange[1])
+    
+    target_pos = target_pos[mask,:]
+    r = r[mask]
+    
+    # remove points outside phi range
+    phi = np.arccos(target_pos[:,2]/r)
+    mask = (phi >= prange[0]) & (phi <= prange[1])
+    target_pos = target_pos[mask,:]
+    
+    target_pos += origin.reshape((1,3))
+    
+    return target_pos
+

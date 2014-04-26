@@ -282,7 +282,7 @@ ArrayInfo f2_xdc_get(int Th_, char * opt_)
     ArrayInfo data;
     
     mwArray dims = res.GetDimensions();
-    data.nrows = (int) dims.Get(1,1,1);
+    data.nrows = (int) dims.Get(2,1,1);
     data.ncols = (int) dims.Get(2,1,2);
 
     data.ptr = new double [data.nrows*data.ncols];
