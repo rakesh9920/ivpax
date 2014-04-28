@@ -92,6 +92,8 @@ class Field:
         f2.f2_xdc_2d_array.argtypes = [ct.c_int, ct.c_int, ct.c_double, 
             ct.c_double, ct.c_double, ct.c_double, ct.POINTER(_ArrayInfo), 
             ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo)]
+        f2.f2_xdc_concave.restype = ct.c_int
+        f2.f2_xdc_concave.argtypes = [ct.c_double, ct.c_double, ct.c_double]
         f2.f2_xdc_linear_array.restype = ct.c_int
         f2.f2_xdc_linear_array.argtypes = [ct.c_int, ct.c_double, ct.c_double,
             ct.c_double, ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo)]
@@ -193,6 +195,10 @@ class Field:
         
         return self.libf2.f2_xdc_linear_array(nele, width, height, kerf, nsubx, 
             nsuby, ct.byref(_getArrayInfo(focus)))
+    
+    def xdc_concave(self, radius, focus, elsize):
+        
+        return self.libf2.f2_xdc_concave(radius, focus, elsize)
     
     def xdc_focus_times(self, aperture, times, delays):
         

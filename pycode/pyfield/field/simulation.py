@@ -126,7 +126,6 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
     input_root = h5py.File(input_file, 'a')
     targdata = input_root[input_key]
     ntarget = targdata.shape[0]
-    nframe = targdata.shape[2]
     
     # get parameters from field ii script
     field_prms = __import__(script_path).get_prms()
@@ -137,7 +136,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
     if output_file == input_file:
         output_root = input_root
     else:
-        output_root = h5py.File(output_file)
+        output_root = h5py.File(output_file, 'a')
     
     try:
      

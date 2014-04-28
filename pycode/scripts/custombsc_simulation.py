@@ -7,10 +7,10 @@ if __name__ == '__main__':
     
     sim = Simulation()
     
-    sim.input_path = ('fieldii_bsc_experiments.h5py', 
+    sim.input_path = ('fieldii_bsc_experiments.hdf5', 
         'custombsc/field/targdata/0')
-    sim.script_path = 'focused_piston_f4.py'
-    sim.output_path = ('fieldii_bsc_experiments.h5py', 
+    sim.script_path = 'focused_piston_f4'
+    sim.output_path = ('fieldii_bsc_experiments.hdf5', 
         'custombsc/field/rfdata/raw')
     
     opt = { 'maxtargetsperchunk': 100000,
@@ -22,23 +22,28 @@ if __name__ == '__main__':
     
     for inst in xrange(ninstance):
         
-        target_pos = sct_sphere((0.015, 0.025), (0, 2*np.pi), (0, np.pi/2), ns=ns)
+        target_pos = sct_sphere((0.015, 0.025), (0, 2*np.pi), (0, np.pi/2), 
+            ns=ns)
+        ntarget = target_pos.shape[0]
         
         root = h5py.File(sim.input_path[0], 'a')
         
         if sim.input_path[1] in root:
             del root[sim.input_path[1]]
             
-        targdata = root.create_dataset(sim.input_path[1], data=target_pos,
-        compression='gzip')
+        targdata = root.create_dataset(sim.input_path[1], shape=(ntarget, 4),
+            compression='gzip')
+        
+        targdata[:,0:3] = target_pos
+        targdata[:,3] = np.ones((ntarget,))
         
         targdata.attrs.create('target_density', ns)
     
         root.close() 
         
-        sim.start(nproc=1, overwrite=True)
+        sim.start(nproc=1)
         
-    
+        print sim
     
     
     
