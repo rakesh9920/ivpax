@@ -31,6 +31,8 @@ if __name__ == '__main__':
             
         targdata = root.create_dataset(sim.input_path[1], data=target_pos,
         compression='gzip')
+        
+        targdata.attrs.create('target_density', ns)
     
         root.close() 
         
