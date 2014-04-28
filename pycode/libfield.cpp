@@ -1,12 +1,12 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Thu Apr 10 10:39:35 2014
+// Date: Mon Apr 28 00:18:40 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
 // "-B" "functionlist.txt" "Mat_field" "field_init" "field_end" "calc_scat"
 // "calc_scat_multi" "xdc_piston" "xdc_linear_array" "xdc_excitation"
 // "xdc_impulse" "set_field" "xdc_focus_times" "xdc_free" "xdc_get"
 // "xdc_quantization" "xdc_rectangles" "xdc_show" "xdc_triangles"
-// "xdc_2d_array" 
+// "xdc_2d_array" "xdc_concave" 
 //
 
 #include <stdio.h>
@@ -244,6 +244,12 @@ bool MW_CALL_CONV mlxXdc_2d_array(int nlhs, mxArray *plhs[], int nrhs, mxArray *
   return mclFeval(_mcr_inst, "xdc_2d_array", nlhs, plhs, nrhs, prhs);
 }
 
+LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_concave(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[])
+{
+  return mclFeval(_mcr_inst, "xdc_concave", nlhs, plhs, nrhs, prhs);
+}
+
 LIB_libfield_CPP_API 
 void MW_CALL_CONV Mat_field(int nargout, mwArray& varargout, const mwArray& varargin)
 {
@@ -389,5 +395,12 @@ void MW_CALL_CONV xdc_2d_array(int nargout, mwArray& Th, const mwArray& no_ele_x
                                mwArray& no_sub_y, const mwArray& focus)
 {
   mclcppMlfFeval(_mcr_inst, "xdc_2d_array", nargout, 1, 10, &Th, &no_ele_x, &no_ele_y, &width, &height, &kerf_x, &kerf_y, &enabled, &no_sub_x, &no_sub_y, &focus);
+}
+
+LIB_libfield_CPP_API 
+void MW_CALL_CONV xdc_concave(int nargout, mwArray& Th, const mwArray& radius, const 
+                              mwArray& focal_radius, const mwArray& ele_size)
+{
+  mclcppMlfFeval(_mcr_inst, "xdc_concave", nargout, 1, 3, &Th, &radius, &focal_radius, &ele_size);
 }
 

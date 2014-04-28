@@ -1,12 +1,12 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Thu Apr 10 10:39:35 2014
+// Date: Mon Apr 28 00:18:40 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
 // "-B" "functionlist.txt" "Mat_field" "field_init" "field_end" "calc_scat"
 // "calc_scat_multi" "xdc_piston" "xdc_linear_array" "xdc_excitation"
 // "xdc_impulse" "set_field" "xdc_focus_times" "xdc_free" "xdc_get"
 // "xdc_quantization" "xdc_rectangles" "xdc_show" "xdc_triangles"
-// "xdc_2d_array" 
+// "xdc_2d_array" "xdc_concave" 
 //
 
 #ifndef __libfield_h
@@ -135,6 +135,9 @@ bool MW_CALL_CONV mlxXdc_triangles(int nlhs, mxArray *plhs[], int nrhs, mxArray 
 extern LIB_libfield_C_API 
 bool MW_CALL_CONV mlxXdc_2d_array(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
+extern LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_concave(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+
 
 #ifdef __cplusplus
 }
@@ -206,6 +209,8 @@ extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_show(int nargout, mwArray& res
 extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_triangles(int nargout, mwArray& Th, const mwArray& data, const mwArray& center, const mwArray& focus);
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_2d_array(int nargout, mwArray& Th, const mwArray& no_ele_x, const mwArray& no_ele_y, const mwArray& width, const mwArray& height, const mwArray& kerf_x, const mwArray& kerf_y, const mwArray& enabled, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
+
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_concave(int nargout, mwArray& Th, const mwArray& radius, const mwArray& focal_radius, const mwArray& ele_size);
 
 #endif
 #endif

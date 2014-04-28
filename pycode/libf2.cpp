@@ -279,7 +279,7 @@ int f2_xdc_concave(double radius_, double focus_, double elsize_)
     
     xdc_concave(1, res, radius, focus, elsize);
     
-    return (int) res.Get(1,1)
+    return (int) res.Get(1,1);
 }
 
 ArrayInfo f2_xdc_get(int Th_, char * opt_)
