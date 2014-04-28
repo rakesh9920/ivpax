@@ -41,9 +41,11 @@ if __name__ == '__main__':
     
         root.close() 
         
-        sim.start(nproc=1)
+        sim.start(nproc=4)
         
         print sim
+        
+        sim.join()
     
     
     
