@@ -15,24 +15,31 @@ def sct_cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None,
     y = sp.rand(ntarget, 1)*dims[1]
     z = sp.rand(ntarget, 1)*dims[2]
     
-    pos = np.concatenate((x, y, z), axis=1) + center
+    pos = np.concatenate((x, y, z), axis=1) - np.array(dims)[None,:]/2 + center
     amp = np.ones((ntarget, 1))
     
     root = h5py.File(outpath[0], 'a')
-    path = outpath[1]
     
-    if path in root:
-        del root[path]
-    
-    dset = root.create_dataset(path, shape=(ntarget, 4, nframe), dtype='double',
-        compression='gzip')
-    
-    dset[:,:,0] = np.concatenate((pos, amp), axis=1)
-    
-    for f in xrange(1, nframe):
+    try:
         
-        new_pos = pos + vel/prf*f
-        dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
+        path = outpath[1]
+        
+        if path in root:
+            del root[path]
+        
+        dset = root.create_dataset(path, shape=(ntarget, 4, nframe), 
+            dtype='double', compression='gzip')
+        
+        dset[:,:,0] = np.concatenate((pos, amp), axis=1)
+        
+        for f in xrange(1, nframe):
+            
+            new_pos = pos + vel/prf*f
+            dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
+    
+    finally:
+        
+        root.close()
 
 def sct_sphere(rrange, trange, prange, origin=None, ns=1000**3):
     

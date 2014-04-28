@@ -176,7 +176,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
                     in_queue.put(targdata[targ_idx,:,frame])
                 else:
                     in_queue.put(targdata[targ_idx,:])
-            
+            return
             item = out_queue.get()
             if isinstance(item, Exception):
                 raise item
