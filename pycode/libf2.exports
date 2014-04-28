@@ -16,9 +16,9 @@ f2_set_field
 f2_xdc_focus_times
 f2_xdc_free
 f2_xdc_linear_array
+f2_xdc_concave
 
 *f2_xdc_convex_array
-*f2_xdc_concave
 *f2_xdc_convex_focused_array
 *f2_xdc_quantization
 *f2_xdc_show

@@ -33,6 +33,7 @@ void f2_xdc_free(int);
 int f2_xdc_2d_array(int, int, double, double, double, double, ArrayInfo *,
         int, int, ArrayInfo *);
 int f2_xdc_linear_array(int, double, double, double, int, int, ArrayInfo *);
+int f2_xdc_concave(double, double, double);
 struct ArrayInfo f2_calc_scat(int, int, ArrayInfo *, ArrayInfo *);
 struct ArrayInfo f2_calc_scat_multi(int, int, ArrayInfo *, ArrayInfo *);
 

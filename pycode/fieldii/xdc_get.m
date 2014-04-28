@@ -26,7 +26,7 @@ function data = xdc_get (Th, info_type)
 
   if nargin < 2
     info_type = 'rect';
-    end
+  end
 
   if strcmp(info_type, 'rect')
     info = 1;

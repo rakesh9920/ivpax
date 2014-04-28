@@ -34,8 +34,11 @@ def sct_cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None,
         new_pos = pos + vel/prf*f
         dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
 
-def sct_sphere(rrange, trange, prange, origin, ns):
+def sct_sphere(rrange, trange, prange, origin=None, ns=1000**3):
     
+    if origin is None:
+        origin = np.zeros((1,3))
+        
     length = 2*rrange[1]
     ntarget = np.round((length)**3*ns)
     

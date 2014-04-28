@@ -270,6 +270,18 @@ int f2_xdc_2d_array(int nelex_, int neley_, double width_, double height_,
     return (int) res.Get(1,1);
 }
 
+int f2_xdc_concave(double radius_, double focus_, double elsize_)
+{
+    mwArray radius (radius_);
+    mwArray focus (focus_);
+    mwArray elsize (elsize_);
+    mwArray res;
+    
+    xdc_concave(1, res, radius, focus, elsize);
+    
+    return (int) res.Get(1,1)
+}
+
 ArrayInfo f2_xdc_get(int Th_, char * opt_)
 {
     mwArray Th (Th_);

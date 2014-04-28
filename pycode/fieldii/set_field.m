@@ -55,7 +55,7 @@ function res = set_field (option_name, value)
 
   if (~isstr(option_name))
     error ('First argument must be an option name');
-    end
+  end
 
 %  Call the C-part of the program to set the option
 
