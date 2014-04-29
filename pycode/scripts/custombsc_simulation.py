@@ -7,18 +7,19 @@ if __name__ == '__main__':
     
     sim = Simulation()
     
-    sim.input_path = ('fieldii_bsc_experiments.hdf5', 
-        'custombsc/field/targdata/0')
+    file_path = 'fieldii_bsc_experiments.hdf5'
+    input_key = 'custombsc/field/targdata/0'
+    output_key = 'custombsc/field/rfdata/raw/'
+    
+    sim.input_path = (file_path, input_key)
     sim.script_path = 'focused_piston_f4'
-    sim.output_path = ('fieldii_bsc_experiments.hdf5', 
-        'custombsc/field/rfdata/raw')
     
     opt = { 'maxtargetsperchunk': 15000,
             'overwrite': True }
     sim.set_options(**opt)
     
-    ns = 0.5*1000**3
-    ninstance = 1
+    ns = 20*1000**3
+    ninstance = 500
     
     for inst in xrange(ninstance):
         
@@ -26,12 +27,12 @@ if __name__ == '__main__':
             ns=ns)
         ntarget = target_pos.shape[0]
         
-        root = h5py.File(sim.input_path[0], 'a')
+        root = h5py.File(file_path, 'a')
         
         if sim.input_path[1] in root:
             del root[sim.input_path[1]]
             
-        targdata = root.create_dataset(sim.input_path[1], shape=(ntarget, 4, 1),
+        targdata = root.create_dataset(input_key, shape=(ntarget, 4, 1),
             compression='gzip')
         
         targdata[:,0:3, 0] = target_pos
@@ -41,11 +42,13 @@ if __name__ == '__main__':
     
         root.close() 
         
-        sim.start(nproc=4)
+        sim.output_path = (file_path, output_key + str(inst))
+        
+        sim.start(nproc=2)
         
         print sim
         
-        sim.join()
+        
     
     
     

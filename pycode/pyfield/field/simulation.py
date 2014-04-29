@@ -176,7 +176,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
                     in_queue.put(targdata[targ_idx,:,frame])
                 else:
                     in_queue.put(targdata[targ_idx,:])
-            return
+            
             item = out_queue.get()
             if isinstance(item, Exception):
                 raise item
@@ -354,120 +354,6 @@ class Simulation():
     def reset(self):
         self.workers = []
         self.delegator = []
- 
-    #def start(self, nproc=1, maxtargetsperchunk=10000, frames=None):
-    #        
-    #    # check that script and dataset are defined
-    #    if self.script is None:
-    #        raise Exception('Simulation script not set')
-    #    
-    #    self.reset()
-    #    in_queue = Queue() # queue that sends data to workers
-    #    out_queue = Queue() # queue that sends data to collector
-    #    res_queue = Queue() # queue that sends data to delegator
-    #    
-    #    # open input file and read dataset
-    #    root = h5py.File(self.input_path[0], 'r')
-    #    targets = root[self.input_path[1]]
-    #    
-    #    # get metadata from dataset
-    #    target_prms = dict()
-    #    for key, val in targets.attrs.iteritems():
-    #        target_prms[key] = val
-    #    
-    #    # get field ii parameters
-    #    def_script = __import__(self.script)
-    #    field_prms = def_script.get_prms()
-    #    
-    #    ntargets = targets.shape[0]
-    #    
-    #    if frames is None:
-    #        frames = 0
-    #        self.frame_no = 0
-    #    else:
-    #        self.frame_no = frames
-    #        
-    #    if len(targets.shape) < 3:
-    #        frames = Ellipsis
-    #    
-    #    targets_per_chunk = min(np.floor(ntargets/nproc).astype(int), 
-    #        maxtargetsperchunk)
-    #        
-    #    try: 
-    #        
-    #        # start collector process
-    #        collector = Process(target=collect, args=(out_queue, res_queue, 
-    #            field_prms['sample_frequency']), name='collector')
-    #        collector.start()
-    #        self.collector.append(collector)
-    #        
-    #        # start worker processes
-    #        for j in xrange(nproc):
-    #            worker = Process(target=work, args=(in_queue, out_queue, 
-    #                self.script), name=('worker'+str(j)))
-    #            worker.start()
-    #            self.workers.append(worker)
-    #        
-    #        # put data chunks into the input queue
-    #        for idx in chunks(range(ntargets), targets_per_chunk):
-    #            in_queue.put(targets[(idx),:,frames])
-    #        
-    #        # put poison pills into the input queue
-    #        for w in self.workers:
-    #            in_queue.put('STOP')
-    #        
-    #        root.close()
-    #        
-    #        self.out_queue = out_queue
-    #        self.res_queue = res_queue
-    #        self.field_prms = field_prms
-    #        self.target_prms = target_prms
-   
-#    def write_data(self, path=(), frame=None):
-#
-#        if frame is None:
-#            frame = self.frame_no
-#            
-#        try:
-#            # open output file and write results
-#            root = h5py.File(path[0], 'a')
-#            dataset = path[1]
-#            
-#            dims = self.result[0].shape
-#            
-#            # if dataset doesn't exist, create a new dataset
-#            if dataset not in root:
-#                
-#                rfdata = root.create_dataset(dataset, 
-#                    shape=(dims[0], dims[1], frame+1),
-#                    maxshape=(None, dims[1], None), dtype='double',
-#                    compression='gzip')
-#                     
-#                rfdata[:,:,frame] = self.result[0].copy()
-#               
-#            else:
-#                
-#                rfdata = root[dataset]
-#                align_write(rfdata, self.result[0], self.result[1], frame)
-#            
-#            # set data attributes
-#            rfdata.attrs.create('start_time', self.result[1])
-#            
-#            # copy target parameters to data attributes
-#            for key, val in self.target_prms.iteritems():
-#                rfdata.attrs.create(key, val)
-#            
-#            # copy field ii parameters to data attributes
-#            for key, val in self.field_prms.iteritems():
-#                rfdata.attrs.create(key, val)
-#            
-#            root.close()
-#            
-#        except:
-#            
-#            root.close()
-#            raise  
-        
         
         
         

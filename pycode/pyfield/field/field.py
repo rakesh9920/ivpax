@@ -144,6 +144,7 @@ class Field:
         
         # force excitation to be a row vector
         excitation = excitation.reshape((1, excitation.size))
+        excitation = np.asfortranarray(excitation)
         
         # get array info and call libf2
         self.libf2.f2_xdc_excitation(aperture, 
@@ -153,6 +154,7 @@ class Field:
         
         # force impulse to be a row vector
         impulse = impulse.reshape((1, impulse.size))
+        impulse = np.asfortranarray(impulse)
         
         # get array info and call libf2
         self.libf2.f2_xdc_impulse(aperture, 

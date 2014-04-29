@@ -33,8 +33,8 @@ def get_apertures(f2):
     prms = get_prms()
     f2.set_field('c', prms['sound_speed'])
     f2.set_field('fs', prms['sample_frequency'])
-    f2.set_field('att', prms['frequency_attenuation'])
-    f2.set_field('freq_att', prms['sound_speed'])
+    f2.set_field('att', prms['attenuation'])
+    f2.set_field('freq_att', prms['frequency_attenuation'])
     f2.set_field('att_f0', prms['attenuation_center_frequency'])
     f2.set_field('use_att', prms['use_attenuation'])
     

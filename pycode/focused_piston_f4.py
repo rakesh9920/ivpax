@@ -5,20 +5,17 @@ import scipy as sp
 def get_prms():
     
     fc = 6e6
-    bw = 9e6
-    fbw = bw/fc
+    fbw = 1.5
     fs = 100e6
 
     #impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));
     #impulse_response = impulse_response*(sp.hanning(np.size(impulse_response)))
     #excitation = impulse_response.copy()
     
-    cutoff = sig.gausspulse('cutoff', fc=6e6, bw=0.5, tpr=-60)
+    cutoff = sig.gausspulse('cutoff', fc=fc, bw=fbw, tpr=-60)
     adj_cutoff = np.ceil(cutoff*fs)/fs
     t = np.arange(-adj_cutoff, adj_cutoff + 1/fs, 1/fs)
-    x, impulse_response = sig.gausspulse(t, fc=6e6, bw=0.5, retquad=True)
-    impulse_response[0] = 0
-    impulse_response[-1] = 0
+    _, impulse_response = sig.gausspulse(t, fc=fc, bw=fbw, retquad=True)
     excitation = impulse_response.copy()
     
     prms = dict()
@@ -43,8 +40,8 @@ def get_apertures(f2):
     prms = get_prms()
     f2.set_field('c', prms['sound_speed'])
     f2.set_field('fs', prms['sample_frequency'])
-    f2.set_field('att', prms['frequency_attenuation'])
-    f2.set_field('freq_att', prms['sound_speed'])
+    f2.set_field('att', prms['attenuation'])
+    f2.set_field('freq_att', prms['frequency_attenuation'])
     f2.set_field('att_f0', prms['attenuation_center_frequency'])
     f2.set_field('use_att', prms['use_attenuation'])
     

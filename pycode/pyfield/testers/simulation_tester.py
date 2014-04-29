@@ -7,20 +7,20 @@ import scipy as sp
     
 if __name__ == '__main__': 
     
-    #root = h5py.File('fieldii_bsc_experiments.hdf5', 'a')
-    #
-    #if 'field/targdata/0' in root:
-    #    del root['field/targdata/0']
+    root = h5py.File('fieldii_bsc_experiments.hdf5', 'a')
+    
+    if 'field/targdata/0' in root:
+        del root['field/targdata/0']
         
-    targ = sct_cube(('fieldii_bsc_experiments.hdf5', 'field/targdata/0'),
-        (0.01, 0.01, 0.01), (0,0,0.02), (0,0,0), 1, 1000**3, 1)
+    #targ = sct_cube(('fieldii_bsc_experiments.hdf5', 'field/targdata/0'),
+    #    (0.01, 0.01, 0.01), (0,0,0.10), (0,0,0), 1, 1000**3, 1)
         
-    #targ = root.create_dataset('field/targdata/0', shape=(1000, 4, 1), 
-    #    dtype='double', compression='gzip')
+    targ = root.create_dataset('field/targdata/0', shape=(1, 4, 1), 
+        dtype='double', compression='gzip')
     #targ[:,0:2,:] = np.zeros((1000, 2, 20))
     #targ[:,2,:] = sp.rand(1000, 20)*0.01 + 0.001
     #targ[:,3,:] = np.ones((1000, 20))
-    #targ[0,:,:] = np.array([0, 0, 0.03, 1]).reshape((1,4,1))
+    targ[0,:,:] = np.array([0, 0, 0.03, 1]).reshape((1,4,1))
     #targ[1,:,:] = np.array([0, 0, 0.02, 1]).reshape((1,4,1))
     #targ[2,:,:] = np.array([0, 0, 0.025, 1]).reshape((1,4,1))
     #targ[3,:,:] = np.array([0, 0, 0.015, 1]).reshape((1,4,1))
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     #targ.attrs.create('bsc_spectrum', np.ones((1,1024))) 
     #targ.attrs.create('target_density', 1e6)
         
-    #root.close()
+    root.close()
     
     sim = Simulation()
     
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     sim.input_path = ('fieldii_bsc_experiments.hdf5', 'field/targdata/0')
     sim.output_path = ('fieldii_bsc_experiments.hdf5', 'field/rfdata/0')
     
-    opt = { 'maxtargetsperchunk': 20000,
+    opt = { 'maxtargetsperchunk': 1,
             'overwrite': True }
     sim.set_options(**opt)
     
