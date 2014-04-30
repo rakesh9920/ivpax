@@ -10,7 +10,7 @@ def work(in_queue, out_queue, script):
     
     try:
        
-        def_script = __import__(script)
+        def_script = __import__(script, fromlist=['asdf'])
         
         f2 = Field()
         f2.field_init(-1, current_process().name + '_log.txt')
@@ -128,7 +128,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
     ntarget = targdata.shape[0]
     
     # get parameters from field ii script
-    field_prms = __import__(script_path).get_prms()
+    field_prms = __import__(script_path, fromlist=['asdf']).get_prms()
     nchannel = field_prms['rx_positions'].shape[0]
     fs = field_prms['sample_frequency']
     
@@ -316,8 +316,8 @@ class Simulation():
         progress = Progress()
         # start worker processes
         for w in xrange(nproc):
-            w = Process(target=work, args=(in_queue, out_queue, 
-                self.script_path))
+            w = Process(target=work, name=('Worker' + str(w)), args=(in_queue, 
+                out_queue, self.script_path))
             w.start()
             self.workers.append(w)        
         

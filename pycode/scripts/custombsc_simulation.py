@@ -7,19 +7,20 @@ if __name__ == '__main__':
     
     sim = Simulation()
     
-    file_path = 'fieldii_bsc_experiments.hdf5'
+    file_path = './data/testdata.hdf5'
     input_key = 'custombsc/field/targdata/0'
     output_key = 'custombsc/field/rfdata/raw/'
+    script_path = 'pyfield.field.focused_piston_f4'
     
     sim.input_path = (file_path, input_key)
-    sim.script_path = 'focused_piston_f4'
+    sim.script_path = script_path
     
-    opt = { 'maxtargetsperchunk': 15000,
+    opt = { 'maxtargetsperchunk': 20000,
             'overwrite': True }
     sim.set_options(**opt)
     
-    ns = 20*1000**3
-    ninstance = 500
+    ns = 1*1000**3
+    ninstance = 1
     
     for inst in xrange(ninstance):
         
@@ -44,9 +45,11 @@ if __name__ == '__main__':
         
         sim.output_path = (file_path, output_key + str(inst))
         
-        sim.start(nproc=2)
+        sim.start(nproc=4)
         
         print sim
+        
+        #sim.join()
         
         
     
