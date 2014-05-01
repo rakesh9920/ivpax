@@ -3,7 +3,10 @@
 
 #ifndef _LIBF2_H_
 #define _LIBF2_H_
-        
+
+extern "C" 
+{
+    
 struct ArrayInfo
 {
     double * ptr;
@@ -13,8 +16,8 @@ struct ArrayInfo
 };
 
 // libf2 library methods
-bool initialize();
-bool initializeWithDiary(char *);
+int initialize();
+int initializeWithDiary(char *);
 void shutdown();
 void cleanup(double *);
 mwArray convertToMwArray(ArrayInfo *);
@@ -37,6 +40,7 @@ int f2_xdc_concave(double, double, double);
 struct ArrayInfo f2_calc_scat(int, int, ArrayInfo *, ArrayInfo *);
 struct ArrayInfo f2_calc_scat_multi(int, int, ArrayInfo *, ArrayInfo *);
 
+}
 #endif
 
 

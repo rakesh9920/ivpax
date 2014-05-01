@@ -1,7 +1,15 @@
-# pyfield / field.py
+# pyfield / field / field.py
+
+# Fixes needed for linux/MCR to work (add to bash script before running python)
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/code/python/bin/
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/MATLAB/R2013b/sys/os/
+# glnxa64/
+# export LD_PRELOAD=/usr/local/MATLAB/R2013b/sys/os/glnxa64/libfreetype.so.6:
+# /usr/local/MATLAB/R2013b/sys/os/glnxa64/libgfortran.so.3
 
 import ctypes as ct
 import numpy as np
+import os
 
 _c_double_p = ct.POINTER(ct.c_double)
 
@@ -53,9 +61,12 @@ class Field:
         self.libf2 = f2
     
     def _initialize(self, diarypath=None):
-        
+         
         # load dll
-        f2 = ct.cdll.LoadLibrary("libf2.dll")
+        if os.name == 'nt':
+            f2 = ct.cdll.LoadLibrary('libf2.dll')
+        else:
+            f2 = ct.cdll.LoadLibrary('libf2.so')
         
         # set dll function prototypes
         f2.initialize.restype = ct.c_int
@@ -101,8 +112,8 @@ class Field:
         f2.f2_calc_scat.argtypes = [ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo),
             ct.POINTER(_ArrayInfo)]
         f2.f2_calc_scat_multi.restype = _ArrayInfo
-        f2.f2_calc_scat_multi.argtypes = [ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo),
-            ct.POINTER(_ArrayInfo)]
+        f2.f2_calc_scat_multi.argtypes = [ct.c_int, ct.c_int, 
+            ct.POINTER(_ArrayInfo), ct.POINTER(_ArrayInfo)]
         
         # initialize libf2
         if diarypath is None:
@@ -112,7 +123,6 @@ class Field:
         
         # set libf2 dll as class member
         self.libf2 = f2
-        
         return success
              
     def _shutdown(self):
@@ -124,7 +134,7 @@ class Field:
     def field_init(self, suppress=0, diarypath=None):
         
         self._initialize(diarypath)
-        self.libf2.f2_field_init(suppress)
+        self.libf2.f2_field_init(ct.c_int(suppress))
 
     def field_end(self):
         
@@ -138,7 +148,8 @@ class Field:
         self.libf2.f2_xdc_free(aperture)
     
     def xdc_piston(self, radius, elsize):  
-        return self.libf2.f2_xdc_piston(radius, elsize)
+        return self.libf2.f2_xdc_piston(ct.c_double(radius), 
+            ct.c_double(elsize))
     
     def xdc_excitation(self, aperture, excitation):
         

@@ -6,28 +6,28 @@
 #include <iostream>
 #include <fstream>
 
-bool initialize()
+int initialize()
 {
     if (!mclInitializeApplication(NULL, 0))
     {
         std::cout << "libf2: Failed to initialize library\n";
         std::cout.flush();
-        return false;
+        return 0;
     }
     
     if (!libfieldInitialize())
     {
         std::cout << "libf2: Failed to initialize library\n";
         std::cout.flush();
-        return false;
+        return 0;
     }
     
     std::cout << "libf2: library initialized\n";
     std::cout.flush();
-    return true;
+    return 1;
 }
 
-bool initializeWithDiary(char * filePath)
+int initializeWithDiary(char * filePath)
 {
     freopen(filePath, "w", stdout);
     return initialize();
@@ -163,7 +163,7 @@ void f2_xdc_free(int Th_)
     xdc_free(0, res, Th);
 }
 
-ArrayInfo f2_calc_scat(int Th1_, int Th2_, ArrayInfo * points_, 
+struct ArrayInfo f2_calc_scat(int Th1_, int Th2_, ArrayInfo * points_, 
         ArrayInfo * amplitudes_)
 {
     // initialize mwArrays
@@ -206,7 +206,7 @@ ArrayInfo f2_calc_scat(int Th1_, int Th2_, ArrayInfo * points_,
     return scat;
 }
 
-ArrayInfo f2_calc_scat_multi(int Th1_, int Th2_, ArrayInfo * points_, 
+struct ArrayInfo f2_calc_scat_multi(int Th1_, int Th2_, ArrayInfo * points_, 
         ArrayInfo * amplitudes_)
 {
     // initialize mwArrays
@@ -282,7 +282,7 @@ int f2_xdc_concave(double radius_, double focus_, double elsize_)
     return (int) res.Get(1,1);
 }
 
-ArrayInfo f2_xdc_get(int Th_, char * opt_)
+struct ArrayInfo f2_xdc_get(int Th_, char * opt_)
 {
     mwArray Th (Th_);
     mwArray opt (opt_);
