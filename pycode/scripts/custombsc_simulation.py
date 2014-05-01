@@ -43,7 +43,7 @@ if __name__ == '__main__':
     
         root.close() 
         
-        sim.output_path = (file_path, output_key + str(inst))
+        sim.output_path = (file_path, output_key + '{:0.5d}'.format(inst))
         
         sim.start(nproc=4)
         
