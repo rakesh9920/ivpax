@@ -79,9 +79,9 @@ def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None,
         nsample, nframe = bfdata.shape
         npos = 1
     
-    midsample = np.round(nsample/2).astype(int)
-    gate_start = 0
-    gate_stop = 0
+    midsample = np.floor(nsample/2).astype(int)
+    gate_start = midsample - np.floor(gate/2.0)
+    gate_stop = gate_start + gate
     
     nestimate = nframe - interleave 
     
@@ -91,13 +91,14 @@ def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None,
         
         I, Q = iqdemod(bfdata[pos,:,:], fc, bw, fs, axis=0)
         
+        I1 = I[gate_start:gate_stop,:]
+        Q1 = Q[gate_start:gate_stop,:]
+        
         for est in xrange(nestimate):
             
-            I1 = I[gate_start:gate_end,est]
-            Q1 = Q[gate_start:gate_end,est]
-            
-            I2 = [gate_start:gate_end,est + 1 + interleave - 1]
-            Q2 = [gate_start:gate_end,est + 1 + interleave - 1]
+            for g in xrange(gate):
+                
+                
             
             
             
