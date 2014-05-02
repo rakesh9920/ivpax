@@ -5,6 +5,7 @@ import numpy as np
 import h5py
 from . import Field
 from pyfield.util import chunks, align_and_sum, Progress
+import time
 
 def work(in_queue, out_queue, script):
     
@@ -319,7 +320,8 @@ class Simulation():
             w = Process(target=work, name=('Worker' + str(w)), args=(in_queue, 
                 out_queue, self.script_path))
             w.start()
-            self.workers.append(w)        
+            self.workers.append(w)  
+            time.sleep(0.25)   
         
         # start delegator
         delegator = Process(target=delegate, args=(in_queue, out_queue,

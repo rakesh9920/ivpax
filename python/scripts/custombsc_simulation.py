@@ -7,8 +7,8 @@ if __name__ == '__main__':
     
     sim = Simulation()
     
-    file_path = './data/testdata.hdf5'
-    input_key = 'custombsc/field/targdata/0'
+    file_path = './data/fieldii_bsc_experiments.hdf5'
+    input_key = 'custombsc/field/targdata/00000'
     output_key = 'custombsc/field/rfdata/raw/'
     script_path = 'pyfield.field.focused_piston_f4'
     
@@ -19,8 +19,8 @@ if __name__ == '__main__':
             'overwrite': True }
     sim.set_options(**opt)
     
-    ns = 1*1000**3
-    ninstance = 1
+    ns = 20*1000**3
+    ninstance = 500
     
     for inst in xrange(ninstance):
         
@@ -43,13 +43,13 @@ if __name__ == '__main__':
     
         root.close() 
         
-        sim.output_path = (file_path, output_key + '{:0.5d}'.format(inst))
+        sim.output_path = (file_path, output_key + '{:05d}'.format(inst))
         
-        sim.start(nproc=4)
+        sim.start(nproc=12)
         
         print sim
         
-        #sim.join()
+        sim.join()
         
         
     
