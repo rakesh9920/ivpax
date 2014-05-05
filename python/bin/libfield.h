@@ -1,12 +1,12 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Wed Apr 30 14:27:36 2014
+// Date: Mon May 05 18:14:35 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
-// "-B" "functionlist.txt" "Mat_field" "field_init" "field_end" "calc_scat"
-// "calc_scat_multi" "xdc_piston" "xdc_linear_array" "xdc_excitation"
-// "xdc_impulse" "set_field" "xdc_focus_times" "xdc_free" "xdc_get"
-// "xdc_quantization" "xdc_rectangles" "xdc_show" "xdc_triangles"
-// "xdc_2d_array" "xdc_concave" 
+// "-B" "functionlist.txt" "calc_scat" "calc_scat_multi" "field_end"
+// "field_init" "set_field" "xdc_2d_array" "xdc_concave" "xdc_excitation"
+// "xdc_focus_times" "xdc_free" "xdc_get" "xdc_impulse" "xdc_linear_array"
+// "xdc_piston" "xdc_rectangles" "xdc_quantization" "xdc_triangles"
+// "xdc_convex_array" "xdc_convex_focused_array" 
 //
 
 #ifndef __libfield_h
@@ -78,15 +78,6 @@ extern LIB_libfield_C_API
 void MW_CALL_CONV libfieldPrintStackTrace(void);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxMat_field(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
-
-extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxField_init(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
-
-extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxField_end(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
-
-extern LIB_libfield_C_API 
 bool MW_CALL_CONV mlxCalc_scat(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
@@ -94,20 +85,22 @@ bool MW_CALL_CONV mlxCalc_scat_multi(int nlhs, mxArray *plhs[], int nrhs, mxArra
                                      *prhs[]);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_piston(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+bool MW_CALL_CONV mlxField_end(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_linear_array(int nlhs, mxArray *plhs[], int nrhs, mxArray 
-                                      *prhs[]);
-
-extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_excitation(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
-
-extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_impulse(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+bool MW_CALL_CONV mlxField_init(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
 bool MW_CALL_CONV mlxSet_field(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+
+extern LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_2d_array(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+
+extern LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_concave(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+
+extern LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_excitation(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
 bool MW_CALL_CONV mlxXdc_focus_times(int nlhs, mxArray *plhs[], int nrhs, mxArray 
@@ -120,23 +113,32 @@ extern LIB_libfield_C_API
 bool MW_CALL_CONV mlxXdc_get(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_quantization(int nlhs, mxArray *plhs[], int nrhs, mxArray 
+bool MW_CALL_CONV mlxXdc_impulse(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+
+extern LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_linear_array(int nlhs, mxArray *plhs[], int nrhs, mxArray 
                                       *prhs[]);
+
+extern LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_piston(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
 bool MW_CALL_CONV mlxXdc_rectangles(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_show(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+bool MW_CALL_CONV mlxXdc_quantization(int nlhs, mxArray *plhs[], int nrhs, mxArray 
+                                      *prhs[]);
 
 extern LIB_libfield_C_API 
 bool MW_CALL_CONV mlxXdc_triangles(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_2d_array(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+bool MW_CALL_CONV mlxXdc_convex_array(int nlhs, mxArray *plhs[], int nrhs, mxArray 
+                                      *prhs[]);
 
 extern LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_concave(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[]);
+bool MW_CALL_CONV mlxXdc_convex_focused_array(int nlhs, mxArray *plhs[], int nrhs, 
+                                              mxArray *prhs[]);
 
 
 #ifdef __cplusplus
@@ -168,31 +170,21 @@ bool MW_CALL_CONV mlxXdc_concave(int nlhs, mxArray *plhs[], int nrhs, mxArray *p
 
 #endif
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV Mat_field(int nargout, mwArray& varargout, const mwArray& varargin);
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV Mat_field(int nargout, mwArray& varargout);
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV Mat_field(const mwArray& varargin);
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV Mat_field();
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV field_init(int nargout, mwArray& res, const mwArray& suppress);
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV field_end(int nargout, mwArray& res);
-
 extern LIB_libfield_CPP_API void MW_CALL_CONV calc_scat(int nargout, mwArray& scat, mwArray& start_time, const mwArray& Th1, const mwArray& Th2, const mwArray& points, const mwArray& amplitudes);
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV calc_scat_multi(int nargout, mwArray& scat, mwArray& start_time, const mwArray& Th1, const mwArray& Th2, const mwArray& points, const mwArray& amplitudes);
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_piston(int nargout, mwArray& Th, const mwArray& radius, const mwArray& ele_size);
+extern LIB_libfield_CPP_API void MW_CALL_CONV field_end(int nargout, mwArray& res);
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_linear_array(int nargout, mwArray& Th, const mwArray& no_elements, const mwArray& width, const mwArray& height, const mwArray& kerf, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_excitation(int nargout, mwArray& res, const mwArray& Th, const mwArray& pulse);
-
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_impulse(int nargout, mwArray& res, const mwArray& Th, const mwArray& pulse);
+extern LIB_libfield_CPP_API void MW_CALL_CONV field_init(int nargout, mwArray& res, const mwArray& suppress);
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV set_field(int nargout, mwArray& res, const mwArray& option_name, const mwArray& value);
+
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_2d_array(int nargout, mwArray& Th, const mwArray& no_ele_x, const mwArray& no_ele_y, const mwArray& width, const mwArray& height, const mwArray& kerf_x, const mwArray& kerf_y, const mwArray& enabled, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
+
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_concave(int nargout, mwArray& Th, const mwArray& radius, const mwArray& focal_radius, const mwArray& ele_size);
+
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_excitation(int nargout, mwArray& res, const mwArray& Th, const mwArray& pulse);
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_focus_times(int nargout, mwArray& res, const mwArray& Th, const mwArray& times, const mwArray& delays);
 
@@ -200,17 +192,21 @@ extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_free(int nargout, mwArray& res
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_get(int nargout, mwArray& data, const mwArray& Th, const mwArray& info_type);
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_quantization(int nargout, mwArray& res, const mwArray& Th, const mwArray& min_delay);
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_impulse(int nargout, mwArray& res, const mwArray& Th, const mwArray& pulse);
+
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_linear_array(int nargout, mwArray& Th, const mwArray& no_elements, const mwArray& width, const mwArray& height, const mwArray& kerf, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
+
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_piston(int nargout, mwArray& Th, const mwArray& radius, const mwArray& ele_size);
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_rectangles(int nargout, mwArray& Th, const mwArray& rect, const mwArray& center, const mwArray& focus);
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_show(int nargout, mwArray& res, const mwArray& Th, const mwArray& info_type);
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_quantization(int nargout, mwArray& res, const mwArray& Th, const mwArray& min_delay);
 
 extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_triangles(int nargout, mwArray& Th, const mwArray& data, const mwArray& center, const mwArray& focus);
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_2d_array(int nargout, mwArray& Th, const mwArray& no_ele_x, const mwArray& no_ele_y, const mwArray& width, const mwArray& height, const mwArray& kerf_x, const mwArray& kerf_y, const mwArray& enabled, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_convex_array(int nargout, mwArray& Th, const mwArray& no_elements, const mwArray& width, const mwArray& height, const mwArray& kerf, const mwArray& Rconvex, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
 
-extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_concave(int nargout, mwArray& Th, const mwArray& radius, const mwArray& focal_radius, const mwArray& ele_size);
+extern LIB_libfield_CPP_API void MW_CALL_CONV xdc_convex_focused_array(int nargout, mwArray& Th, const mwArray& no_elements, const mwArray& width, const mwArray& height, const mwArray& kerf, const mwArray& Rconvex, const mwArray& Rfocus, const mwArray& no_sub_x, const mwArray& no_sub_y, const mwArray& focus);
 
 #endif
 #endif

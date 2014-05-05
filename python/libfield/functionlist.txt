@@ -13,9 +13,7 @@ xdc_impulse
 xdc_linear_array
 xdc_piston
 xdc_rectangles
-
-*xdc_quantization
-*xdc_show
-*xdc_triangles
-*xdc_convex_array
-*xdc_convex_focused_array
+xdc_quantization
+xdc_triangles
+xdc_convex_array
+xdc_convex_focused_array
