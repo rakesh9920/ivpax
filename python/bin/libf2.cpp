@@ -33,7 +33,7 @@ int initializeWithDiary(char * filePath)
     return initialize();
 }
 
-void shutdown()
+void shutdownlib()
 {
     libfieldTerminate();
     mclTerminateApplication();

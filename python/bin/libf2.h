@@ -18,9 +18,8 @@ struct ArrayInfo
 // libf2 library methods
 int initialize();
 int initializeWithDiary(char *);
-void shutdown();
+void shutdownlib();
 void cleanup(double *);
-mwArray convertToMwArray(ArrayInfo *);
 
 // libf2 versions of Field II methods
 void f2_field_init(int);
@@ -41,6 +40,8 @@ struct ArrayInfo f2_calc_scat(int, int, ArrayInfo *, ArrayInfo *);
 struct ArrayInfo f2_calc_scat_multi(int, int, ArrayInfo *, ArrayInfo *);
 
 }
+
+mwArray convertToMwArray(ArrayInfo *);
 #endif
 
 
