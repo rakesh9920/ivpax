@@ -50,7 +50,7 @@ def bsc_to_fir(bsc, c=None, rho=None, area=None, ns=None, fs=None, deriv=True):
     ntap = 101
 
     imp_resp = sig.firwin2(ntap, bsc[:,0], freq_resp, nyq=fs/2.0, 
-        antisymmetric=True, window='hamming')/fs
+        antisymmetric=True, window='hamming')/fs/2
     
     if deriv:
         return np.gradient(imp_resp, 1/fs)
@@ -86,15 +86,18 @@ def apply_bsc(inpath, outpath, bsc=None, write=False, loop=False):
         'sample_frequency']
     params = {k : indata.attrs.get(a) for k,a in zip(keys, attrs)}
     
-    filt = bsc_to_filt(bsc, **params)
+    #filt = bsc_to_filt(bsc, **params)
+    filt = bsc_to_fir(bsc, **params)
     
     if loop:
         for f in xrange(indata.shape[2]):
             for c in xrange(indata.shape[1]):
                 outdata[:,c,f] = sig.fftconvolve(indata[:,c,f], filt, 'same')
+                #outdata[:,c,f] = sig.filtfilt(filt, 1, indata[:,c,f])
     else:
         outdata[:] = np.apply_along_axis(sig.fftconvolve, 0, indata[:], 
             filt, 'same')
+        #outdata[:] = sig.filtfilt(filt, 1, indata[:], axis=0)
     
     for key, val in indata.attrs.iteritems():
         outdata.attrs.create(key, val)
