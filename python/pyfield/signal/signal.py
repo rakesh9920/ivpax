@@ -1,12 +1,16 @@
 from scipy.signal import correlate, butter, filtfilt
-from scipy.fftpack import fft, ifft
+from scipy.fftpack import fft, ifft, fftshift, ifftshift
 import numpy as np
 
-def ffts():
-    pass
+def ffts(x, *args, **kwargs):
     
-def iffts():
-    pass
+    fs = kwargs.pop('fs', 1)
+    return fftshift(fft(x, *args, **kwargs)*fs)
+
+def iffts(x, *args, **kwargs):
+    
+    fs = kwargs.pop('fs', 1)
+    return ifft(ifftshift(x), *args, **kwargs)/fs
 
 def xcorr(in1, in2, mode='full', norm=True):
     

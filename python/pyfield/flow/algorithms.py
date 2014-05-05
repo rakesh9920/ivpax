@@ -83,7 +83,7 @@ def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None,
     gate_start = midsample - np.floor(gate/2.0)
     gate_stop = gate_start + gate
     
-    nestimate = nframe - interleave 
+    nestimate = nframe - interleave - ensemble + 1
     
     velocity = np.zeros(npos, nestimate)
     
@@ -94,17 +94,24 @@ def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None,
         I1 = I[gate_start:gate_stop,:]
         Q1 = Q[gate_start:gate_stop,:]
         
+        delta_phi = np.zeros((gate, nestimate))
         for est in xrange(nestimate):
             
+            idx1 = np.arange(est, est + ensemble)
+            idx2 = idx1 + interleave
+
             for g in xrange(gate):
                 
-                
+                numer = np.sum(Q1(g,idx2)*I1(g,idx1) - I1(g,idx2)*Q1(g,idx1))
+                denom = np.sum(I1(g,idx2)*I1(g,idx1) + Q1(g,idx2)*Q1(g,idx1))
             
-            
-            
-            
-            
+                delta_phi[g,est] += np.mean(np.arctan2(numer, denom))
         
+        
+            velocity[pos,est] = -np.mean(delta_phi[:,est])/interleave * \
+                prf*c/(4*np.pi*fc)
+    
+    return velocity                
 
 def corr_match_doppler():
 	pass		

@@ -14,6 +14,25 @@ def iffts(x, *args, **kwargs):
     
     fs = kwargs.pop('fs', 1)
     return ft.ifft(ft.ifftshift(x), *args, **kwargs)/fs
+
+def nextpow2(n):
+    return np.ceil(np.log2(n)).astype(int)
+    
+def quickfft(x, fs=1, dbscale=True, one_sided=True):
+    
+    nfft = 2**nextpow2(x.size)
+    
+    amp = np.abs(ffts(x, nfft, fs=fs))
+    freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
+    
+    if dbscale:
+        amp = 20*np.log10(amp/np.max(amp))
+    
+    if one_sided:
+        amp = amp[nfft/2+1:]
+        freq = freq[nfft/2+1:]
+    
+    return freq, amp
   
 def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
     
@@ -21,8 +40,24 @@ def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
     filt = np.gradient(np.real(ft.ifftshift(iffts(filt_fft, fs=fs))), 1/fs)
 
     return filt
+
+def bsc_to_fir(bsc, c=None, rho=None, area=None, ns=None, fs=None, deriv=True):
     
-def apply_bsc(inpath, outpath, write=False, loop=False):
+    bsc = bsc.reshape((-1, 2))
+    
+    freq_resp = 2*np.pi/(rho*c*area*np.sqrt(ns))*np.sqrt(np.abs(bsc[:,1]))
+    
+    ntap = 101
+
+    imp_resp = sig.firwin2(ntap, bsc[:,0], freq_resp, nyq=fs/2.0, 
+        antisymmetric=True, window='hamming')/fs
+    
+    if deriv:
+        return np.gradient(imp_resp, 1/fs)
+    else:
+        return imp_resp
+        
+def apply_bsc(inpath, outpath, bsc=None, write=False, loop=False):
     
     inroot = h5py.File(inpath[0], 'a')
     indata = inroot[inpath[1]]
@@ -43,7 +78,8 @@ def apply_bsc(inpath, outpath, write=False, loop=False):
     else:
         outdata = outroot[outpath]
     
-    bsc = indata.attrs.get('bsc_spectrum')
+    if bsc is None:
+        bsc = indata.attrs.get('bsc_spectrum')
     
     keys = ['c', 'rho', 'area', 'ns', 'fs']
     attrs = ['sound_speed', 'density', 'area', 'target_density', 
