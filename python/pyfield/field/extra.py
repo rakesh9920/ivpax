@@ -31,7 +31,7 @@ def bsc_to_fir(bsc, c=None, rho=None, area=None, ns=None, fs=None, deriv=True,
     freq_resp = 2*np.pi/(rho*c*area*np.sqrt(ns))*np.sqrt(np.abs(bsc[:,1]))
 
     imp_resp = sig.firwin2(ntap, bsc[:,0], freq_resp, nyq=fs/2.0, 
-        antisymmetric=False, window='hamming')/fs
+        antisymmetric=False, window='hamming')*fs
     
     if deriv:
         return np.gradient(imp_resp, 1/fs)
