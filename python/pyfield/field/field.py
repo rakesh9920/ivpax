@@ -64,7 +64,10 @@ class Field:
          
         # load dll
         if os.name == 'nt':
+            
+            os.environ['PATH'] = os.environ['PATH'] + '.\\bin\\;'
             f2 = ct.cdll.LoadLibrary('libf2.dll')
+            
         else:
             f2 = ct.cdll.LoadLibrary('libf2.so')
         

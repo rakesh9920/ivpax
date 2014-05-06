@@ -66,19 +66,20 @@ def distance(a, b):
 def nextpow2(n):
     return np.ceil(np.log2(n)).astype(int)
     
-def quickfft(x, fs=1, dbscale=True, one_sided=True):
+def quickfft(x, fs=1, n=None, dbscale=True, one_sided=True):
     
-    nfft = 2**nextpow2(x.size)
+    if n is None:
+        n = 2**nextpow2(x.size)
     
-    amp = np.abs(ffts(x, nfft, fs=fs))
-    freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
+    amp = np.abs(ffts(x, n, fs=fs))
+    freq = ft.fftshift(ft.fftfreq(n, 1/fs))
     
     if dbscale:
         amp = 20*np.log10(amp/np.max(amp))
     
     if one_sided:
-        amp = amp[nfft/2+1:]
-        freq = freq[nfft/2+1:]
+        amp = amp[n/2+1:]
+        freq = freq[n/2+1:]
     
     return freq, amp
            
