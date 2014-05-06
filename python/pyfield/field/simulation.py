@@ -88,32 +88,6 @@ def align_write(dataset, array1, t1, frame):
     
     dataset[:,:,frame] = np.pad(array1, pad_width1, mode='constant')
     dataset.attrs.create('start_time', min(t0, t1))
-    
-#def collect(out_queue, res_queue, fs):
-#    
-#    try:
-#        
-#        item = out_queue.get()
-#        
-#        if isinstance(item, Exception):
-#            raise item
-#        
-#        (scat_t, t0_t) = item
-#        
-#        for item in iter(out_queue.get, 'STOP'):
-#            
-#            if isinstance(item, Exception):
-#                raise item
-#            
-#            (scat, t0) = item
-#            
-#            (scat_t, t0_t) = align_and_sum(scat_t, t0_t, scat, t0, fs)
-#            
-#        res_queue.put((scat_t, t0_t))
-#    
-#    except Exception as e:
-#        
-#        res_queue.put(e)
 
 def delegate(in_queue, out_queue, input_path, script_path, output_path, 
     options, nproc, frames, progress):

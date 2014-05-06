@@ -73,8 +73,8 @@ class Field:
         f2.initialize.argtypes = None
         f2.initializeWithDiary.restype = ct.c_int
         f2.initializeWithDiary.argtypes = [ct.c_char_p]
-        f2.shutdown.restype = None
-        f2.shutdown.argtypes = None
+        f2.shutdownlib.restype = None
+        f2.shutdownlib.argtypes = None
         f2.cleanup.restype = None
         f2.cleanup.argtypes = [_c_double_p]
         f2.f2_field_init.restype = ct.c_int
@@ -126,7 +126,7 @@ class Field:
         return success
              
     def _shutdown(self):
-        self.libf2.shutdown()
+        self.libf2.shutdownlib()
         
     def _deleteArray(self, info):
         self.libf2.cleanup(info.ptr)

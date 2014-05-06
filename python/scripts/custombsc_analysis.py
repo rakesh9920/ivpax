@@ -2,17 +2,104 @@
 
 from pyfield.signal import ffts, iffts
 from pyfield.field import apply_bsc
-
+import h5py
+from pyfield.util import align_cat
+import numpy as np
+from scipy import fftpack as ft, signal as sig
 
 if __name__ == '__main__':
     
-    file_path = 'fieldii_bsc_experiments.hdf5' 
-    raw_key = 'custombsc/field/'
-    ref_key = ''
-    out_key = ''
-    bsc = None
-     
-    apply_bsc((file_path, raw_key), (file_path, out_key), bsc=bsc, write=True)
+    # define paths
+    file_path = './data/fieldii_bsc_experiments.hdf5' 
+    raw_key = 'custombsc/field/rfdata/raw/'
+    ref_key = 'custombsc/field/rfdata/raw/ref'
+    out_key = 'custombsc/field/rfdata/blood/'
+    bsc_key = 'custombsc/field/bsc/shung_hmtc8'
+    
+    # get bsc spectrum 
+    root = h5py.File(file_path, 'a')    
+    bsc = root[bsc_key][:].copy()
+    root.close()
+    
+    # apply bsc to raw rf data
+    ninstance = 10
+    for inst in xrange(ninstance):  
+        apply_bsc((file_path, raw_key + '{:05d}'.format(inst)), 
+            (file_path, out_key + '{:05d}'.format(inst)), bsc=bsc, write=True)
+    
+    # apply bsc to reference rf data to give unit bsc
+    bsc_one = np.ones((1024,1))*20*1000**3
+    bsc_one[0] = 0
+    bsc_one[-1] = 0
+    bsc_one = np.insert(bsc_one, 0, np.linspace(0, 100e6/2, 1024), axis=1)
+    
+    apply_bsc((file_path, ref_key), (file_path, out_key + 'ref'), bsc=bsc_one,
+        write=True)
+    
+    root = h5py.File(file_path, 'a') 
+    
+    # get attributes from bsc-applied data
+    focus = 0.02
+    fs = root[out_key + '00000'].attrs['sample_frequency']
+    c = root[out_key + '00000'].attrs['sound_speed']
+    fc = root[out_key + '00000'].attrs['center_frequency']
+    area = root[out_key + '00000'].attrs['area'] 
+    
+    # read bsc-applied data into a single large array
+    for inst in xrange(ninstance):
+        
+        if inst == 0:
+            
+            rfdata = root[out_key + '{:05d}'.format(inst)][:]
+            t0 = root[out_key + '{:05d}'.format(inst)].attrs['start_time']
+            
+        else:
+            
+            rf1 = root[out_key + '{:05d}'.format(inst)][:]
+            t1 = root[out_key + '{:05d}'.format(inst)].attrs['start_time']
+            rfdata, t0 = align_cat(rfdata, t0, rf1, t1, 100e6, axis=1)
+    
+    rfdata = rfdata.reshape((rfdata.shape[0], -1))
+    
+    # read reference bsc-applied data 
+    ref = root[out_key + 'ref'][:]
+    ref = ref.reshape((ref.shape[0], 1))
+    #ref_t0 = root[ref_key].attrs['start_time']
+    
+    root.close()
+    
+    # define measurement parameters
+    focus_time = focus*2/c
+    gate_length = 10*c/fc
+    gate_duration = gate_length*2/c
+    gate = np.round((focus_time - t0 + np.array([-gate_duration/2, 
+        gate_duration/2]))*fs) + 30
+    
+    nfft = 2**13
+    f_lower = 3.5e6
+    f_upper = 8.5e6
+    wintype = 'hann'
+    
+    freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
+    k = freq*2*np.pi/c
+    freq1 = np.argmin(np.abs(freq[nfft/2:] - f_lower)) + nfft/2
+    freq2 = np.argmin(np.abs(freq[nfft/2:] - f_upper)) + nfft/2
+    
+    window = sig.get_window(wintype, gate[1]-gate[0])
+    energy_correction = (gate[1]-gate[0])/np.sum(window**2)
+    windata = rfdata[gate[0]:gate[1],:]*window[:,None]
+    
+    data_psd = 2*np.abs(ffts(windata, n=nfft, axis=0, fs=fs))**2 * \
+        energy_correction
+    ref_psd = 2*np.abs(ffts(ref, n=nfft, axis=0, fs=fs))**2
+    
+    
+    ratio = data_psd[freq1:freq2,:]/ref_psd[freq1:freq2,:]/ \
+        (k[freq1:freq2,None]**2) 
+    cam = ratio*area/(0.46*(2*np.pi)**2*focus**2*gate_length)
+    
+    
+    
     
     
     

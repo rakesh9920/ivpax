@@ -18,4 +18,5 @@
 /matlab/+sirm/data/
 /matlab/bin/
 /matlab/cmut/
-
+/python/*.dll
+/python/*.mexw64
