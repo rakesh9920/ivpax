@@ -309,9 +309,9 @@ struct ArrayInfo f2_xdc_get(int Th_, char * opt_)
     return data;
 }
 
-struct ArrayInfo f2_xdc_get_rect(int Th_)
+struct ArrayInfo f2_xdc_get_rect()
 {
-    mwArray Th (Th_);
+    mwArray Th (0);
     mwArray res;
     
     xdc_get_rect(1, res, Th);
