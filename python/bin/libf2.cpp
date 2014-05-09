@@ -326,7 +326,7 @@ struct ArrayInfo f2_xdc_get_rect(int Th_)
     
     data.t0 = 0;
     
-    return data
+    return data;
 }
 
 int f2_xdc_rectangles(ArrayInfo * rect_, ArrayInfo * center_, ArrayInfo * focus_)
