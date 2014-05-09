@@ -5,6 +5,7 @@ from multiprocessing import Value
 import time
 import scipy.fftpack as ft
 from pyfield.signal import ffts, iffts
+import h5py
 
 class Progress():
     
@@ -146,3 +147,15 @@ def align_cat(array0, t0, array1, t1, fs, taxis=0, axis=-1):
         np.pad(array1, pad_width1, mode='constant')), axis=axis)
     
     return new_array, min(t0, t1)
+
+def h5py_tree(root):
+    
+    def print_attrs(name, obj):
+        
+        if not isinstance(obj, h5py._hl.dataset.Dataset):
+            print name
+
+    
+    root.visititems(print_attrs)
+        
+    

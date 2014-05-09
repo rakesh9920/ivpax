@@ -13,8 +13,8 @@ if __name__ == '__main__':
     
     # define paths
     file_path = './data/fieldii_bsc_experiments.hdf5'
-    raw_key = 'custombsc/field/rfdata/raw/'
-    ref_key = 'custombsc/field/rfdata/raw/ref'
+    raw_key = 'custombsc/field/rfdata/raw2/'
+    ref_key = 'custombsc/field/rfdata/raw2/ref'
     out_key = 'custombsc/field/rfdata/blood/'
     bsc_key = 'custombsc/field/bsc/shung_hmtc8'
     
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     root.close()
     
     # apply bsc to raw rf data
-    ninstance = 1
+    ninstance = 100
     for inst in xrange(ninstance):  
         apply_bsc((file_path, raw_key + '{:05d}'.format(inst)), 
             (file_path, out_key + '{:05d}'.format(inst)), bsc=bsc, write=True)
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     
     nfft = 2**13
     f_lower = 1e6
-    f_upper = 15e6
+    f_upper = 20e6
     wintype = 'hann'
     
     freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
@@ -95,13 +95,23 @@ if __name__ == '__main__':
         energy_correction
     ref_psd = 2*np.abs(ffts(ref, n=nfft, axis=0, fs=fs))**2
     
-    
     ratio = data_psd[freq1:freq2,:]/ref_psd[freq1:freq2,:] * \
         (k[freq1:freq2,None]**2) 
     cam = ratio*area/(0.46*(2*np.pi)**2*focus**2*gate_length)
     
+    error_upper = np.mean(cam, axis=1)/(1 + 1.96/np.sqrt(cam.shape[1]))
+    error_lower = np.mean(cam, axis=1)/(1 - 1.96/np.sqrt(cam.shape[1]))
     
-    
+    fig1 = pp.figure()
+    ax1, = pp.plot(freq[freq1:freq2], np.mean(cam, axis=1), 'b')
+    ax2, = pp.plot(freq[freq1:freq2], error_upper,'b:')
+    pp.plot(freq[freq1:freq2], error_lower, 'b:')
+    ax3, = pp.plot(bsc[:-1,0], bsc[:-1,1], 'ro')
+    pp.legend((ax1, ax2, ax3), ('CAM','95% CI','Shung et. al.'))
+    pp.xlabel('Frequency ($Hz$)')
+    pp.ylabel('Backscattering Coefficient ($m^{-1}Sr^{-1}$)')
+    fig1.show()
+
     
     
     

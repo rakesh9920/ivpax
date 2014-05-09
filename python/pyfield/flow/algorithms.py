@@ -3,75 +3,102 @@
 from pyfield.signal import xcorr, iqdemod
 import numpy as np
 from scipy.interpolate import interp1d
+import h5py
 
 def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1, 
-    interpolate=1, resample=1, threshold=0, retcoeff=False):
-
-    if bfdata.ndim == 3:
-        npos, nsample, nframe = bfdata.shape
-    else:
-        nsample, nframe = bfdata.shape
-        npos = 1
+    interpolate=1, resample=1, threshold=0, retcoeff=False, hdf5=False,
+    vel_key=None, coeff_key=None, **kwargs):
     
-    nestimate = nframe - interleave 
+    if hdf5:
+        root = h5py.File(bfdata[0], 'a')
+        bfdata = root[bfdata[1]]
     
-    velocity = np.zeros(npos, nestimate)
-    if retcoeff:
-        coeff = np.zeros(velocity.shape)
-    
-    lags = np.linspace(-nsample, nsample, 2*nsample + 1)/(fs*resample*2)*c
-    
-    if interpolate > 1:
-        slags = np.linspace(-nsample*interpolate, nsample*interpolate, 
-            2*nsample*interpolate + 1)/(fs*resample*2)*c
-    
-    for pos in xrange(npos):
+    try:
+        if bfdata.ndim == 3:
+            npos, nsample, nframe = bfdata.shape
+        else:
+            nsample, nframe = bfdata.shape
+            npos = 1
         
-        for est in xrange(nestimate):
-            
-            signal1 = bfdata[pos,:,est]
-            signal2 = bfdata[pos,:,est + 1 + interleave - 1]
-            
-            correlation = xcorr(signal1, signal2, norm=True)
-            
-            if np.all(np.isnan(correlation)):
-                velocity[pos, est] = 0
-                continue
-            
-            if interpolate > 1:
+        nestimate = nframe - interleave 
+        
+        # pre-allocate velocity and coeff arrays, use hdf5 file if specified
+        if hdf5:
+            if vel_key in root:
+                del root[vel_key]
                 
-                interp = interp1d(lags, correlation, kind='cubic')
-                scorrelation = interp(slags)
+            velocity = root.create_dataset(vel_key, shape=(npos, nestimate), 
+                dtype='float', compression='gzip')
+            
+            if retcoeff:
+                if coeff_key in root:
+                    del root[coeff_key]
                 
-                maxcorr = np.max(scorrelation)
-                maxlag = slags(np.argmax(scorrelation))
+                coeff = root.create_dataset(coeff_key, shape=(npos, nestimate), 
+                    dtype='float', compression='gzip')
+        else:
+            velocity = np.zeros(npos, nestimate) 
+            
+            if retcoeff:
+                coeff = np.zeros(velocity.shape)
+        
+        lags = np.linspace(-nsample, nsample, 2*nsample + 1)/(fs*resample*2)*c
+        
+        if interpolate > 1:
+            slags = np.linspace(-nsample*interpolate, nsample*interpolate, 
+                2*nsample*interpolate + 1)/(fs*resample*2)*c
+        
+        for pos in xrange(npos):
+            
+            for est in xrange(nestimate):
                 
-                coeff[pos,est] = maxcorr
+                signal1 = bfdata[pos,:,est]
+                signal2 = bfdata[pos,:,est + 1 + interleave - 1]
                 
-                if maxcorr > threshold:
-                    velocity[pos,est] = maxlag*prf/interleave
+                correlation = xcorr(signal1, signal2, norm=True)
+                
+                if np.all(np.isnan(correlation)):
+                    velocity[pos, est] = 0
+                    continue
+                
+                if interpolate > 1:
+                    
+                    interp = interp1d(lags, correlation, kind='cubic')
+                    scorrelation = interp(slags)
+                    
+                    maxcorr = np.max(scorrelation)
+                    maxlag = slags(np.argmax(scorrelation))
+                    
+                    coeff[pos,est] = maxcorr
+                    
+                    if maxcorr > threshold:
+                        velocity[pos,est] = maxlag*prf/interleave
+                    else:
+                        velocity[pos,est] = 0
+                
                 else:
-                    velocity[pos,est] = 0
-            
+                    
+                    maxcorr = np.max(correlation)
+                    maxlag = lags(np.argmax(correlation))
+                    
+                    coeff[pos,est] = maxcorr
+                    
+                    if maxcorr > threshold:
+                        velocity[pos,est] = maxlag*prf/interleave
+                    else:
+                        velocity[pos,est] = 0
+        
+        if not hdf5:
+            if retcoeff:
+                return velocity, coeff
             else:
-                
-                maxcorr = np.max(correlation)
-                maxlag = lags(np.argmax(correlation))
-                
-                coeff[pos,est] = maxcorr
-                
-                if maxcorr > threshold:
-                    velocity[pos,est] = maxlag*prf/interleave
-                else:
-                    velocity[pos,est] = 0
+                return velocity
     
-    if retcoeff:
-        return velocity, coeff
-    else:
-        return velocity
+    finally:
+        root.close()
 
 def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None, 
-    interleave=1, ensemble=1, gate=1):
+    interleave=1, ensemble=1, gate=1, **kwargs):
     
     if bfdata.ndim == 3:
         npos, nsample, nframe = bfdata.shape
