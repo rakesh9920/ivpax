@@ -90,7 +90,8 @@ int f2_xdc_piston(double radius_, double elSize_)
     
     xdc_piston(1, res, radius, elSize);
     
-    std::cout << "Field II: piston array defined\n";
+    std::cout << "Field II: piston array defined\n"; 
+    std::cout.flush();
     return (int) res.Get(1,1,1);
 }
 
