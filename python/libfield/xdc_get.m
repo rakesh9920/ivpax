@@ -20,7 +20,7 @@
 %
 %  Version 1.1, November 29, 2001 by Joergen Arendt Jensen
 
-function data = xdc_get (Th, info_type)
+function data = xdc_get(Th, info_type)
 
 %  Check the type argument
 
@@ -44,6 +44,7 @@ function data = xdc_get (Th, info_type)
 
 %  Call the C-part of the program to show aperture
 
-  data = Mat_field (1101,Th,info);
+  data = Mat_field(1101,Th,info);
+end
 
 
