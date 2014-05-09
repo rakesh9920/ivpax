@@ -285,7 +285,7 @@ int f2_xdc_concave(double radius_, double focus_, double elsize_)
 
 struct ArrayInfo f2_xdc_get(double Th_, char * opt_)
 {
-    mwArray Th (Th_);
+    mwArray Th (Th_); //Th_ must be a double! call fails if int
     mwArray opt (opt_);
     mwArray res;
     
@@ -309,26 +309,26 @@ struct ArrayInfo f2_xdc_get(double Th_, char * opt_)
     return data;
 }
 
-struct ArrayInfo f2_xdc_get_rect()
-{
-    mwArray Th (0);
-    mwArray res;
-    
-    xdc_get_rect(1, res, Th);
-    
-    ArrayInfo data;
-    
-    mwArray dims = res.GetDimensions();
-    data.nrows = (int) dims.Get(2,1,1);
-    data.ncols = (int) dims.Get(2,1,2);
-    
-    data.ptr = new double [data.nrows*data.ncols];
-    res.GetData(data.ptr, data.nrows*data.ncols);
-    
-    data.t0 = 0;
-    
-    return data;
-}
+// struct ArrayInfo f2_xdc_get_rect()
+// {
+//     mwArray Th (0);
+//     mwArray res;
+//     
+//     xdc_get_rect(1, res, Th);
+//     
+//     ArrayInfo data;
+//     
+//     mwArray dims = res.GetDimensions();
+//     data.nrows = (int) dims.Get(2,1,1);
+//     data.ncols = (int) dims.Get(2,1,2);
+//     
+//     data.ptr = new double [data.nrows*data.ncols];
+//     res.GetData(data.ptr, data.nrows*data.ncols);
+//     
+//     data.t0 = 0;
+//     
+//     return data;
+// }
 
 int f2_xdc_rectangles(ArrayInfo * rect_, ArrayInfo * center_, ArrayInfo * focus_)
 {

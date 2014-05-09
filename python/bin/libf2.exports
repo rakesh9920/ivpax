@@ -10,7 +10,6 @@ f2_xdc_impulse
 f2_xdc_excitation
 f2_xdc_rectangles
 f2_xdc_get
-f2_xdc_get_rect
 f2_xdc_2d_array
 f2_calc_scat_multi
 f2_set_field
@@ -19,6 +18,7 @@ f2_xdc_free
 f2_xdc_linear_array
 f2_xdc_concave
 
+*f2_xdc_get_rect
 *f2_xdc_convex_array
 *f2_xdc_convex_focused_array
 *f2_xdc_quantization

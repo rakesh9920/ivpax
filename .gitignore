@@ -18,5 +18,7 @@
 /matlab/+sirm/data/
 /matlab/bin/
 /matlab/cmut/
+/python/bin/*.exp
+/python/libfield/*.exp
 /python/*.dll
 /python/*.mexw64

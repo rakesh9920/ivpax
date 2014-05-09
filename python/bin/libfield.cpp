@@ -1,12 +1,12 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Fri May 09 07:23:22 2014
+// Date: Fri May 09 08:38:55 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
 // "-B" "functionlist.txt" "calc_scat" "calc_scat_multi" "field_end"
 // "field_init" "set_field" "xdc_2d_array" "xdc_concave" "xdc_excitation"
 // "xdc_focus_times" "xdc_free" "xdc_get" "xdc_impulse" "xdc_linear_array"
 // "xdc_piston" "xdc_rectangles" "xdc_quantization" "xdc_triangles"
-// "xdc_convex_array" "xdc_convex_focused_array" "xdc_get_rect" 
+// "xdc_convex_array" "xdc_convex_focused_array" 
 //
 
 #include <stdio.h>
@@ -252,12 +252,6 @@ bool MW_CALL_CONV mlxXdc_convex_focused_array(int nlhs, mxArray *plhs[], int nrh
   return mclFeval(_mcr_inst, "xdc_convex_focused_array", nlhs, plhs, nrhs, prhs);
 }
 
-LIB_libfield_C_API 
-bool MW_CALL_CONV mlxXdc_get_rect(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[])
-{
-  return mclFeval(_mcr_inst, "xdc_get_rect", nlhs, plhs, nrhs, prhs);
-}
-
 LIB_libfield_CPP_API 
 void MW_CALL_CONV calc_scat(int nargout, mwArray& scat, mwArray& start_time, const 
                             mwArray& Th1, const mwArray& Th2, const mwArray& points, 
@@ -400,11 +394,5 @@ void MW_CALL_CONV xdc_convex_focused_array(int nargout, mwArray& Th, const mwArr
                                            const mwArray& focus)
 {
   mclcppMlfFeval(_mcr_inst, "xdc_convex_focused_array", nargout, 1, 9, &Th, &no_elements, &width, &height, &kerf, &Rconvex, &Rfocus, &no_sub_x, &no_sub_y, &focus);
-}
-
-LIB_libfield_CPP_API 
-void MW_CALL_CONV xdc_get_rect(int nargout, mwArray& data, const mwArray& Th)
-{
-  mclcppMlfFeval(_mcr_inst, "xdc_get_rect", nargout, 1, 1, &data, &Th);
 }
 
