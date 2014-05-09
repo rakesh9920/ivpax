@@ -29,7 +29,7 @@ int f2_xdc_piston(double, double);
 void f2_xdc_excitation(int, ArrayInfo *);
 void f2_xdc_impulse(int, ArrayInfo *);
 void f2_xdc_focus_times(int, ArrayInfo *, ArrayInfo *);
-struct ArrayInfo f2_xdc_get(int, char *);
+struct ArrayInfo f2_xdc_get(double, char *);
 struct ArrayInfo f2_xdc_get_rect();
 int f2_xdc_rectangles(ArrayInfo *, ArrayInfo *, ArrayInfo *);
 void f2_xdc_free(int);

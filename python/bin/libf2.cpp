@@ -283,7 +283,7 @@ int f2_xdc_concave(double radius_, double focus_, double elsize_)
     return (int) res.Get(1,1);
 }
 
-struct ArrayInfo f2_xdc_get(int Th_, char * opt_)
+struct ArrayInfo f2_xdc_get(double Th_, char * opt_)
 {
     mwArray Th (Th_);
     mwArray opt (opt_);
@@ -304,7 +304,7 @@ struct ArrayInfo f2_xdc_get(int Th_, char * opt_)
     data.ptr = new double [data.nrows*data.ncols];
     res.GetData(data.ptr, data.nrows*data.ncols);
     
-    data.t0 = 0.0;
+    data.t0 = 0;
     
     return data;
 }

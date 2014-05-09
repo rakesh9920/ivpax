@@ -65,7 +65,7 @@ class Field:
         # load dll
         if os.name == 'nt':
             
-            os.environ['PATH'] = os.environ['PATH'] + '.\\bin\\;'
+            os.environ['PATH'] = os.environ['PATH'] + ';.\\bin\\;'
             f2 = ct.cdll.LoadLibrary('libf2.dll')
             
         else:
@@ -97,8 +97,10 @@ class Field:
         f2.f2_xdc_focus_times.restype = None
         f2.f2_xdc_focus_times.argtypes = [ct.c_int, ct.POINTER(_ArrayInfo),
             ct.POINTER(_ArrayInfo)]
-        f2.f2_xdc_get.restype = ct.POINTER(_ArrayInfo)
+        f2.f2_xdc_get.restype = _ArrayInfo
         f2.f2_xdc_get.argtypes =[ct.c_int, ct.c_char_p]
+        f2.f2_xdc_get_rect.restype = _ArrayInfo
+        f2.f2_xdc_get_rect.argtypes =None
         f2.f2_xdc_rectangles.restype = ct.c_int
         f2.f2_xdc_rectangles.argtypes =[ct.POINTER(_ArrayInfo), 
             ct.POINTER(_ArrayInfo), ct.POINTER(_ArrayInfo)]
@@ -181,6 +183,14 @@ class Field:
         self._deleteArray(info)
         
         return array
+    
+    def xdc_get_rect(self):
+        
+        info = self.libf2.f2_xdc_get_rect()
+        (array, t0) = _copyArray(info)
+        self._deleteArray(info)
+        
+        return array    
         
     def xdc_2d_array(self, nelex, neley, width, height, kerfx, kerfy, enabled,
         nsubx, nsuby, focus):
