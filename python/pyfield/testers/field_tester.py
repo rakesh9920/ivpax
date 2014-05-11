@@ -37,7 +37,7 @@ if __name__ == '__main__':
     f2.xdc_excitation(Th3, excitation)
     f2.xdc_focus_times(Th3, np.zeros((1,1)), np.zeros((1,5*5)))
     
-    #rect = f2.xdc_get(Th1, "rect") # xdc_get doesn't work 
+    rect = f2.xdc_get(Th1, 'rect') # xdc_get doesn't work 
     
     points = np.array([[0, 0, 0.05],[0, 0, 0.06]])
     amplitudes = np.array([[1],[2]])

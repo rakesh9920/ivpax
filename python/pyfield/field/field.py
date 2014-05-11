@@ -98,9 +98,7 @@ class Field:
         f2.f2_xdc_focus_times.argtypes = [ct.c_int, ct.POINTER(_ArrayInfo),
             ct.POINTER(_ArrayInfo)]
         f2.f2_xdc_get.restype = _ArrayInfo
-        f2.f2_xdc_get.argtypes =[ct.c_int, ct.c_char_p]
-        f2.f2_xdc_get_rect.restype = _ArrayInfo
-        f2.f2_xdc_get_rect.argtypes =None
+        f2.f2_xdc_get.argtypes =[ct.c_double, ct.c_char_p]
         f2.f2_xdc_rectangles.restype = ct.c_int
         f2.f2_xdc_rectangles.argtypes =[ct.POINTER(_ArrayInfo), 
             ct.POINTER(_ArrayInfo), ct.POINTER(_ArrayInfo)]
@@ -183,14 +181,6 @@ class Field:
         self._deleteArray(info)
         
         return array
-    
-    def xdc_get_rect(self):
-        
-        info = self.libf2.f2_xdc_get_rect()
-        (array, t0) = _copyArray(info)
-        self._deleteArray(info)
-        
-        return array    
         
     def xdc_2d_array(self, nelex, neley, width, height, kerfx, kerfy, enabled,
         nsubx, nsuby, focus):
@@ -212,7 +202,7 @@ class Field:
         centers = _checkArray(centers, orient="row")
         focus = _checkArray(focus, orient="row")
         
-        return self.libf2.f2_xdc_rectanges(ct.byref(_getArrayInfo(rect)),
+        return self.libf2.f2_xdc_rectangles(ct.byref(_getArrayInfo(rect)),
             ct.byref(_getArrayInfo(centers)), ct.byref(_getArrayInfo(focus)))
     
     def xdc_linear_array(self, nele, width, height, kerf, nsubx, nsuby, focus):
@@ -268,7 +258,57 @@ class Field:
         self._deleteArray(scatinfo)
         
         return (scat, t0)
+        
+    # Reference for xdc_get:
+    # number of elements = size(Info, 2);
+    # physical element no. = Info(1,:);
+    # mathematical element no. = Info(2,:);
+    # element width = Info(3,:);
+    # element height = Info(4,:);
+    # apodization weight = Info(5,:);
+    # mathematical element center = Info(8:10,:);
+    # element corners = Info(11:22,:);
+    # delays = Info(23,:);
+    # physical element position = Info(24:26,:);
+    
+    # Reference for xdc_rectangles:
+    # physical element no = Rect(1,:)
+    # rectangle coords = Rect(2:13,:)
+    # apodization = Rect(14,:)
+    # width = Rect(15,:)
+    # height = Rect(16,:)
+    # center = Rect(17:19,:)  
 
+    def xdc_save(self, file_path, aperture):
+        
+        info = self.xdc_get(aperture, 'rect')
+        focus = self.xdc_get(aperture, 'focus')
+        np.savez(file_path, info=info, focus=focus)
+    
+    def xdc_load(self, file_path):
+        
+        with np.load(file_path) as varz:
+            
+            info = varz['info']
+            focus = varz['focus']
+            
+            rect = np.zeros((19, info.shape[1]))
+            rect[0,:] = info[0,:]
+            rect[1:13,:] = info[10:22,:]
+            rect[13,:] = info[4,:]
+            rect[14,:] = info[2,:]
+            rect[15,:] = info[3,:]
+            rect[16:19,:] = info[7:10,:]
+            
+            centers = info[23:26,:].T
+            
+            focus_times = focus[:,0]
+            focus_delays = focus[:,1:]
+            
+            aperture = self.xdc_rectangles(rect, centers, np.array([[0,0,300]]))
+            self.xdc_focus_times(aperture, focus_times, focus_delays)
+        
+        return aperture
      
 
 
