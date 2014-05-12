@@ -8,6 +8,7 @@ import h5py
 import numpy as np
 from scipy import fftpack as ft, signal as sig
 from matplotlib import pyplot as pp
+from scipy.stats import rayleigh
 
 if __name__ == '__main__':
     
@@ -15,12 +16,12 @@ if __name__ == '__main__':
     file_path = './data/bsc/fieldii_bsc_experiments.hdf5'
     raw_key = 'custombsc/field/rfdata/raw2/'
     ref_key = 'custombsc/field/rfdata/raw2/ref'
-    out_key = 'custombsc/field/rfdata/blood/'
-    bsc_key = 'custombsc/field/bsc/blood_shung_hmtc8'
-    out_key = 'custombsc/field/rfdata/kidney/'
-    bsc_key = 'custombsc/field/bsc/kidney_wear'
-    #out_key = 'custombsc/field/rfdata/liver/'
-    #bsc_key = 'custombsc/field/bsc/liver_wear'
+    #out_key = 'custombsc/field/rfdata/blood/'
+    #bsc_key = 'custombsc/field/bsc/blood_shung_hmtc8'
+    #out_key = 'custombsc/field/rfdata/kidney/'
+    #bsc_key = 'custombsc/field/bsc/kidney_wear'
+    out_key = 'custombsc/field/rfdata/liver/'
+    bsc_key = 'custombsc/field/bsc/liver_wear'
     
     ninstance = 1000
     filter_method = 'fir'
@@ -44,8 +45,8 @@ if __name__ == '__main__':
         bsc_one[-1] = 0
         bsc_one = np.insert(bsc_one, 0, np.linspace(0, 100e6/2, 1024), axis=1)
         
-        apply_bsc((file_path, ref_key), (file_path, out_key + 'ref'), bsc=bsc_one,
-            write=True, method=filter_method)
+        apply_bsc((file_path, ref_key), (file_path, out_key + 'ref'), 
+            bsc=bsc_one, write=True, method=filter_method)
     
     root = h5py.File(file_path, 'a') 
     
@@ -85,7 +86,7 @@ if __name__ == '__main__':
     gate_length = 5*c/fc
     gate_duration = gate_length*2/c
     gate = np.round((focus_time - t0 + np.array([-gate_duration/2, 
-        gate_duration/2]))*fs) + 30
+        gate_duration/2]))*fs) + 32
     
     nfft = 2**13
     f_lower = 4e6
@@ -128,45 +129,82 @@ if __name__ == '__main__':
     pp.ylabel(r'Backscattering Coefficient ($m^{-1}Sr^{-1}$)', fontsize=12)
     fig1.show()
     
-    pdf = np.sqrt((cam/np.mean(cam, axis=1)[:,None]).ravel()) 
-        
-
+    # scale bsc based on mean for each frequency bin such that the root bsc will
+    # has a rayleigh distribution with scale parameter = 1
     
+    #pdf = np.sqrt((cam/np.mean(cam, axis=1)[:,None]).ravel()) 
+    #pdf = (np.sqrt(cam)/np.sqrt(np.mean(cam, axis=1)[:,None])).ravel()
     
-    cam2 = cam
-    error_upper2 = error_upper
-    error_lower2 = error_lower
-    bsc2 = bsc
+    bsc_normed = 2*cam/np.mean(cam, axis=1)[:,None]
+    bsc_normed = bsc_normed.ravel()
+    root_bsc = np.sqrt(bsc_normed)
+    
+    #pdf = root_bsc/(np.sqrt(2/np.pi)*np.mean(root_bsc, axis=1)[:,None])
+    #pdf = pdf.ravel()
+    
+    cam3 = cam
+    error_upper3 = error_upper
+    error_lower3 = error_lower
+    bsc3 = bsc
     
 def make_plot():
     
-    rc('mathtext', fontset='stixsans', default='regular')
+    rc('mathtext', fontset='stix', default='regular')
+    rc('axes', linewidth = 0.6)
 
-    fig2 = pp.figure()
+    # spectrum plots for cam and bsc
+    fig2 = pp.figure(figsize=(3.5,2.7), dpi=100, tight_layout=True)
     ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=8)
     #ax2.set_xscale('log')
     ax2.set_yscale('log')
     ax2.set_xlim(4, 12)
     
     c1, = pp.plot(freq[freq1:freq2]/1e6, np.mean(cam1, axis=1), 'b-')
-    e1, = pp.plot(freq[freq1:freq2]/1e6, error_upper1,'b:')
-    pp.plot(freq[freq1:freq2]/1e6, error_lower1, 'b:')
-    b1, = pp.plot(bsc1[:,0]/1e6, bsc1[:,1], 'ro')
+    #e1, = pp.plot(freq[freq1:freq2]/1e6, error_upper1,'b:')
+    #pp.plot(freq[freq1:freq2]/1e6, error_lower1, 'b:')
+    b1, = pp.plot(bsc1[:,0]/1e6, bsc1[:,1], color='#fb8072', marker='o', 
+        alpha=0.9, ls='none')
 
     c2, = pp.plot(freq[freq1:freq2]/1e6, np.mean(cam2, axis=1), 'b-')
-    e2, = pp.plot(freq[freq1:freq2]/1e6, error_upper2,'b:')
-    pp.plot(freq[freq1:freq2]/1e6, error_lower2, 'b:')
-    b2, = pp.plot(bsc2[:,0]/1e6, bsc2[:,1], 'gv')
+    #e2, = pp.plot(freq[freq1:freq2]/1e6, error_upper2,'b:')
+    #pp.plot(freq[freq1:freq2]/1e6, error_lower2, 'b:')
+    b2, = pp.plot(bsc2[:,0]/1e6, bsc2[:,1], color='#fdb462', marker='v', 
+        alpha=0.9, ls='none')
 
     c3, = pp.plot(freq[freq1:freq2]/1e6, np.mean(cam3, axis=1), 'b-')
-    e3, = pp.plot(freq[freq1:freq2]/1e6, error_upper3,'b:')
-    pp.plot(freq[freq1:freq2]/1e6, error_lower3, 'b:')
-    b3, = pp.plot(bsc3[:,0]/1e6, bsc3[:,1], 'cs')
+    #e3, = pp.plot(freq[freq1:freq2]/1e6, error_upper3,'b:')
+    #pp.plot(freq[freq1:freq2]/1e6, error_lower3, 'b:')
+    b3, = pp.plot(bsc3[:,0]/1e6, bsc3[:,1], color='#80b1d3', marker='s', 
+        alpha=0.9, ls='none')
+
+    #ax2.legend((c1, e1, b1, b2, b3), ('CAM','95% CI',' Blood, Shung et. al.',
+        #'Kidney, Wear et. al.','Liver, Wear et. al.'), loc='center left', 
+        #frameon=False, fontsize=10)
+    ax2.legend((c1, b1, b2, b3), ('CAM', 'blood', 'kidney', 'liver'),
+        frameon=False, fontsize=9, loc='center left')
+    ax2.set_xlabel('Frequency ($MHz$)', fontsize=10)
+    #ax2.set_ylabel(r'Backscattering Coefficient ($m^{-1}Sr^{-1}$)', fontsize=10)
+    ax2.set_ylabel(r'$\eta(f) \, (m^{-1}Sr^{-1}$)', fontsize=10)
     
-    ax2.legend((c1, e1, b1, b2, b3), ('CAM','95% CI',' Blood, Shung et. al.',
-        'Kidney, Wear et. al.','Liver, Wear et. al.'), loc='center left')
-    ax2.set_xlabel('Frequency ($MHz$)', fontsize=12)
-    ax2.set_ylabel(r'Backscattering Coefficient ($m^{-1}Sr^{-1}$)', fontsize=12)
+    # histogram for root bsc
+    fig3 = pp.figure(figsize=(3.5,2.7), dpi=100, tight_layout=True)
+    ax3 = fig3.add_subplot(111)
+    ax3.tick_params(labelsize=8)
     
-    fig3 = pp.figure()
+    _, _, patches = ax3.hist(root_bsc, bins=30, normed=True,
+        facecolor='#fdb462')
     
+    for p in patches:
+        p.set_linewidth(0.4)
+        p.set_edgecolor('black')
+        
+    ax3.plot(np.linspace(0, 4, 100), rayleigh.pdf(np.linspace(0, 4, 100)), 
+        'k--', linewidth=0.8)
+    
+    ax3.set_xlabel(r'$[2 \eta(f) / \bar{\eta}(f)]^{1/2}$',
+        fontsize=10) 
+    ax3.set_ylabel('Probability density', fontsize=10)
+    ax3.legend((r'Rayleigh pdf' '\n' r'$(\sigma = 1)$','CAM'), 
+        fontsize=10, frameon=False, loc='top right')
+    fig3.show()
