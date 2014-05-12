@@ -79,3 +79,9 @@ def sct_sphere(rrange, trange, prange, origin=None, ns=1000**3):
     
     return target_pos
 
+def simple_lumen():
+    
+    # lumen dia = 15mm, lumen thickness = 3mm
+    
+    pass
+
