@@ -122,7 +122,20 @@ def sct_cylinder(rrange, trange, zrange, origin=None, ns=None):
     
     return target_pos
 
-def simple_lumen(out_path):
+def simple_lumen(out_path, ns=None, nframe=None, prf=None):
+    
+    def velocity_field(x, y, z):
+        
+        omega = 15 # angular velocity in rad/s
+        vel_z =0.01 # z velocity in m/s
+        
+        theta = sp.arctan2(y, x)
+        r = np.sqrt(x**2 + y**2)
+        
+        vel_x = omega*r*sp.sin(theta)
+        vel_y = omega*r*sp.cos(theta)
+        
+        return np.array([[vel_x, vel_y, vel_z]])
     
     # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
     ns = 10*1000**3
@@ -133,24 +146,40 @@ def simple_lumen(out_path):
     fluid = sct_cylinder(rrange=(0, 0.0075), trange=(0, 2*np.pi),
         zrange=(0.01, 0.04), ns=ns)
     
-    
+    wall_ntarget = wall.shape[0]
+    fluid_ntarget = fluid.shape[0]
+    wall_amp = np.ones((wall_ntarget, 1))
+    fluid_amp = np.ones((fluid_ntarget, 1))
     
     with h5py.File(out_path[0], 'a') as root:
 
-        path = out_path[1]
+        key = out_path[1]
         
-        if path in root:
-            del root[path]
+        if key in root:
+            del root[key]
         
-        dset = root.create_dataset(path, shape=(ntarget, 4, nframe), 
-            dtype='double', compression='gzip')
-        
-        dset[:,:,0] = np.concatenate((pos, amp), axis=1)
+        wall_dset = root.create_dataset(key + 'wall', 
+            data=np.concatenate((wall, wall_amp), axis=1), dtype='double', 
+            compression='gzip')
+
+        fluid_dset = root.create_dataset(key + 'fluid',
+            shape=(fluid_ntarget, 4, nframe), dtype='double',
+            compression='gzip')
+            
+        fluid_dset[:,:,0] = np.concatenate((fluid, fluid_amp), axis=1)
         
         for f in xrange(1, nframe):
             
-            new_pos = pos + vel/prf*f
-            dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
-
+            new_fluid = fluid + velocity_field(fluid[:,0], fluid[:,1], 
+                fluid[:,2])*prf
+                
+            fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
+            
+            fluid = new_fluid
+        
+        wall_dset.attrs['target_density'] = ns
+        wall_dset.attrs['pulse_repitition_frequency'] = prf
+        fluid_dset.attrs['target_density'] = ns
+        fluid_dset.attrs['pulse_repitition_frequency'] = prf
 
 
