@@ -41,7 +41,7 @@ def sct_cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None,
         
         root.close()
 
-def sct_sphere(rrange, trange, prange, origin=None, ns=1000**3):
+def sct_sphere(rrange, trange, prange, origin=None, ns=None):
     
     if origin is None:
         origin = np.zeros((1,3))
@@ -79,9 +79,78 @@ def sct_sphere(rrange, trange, prange, origin=None, ns=1000**3):
     
     return target_pos
 
-def simple_lumen():
+def sct_cylinder(rrange, trange, zrange, origin=None, ns=None):
     
-    # lumen dia = 15mm, lumen thickness = 3mm
+    if origin is None:
+        origin = np.zeros((1,3))
+        
+    length_x = rrange[1]*2
+    length_y = rrange[1]*2
+    length_z = zrange[1] - zrange[0]
     
-    pass
+    ntarget = np.round(length_x*length_y*length_z*ns)
+    
+    pos_x = sp.rand(ntarget, 1)*length_x
+    pos_y = sp.rand(ntarget, 1)*length_y
+    pos_z = sp.rand(ntarget, 1)*length_z
+    
+    target_pos = (np.concatenate((pos_x, pos_y, pos_z), axis=1) - 
+        np.array([[length_x/2, length_y/2, zrange[0]]]))
+    
+    # remove points outside radius range
+    r = np.sqrt(target_pos[:,0]**2 + target_pos[:,1]**2)
+    mask = (r >= rrange[0]) & (r <= rrange[1])
+    
+    target_pos = target_pos[mask,:]
+    r = r[mask]
+    
+    # remove points outside theta range
+    theta = sp.arctan2(target_pos[:,1], target_pos[:,0])
+    theta[theta < 0] = theta[theta < 0] + 2*np.pi
+    mask = (theta >= trange[0]) & (theta <= trange[1])
+    
+    target_pos = target_pos[mask,:]
+    r = r[mask]
+    
+    # remove points outside zrange
+    z = target_pos[:,2]
+    mask = (z >= zrange[0]) & (z <= zrange[1])
+    
+    target_pos = target_pos[mask,:]  
+    
+    target_pos += origin.reshape((1,3))
+    
+    return target_pos
+
+def simple_lumen(out_path):
+    
+    # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
+    ns = 10*1000**3
+    
+    wall = sct_cylinder(rrange=(0.0075, 0.0105), trange=(0, 2*np.pi), 
+        zrange=(0.01, 0.04), ns=ns)
+    
+    fluid = sct_cylinder(rrange=(0, 0.0075), trange=(0, 2*np.pi),
+        zrange=(0.01, 0.04), ns=ns)
+    
+    
+    
+    with h5py.File(out_path[0], 'a') as root:
+
+        path = out_path[1]
+        
+        if path in root:
+            del root[path]
+        
+        dset = root.create_dataset(path, shape=(ntarget, 4, nframe), 
+            dtype='double', compression='gzip')
+        
+        dset[:,:,0] = np.concatenate((pos, amp), axis=1)
+        
+        for f in xrange(1, nframe):
+            
+            new_pos = pos + vel/prf*f
+            dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
+
+
 
