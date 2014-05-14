@@ -25,10 +25,10 @@ if __name__ == '__main__':
     
     ns = 20*1000**3
     
-    sim.start(nproc=1)
+    sim.start(nproc=4, frames=(1,4))
     print sim
     stdout.flush()
-    #sim.join()
+    sim.join()
         
     
     
