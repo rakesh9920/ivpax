@@ -15,31 +15,57 @@ def sct_cube(outpath, dims=None, center=None, vel=None, nframe=None, ns=None,
     y = sp.rand(ntarget, 1)*dims[1]
     z = sp.rand(ntarget, 1)*dims[2]
     
-    pos = np.concatenate((x, y, z), axis=1) - np.array(dims)[None,:]/2 + center
-    amp = np.ones((ntarget, 1))
+    target_pos = (np.concatenate((x, y, z), axis=1) - np.array(dims)[None,:]/2 + 
+        center)
+    #amp = np.ones((ntarget, 1))
     
-    root = h5py.File(outpath[0], 'a')
+    #root = h5py.File(outpath[0], 'a')
+    #
+    #try:
+    #    
+    #    path = outpath[1]
+    #    
+    #    if path in root:
+    #        del root[path]
+    #    
+    #    dset = root.create_dataset(path, shape=(ntarget, 4, nframe), 
+    #        dtype='double', compression='gzip')
+    #    
+    #    dset[:,:,0] = np.concatenate((pos, amp), axis=1)
+    #    
+    #    for f in xrange(1, nframe):
+    #        
+    #        new_pos = pos + vel/prf*f
+    #        dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
+    #
+    #finally:
+    #    
+    #    root.close()
     
-    try:
-        
-        path = outpath[1]
-        
-        if path in root:
-            del root[path]
-        
-        dset = root.create_dataset(path, shape=(ntarget, 4, nframe), 
-            dtype='double', compression='gzip')
-        
-        dset[:,:,0] = np.concatenate((pos, amp), axis=1)
-        
-        for f in xrange(1, nframe):
-            
-            new_pos = pos + vel/prf*f
-            dset[:,:,f] = np.concatenate((new_pos, amp), axis=1)
+    return target_pos
+
+def sct_rectangle(range_x, range_y, range_z, origin=None, ns=None):
     
-    finally:
+    if origin is None:
+        origin = np.zeros((1,3))
+    
+    length_x = range_x[1] - range_x[0]
+    length_y = range_y[1] - range_y[0]
+    length_z = range_z[1] - range_z[0]
+    
+    org = np.array([[length_x/2 + range_x[0], length_y/2 + range_y[0], 
+        length_z/2 + range_z[0]]])
+    
+    ntarget = np.round(length_x*length_y*length_z*ns)
+    
+    pos_x = sp.rand(ntarget, 1)*length_x
+    pos_y = sp.rand(ntarget, 1)*length_y
+    pos_z = sp.rand(ntarget, 1)*length_z    
+    
+    target_pos = (np.concatenate((pos_x, pos_y, pos_z), axis=1) - 
+        np.array([[length_x/2, length_y/2, length_z/2]]) + org + origin)
         
-        root.close()
+    return target_pos    
 
 def sct_sphere(rrange, trange, prange, origin=None, ns=None):
     
@@ -122,19 +148,32 @@ def sct_cylinder(rrange, trange, zrange, origin=None, ns=None):
     
     return target_pos
 
+#from mayavi import mlab
+
+#x, y, z = np.mgrid[-0.01:0.01:0.001, -0.01:0.01:0.001,0:0.02:0.001]
+#src = mlab.pipeline.vector_field(x, y, z, velocity_field)
+#vec = mlab.pipeline.vectors(src, scale_factor=0.0015)
+#
+#mask = vec.glyph.mask_points
+#mask.maximum_number_of_points = 10000
+#mask.on_ratio = 2
+#vec.glyph.mask_input_points = True
+#
+#mlab.show()
+
 def simple_lumen(out_path, ns=None, nframe=None, prf=None):
     
     def velocity_field(x, y, z):
         
         omega = 15 # angular velocity in rad/s
-        vel_z =0.01 # z velocity in m/s
         
         theta = sp.arctan2(y, x)
         r = np.sqrt(x**2 + y**2)
         
-        vel_x = omega*r*sp.sin(theta)
+        vel_x = -omega*r*sp.sin(theta)
         vel_y = omega*r*sp.cos(theta)
-        
+        vel_z = np.ones_like(vel_x)*0.01
+            
         return np.array([[vel_x, vel_y, vel_z]])
     
     # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
@@ -181,5 +220,4 @@ def simple_lumen(out_path, ns=None, nframe=None, prf=None):
         wall_dset.attrs['pulse_repitition_frequency'] = prf
         fluid_dset.attrs['target_density'] = ns
         fluid_dset.attrs['pulse_repitition_frequency'] = prf
-
 

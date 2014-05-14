@@ -1,26 +1,38 @@
 import numpy as np
 import scipy as sp
+from scipy import signal as sig
 
 def get_prms():
     
-    fc = 6e6
+    fc = 5e6
+    fbw = 1
     fs = 100e6
-    impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));
-    impulse_response = impulse_response*(sp.hanning(np.size(impulse_response)))
+
+    #impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));
+    #impulse_response = impulse_response*(sp.hanning(np.size(impulse_response)))
+    #excitation = impulse_response.copy()
+    
+    cutoff = sig.gausspulse('cutoff', fc=fc, bw=fbw, tpr=-60, bwr=-3)
+    adj_cutoff = np.ceil(cutoff*fs)/fs
+    t = np.arange(-adj_cutoff, adj_cutoff + 1/fs, 1/fs)
+    _, impulse_response = sig.gausspulse(t, fc=fc, bw=fbw, retquad=True, bwr=-3)
     excitation = impulse_response.copy()
     
     prms = dict()
     prms['density'] = 1000
     prms['sound_speed'] = 1540
-    prms['sample_frequency'] = 100e6
-    prms['center_frequency'] = 6e6
-    prms['use_attenuation'] = 0
+    prms['sample_frequency'] = fs
+    prms['center_frequency'] = fc
+    prms['use_attenuation'] = 1
     prms['attenuation'] = 0
     prms['frequency_attenuation'] = 0
-    prms['attenuation_center_frequency'] = 6e6
+    prms['attenuation_center_frequency'] = 5e6
     prms['tx_impulse_response'] = impulse_response
     prms['rx_impulse_response'] = impulse_response
     prms['tx_excitation'] = excitation
+    prms['tx_positions'] = np.zeros((1,3))
+    prms['rx_positions'] = np.zeros((1,3))
+    prms['area'] = 0.003*290e-6*128
     
     centers = (np.arange(0,128) - 63.5)*300e-6
     prms['tx_positions'] = np.zeros((1,3))

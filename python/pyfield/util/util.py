@@ -157,5 +157,21 @@ def h5py_tree(root):
 
     
     root.visititems(print_attrs)
+
+class cyl_mgrid_class:
+    
+    def __getitem__(self, key):
+    
+        x, y, z = np.mgrid[key]
         
+        r = np.sqrt(x**2 + y**2)
+        mask = r <= max(key[0].stop, key[1].stop)
+        
+        return x[mask], y[mask], z[mask]
+
+cyl_mgrid = cyl_mgrid_class()
+        
+
+    
+    
     
