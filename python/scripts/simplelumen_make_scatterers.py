@@ -27,6 +27,26 @@ def velocity_field(x, y, z, cat=False):
         return np.concatenate((vel_x, vel_y, vel_z), axis=1)
     else:
         return vel_x, vel_y, vel_z
+        
+def field(t, r):
+    
+    omega = 1.33 # angular velocity in rad/s
+    
+    theta = sp.arctan2(r[1], r[0])
+    r = np.sqrt(r[0]**2 + r[1]**2)
+    
+    vel_x = -omega*r*sp.sin(theta)
+    vel_y = omega*r*sp.cos(theta)
+    vel_z = 0.01
+    
+    return [vel_x, vel_y, vel_z]
+
+def traj(ipos, t, o):
+    
+    o.set_initial_value(ipos, t=0.0)
+    o.integrate(t)
+    
+    return o.y
     
 if __name__ == '__main__':
       
