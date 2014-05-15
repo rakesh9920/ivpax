@@ -8,14 +8,14 @@ import scipy as sp
 
 def velocity_field(x, y, z, cat=False):
     
-    omega = 15 # angular velocity in rad/s
+    omega = 1.33 # angular velocity in rad/s
     r_cutoff = 0.0075
     
     theta = sp.arctan2(y, x)
     r = np.sqrt(x**2 + y**2)
     
-    vel_x = -omega*r*sp.sin(theta)
-    vel_y = omega*r*sp.cos(theta)
+    vel_x = (-omega*r*sp.sin(theta))[:,None]
+    vel_y = (omega*r*sp.cos(theta))[:,None]
     vel_z = np.ones_like(vel_x)*0.01
     
     mask = (r > r_cutoff)
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         for f in xrange(1, nframe):
             
             new_fluid = fluid + velocity_field(fluid[:,0], fluid[:,1], 
-                fluid[:,2], cat=True)*prf
+                fluid[:,2], cat=True)/prf
                 
             fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
             
