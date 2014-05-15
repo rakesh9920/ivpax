@@ -5,30 +5,43 @@ from pyfield.field import sct_rectangle
 import h5py
 import numpy as np
 import scipy as sp
+from scipy.integrate import ode
 
-def velocity_field(x, y, z, cat=False):
-    
-    omega = 1.33 # angular velocity in rad/s
-    r_cutoff = 0.0075
-    
-    theta = sp.arctan2(y, x)
-    r = np.sqrt(x**2 + y**2)
-    
-    vel_x = (-omega*r*sp.sin(theta))[:,None]
-    vel_y = (omega*r*sp.cos(theta))[:,None]
-    vel_z = np.ones_like(vel_x)*0.01
-    
-    mask = (r > r_cutoff)
-    vel_x[mask] = 0
-    vel_y[mask] = 0
-    vel_z[mask] = 0
-    
-    if cat:
-        return np.concatenate((vel_x, vel_y, vel_z), axis=1)
-    else:
-        return vel_x, vel_y, vel_z
+#def velocity_field(x, y, z, cat=False):
+#    
+#    omega = 1.33 # angular velocity in rad/s
+#    r_cutoff = 0.0075
+#    
+#    theta = sp.arctan2(y, x)
+#    r = np.sqrt(x**2 + y**2)
+#    
+#    vel_x = (-omega*r*sp.sin(theta))#[:,None]
+#    vel_y = (omega*r*sp.cos(theta))#[:,None]
+#    vel_z = np.ones_like(vel_x)*0.01
+#    
+#    #mask = (r > r_cutoff)
+#    #vel_x[mask] = 0
+#    #vel_y[mask] = 0
+#    #vel_z[mask] = 0
+#    
+#    if cat:
+#        return np.concatenate((vel_x, vel_y, vel_z), axis=1)
+#    else:
+#        return vel_x, vel_y, vel_z
         
-def field(t, r):
+def flow_field_viz(x, y, z, t):
+    
+    f = lambda x: flow_field(t, x)
+
+    dim = x.ndim
+    r = np.concatenate([x[...,None], y[...,None], z[...,None]], axis=dim)
+    
+    vel = np.apply_along_axis(f, dim, r)
+    
+    return vel[...,0], vel[...,1], vel[..., 2]
+    
+    
+def flow_field(t, r):
     
     omega = 1.33 # angular velocity in rad/s
     
@@ -41,21 +54,28 @@ def field(t, r):
     
     return [vel_x, vel_y, vel_z]
 
-def traj(ipos, t, o):
+def trajectory(ipos, dt, nstep, ode_obj):
     
-    o.set_initial_value(ipos, t=0.0)
-    o.integrate(t)
+    ode_obj.set_initial_value(ipos, t=0.0)
     
-    return o.y
+    pos = np.zeros((3, nstep))
+    pos[:,0] = ipos
+    
+    for n in xrange(1, nstep):
+        
+        ode_obj.integrate(n*dt)
+        pos[:,n] = ode_obj.y
+    
+    return pos
     
 if __name__ == '__main__':
       
     # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
     ns = 20*1000**3
-    nframe = 1
+    nframe = 20
     prf = 1000
-    file_path = './data/simple_lumen_experiments.hdf5'
-    out_key = 'field/targdata/'
+    file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
+    out_key = 'field/targdata/fluid2'
     range_x = (-0.01, 0.01)
     range_y = (-0.01, 0.01)
     range_z = (0.01, 0.04)
@@ -66,27 +86,38 @@ if __name__ == '__main__':
     fluid_ntarget = fluid.shape[0]
     fluid_amp = np.ones((fluid_ntarget, 1))
     
+    solver = ode(flow_field)
+    solver.set_integrator('dopri5')
+    
     with h5py.File(out_path[0], 'a') as root:
 
         key = out_path[1]
         
         if key in root:
             del root[key]
-
-        fluid_dset = root.create_dataset(key + 'fluid',
-            shape=(fluid_ntarget, 4, nframe), dtype='double',
-            compression='gzip')
+    
+        fluid_dset = root.create_dataset(key, shape=(fluid_ntarget, 4, nframe), 
+            dtype='double', compression='gzip')
             
-        fluid_dset[:,:,0] = np.concatenate((fluid, fluid_amp), axis=1)
+        #fluid_dset[:,:,0] = np.concatenate((fluid, fluid_amp), axis=1)
         
-        for f in xrange(1, nframe):
+        for r in xrange(fluid_ntarget):
             
-            new_fluid = fluid + velocity_field(fluid[:,0], fluid[:,1], 
-                fluid[:,2], cat=True)/prf
-                
-            fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
+            ipos = fluid[r,:]
+            pos = trajectory(ipos, 1/prf, nframe, solver)
             
-            fluid = new_fluid
+            fluid_dset[r,0:3,:] = pos
+        
+        fluid_dset[:,3,:] = np.ones((fluid_ntarget, nframe))
+        
+        #for f in xrange(1, nframe):
+        #    
+        #    new_fluid = fluid + flow_field_viz(fluid[:,0], fluid[:,1], 
+        #        fluid[:,2], 0)/prf
+        #        
+        #    fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
+        #    
+        #    fluid = new_fluid
 
         fluid_dset.attrs['target_density'] = ns
         fluid_dset.attrs['pulse_repitition_frequency'] = prf
