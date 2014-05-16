@@ -67,7 +67,15 @@ def trajectory(ipos, dt, nstep, ode_obj):
         pos[:,n] = ode_obj.y
     
     return pos
+
+def trajectory2(ipos, t, ode_obj):
     
+    ode_obj.set_initial_value(ipos, t=0.0)
+    
+    ode_obj.integrate(t)
+    
+    return ode_obj.y
+        
 if __name__ == '__main__':
       
     # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
@@ -99,16 +107,16 @@ if __name__ == '__main__':
         fluid_dset = root.create_dataset(key, shape=(fluid_ntarget, 4, nframe), 
             dtype='double', compression='gzip')
             
-        #fluid_dset[:,:,0] = np.concatenate((fluid, fluid_amp), axis=1)
+        fluid_dset[:,:,0] = np.concatenate((fluid, fluid_amp), axis=1)
         
-        for r in xrange(fluid_ntarget):
-            
-            ipos = fluid[r,:]
-            pos = trajectory(ipos, 1/prf, nframe, solver)
-            
-            fluid_dset[r,0:3,:] = pos
-        
-        fluid_dset[:,3,:] = np.ones((fluid_ntarget, nframe))
+        #for r in xrange(fluid_ntarget):
+        #    
+        #    ipos = fluid[r,:]
+        #    pos = trajectory(ipos, 1/prf, nframe, solver)
+        #    
+        #    fluid_dset[r,0:3,:] = pos
+        #
+        #fluid_dset[:,3,:] = np.ones((fluid_ntarget, nframe))
         
         #for f in xrange(1, nframe):
         #    
@@ -119,5 +127,11 @@ if __name__ == '__main__':
         #    
         #    fluid = new_fluid
 
+        for f in xrange(1, nframe):
+            
+            new_fluid = np.apply_along_axis(trajectory2, 1, fluid, nframe/prf,
+                solver)
+            fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
+            
         fluid_dset.attrs['target_density'] = ns
         fluid_dset.attrs['pulse_repitition_frequency'] = prf
