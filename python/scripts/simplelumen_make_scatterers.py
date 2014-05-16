@@ -80,7 +80,7 @@ if __name__ == '__main__':
       
     # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
     ns = 20*1000**3
-    nframe = 20
+    nframe = 2
     prf = 1000
     file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
     out_key = 'field/targdata/fluid2'
@@ -129,8 +129,8 @@ if __name__ == '__main__':
 
         for f in xrange(1, nframe):
             
-            new_fluid = np.apply_along_axis(trajectory2, 1, fluid, nframe/prf,
-                solver)
+            new_fluid = np.apply_along_axis(trajectory2, 1, fluid, 
+                float(nframe)/prf, solver)
             fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
             
         fluid_dset.attrs['target_density'] = ns
