@@ -9,12 +9,14 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
     interpolate=1, resample=1, threshold=0, retcoeff=False, hdf5=False,
     vel_key=None, coeff_key=None, **kwargs):
     
-    if hdf5:
+    if isinstance(bfdata, tuple):
+        hdf5 = True
         root = h5py.File(bfdata[0], 'a')
-        bfdata = root[bfdata[1]]
+        bfdata = root[bfdata[1]][:] # copy all bfdata to memory... more memory
+            # intensive but much much faster than looped access
     
     try:
-        if bfdata.ndim == 3:
+        if len(bfdata.shape) == 3:
             npos, nsample, nframe = bfdata.shape
         else:
             nsample, nframe = bfdata.shape
@@ -42,13 +44,16 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
             if retcoeff:
                 coeff = np.zeros(velocity.shape)
         
-        lags = np.linspace(-nsample, nsample, 2*nsample + 1)/(fs*resample*2)*c
+        lags = (np.linspace(-nsample + 1, nsample - 1, 2*nsample - 1) /
+            (fs*resample*2)*c)
         
         if interpolate > 1:
-            slags = np.linspace(-nsample*interpolate, nsample*interpolate, 
-                2*nsample*interpolate + 1)/(fs*resample*2)*c
+            slags = np.linspace(-nsample + 1, nsample - 1, 
+                2*nsample*interpolate - 2*interpolate + 1)/(fs*resample*2)*c
         
         for pos in xrange(npos):
+            
+            print pos
             
             for est in xrange(nestimate):
                 
@@ -61,27 +66,45 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
                     velocity[pos, est] = 0
                     continue
                 
+                maxcorr = np.max(correlation)
+                maxarg = np.argmax(correlation)
+                
                 if interpolate > 1:
                     
-                    interp = interp1d(lags, correlation, kind='cubic')
+                    argb = max(maxarg - 2, 0)
+                    arge = min(maxarg + 2, 2*nsample - 1)
+                    
+                    interp = interp1d(lags[argb:(arge + 1)], 
+                        correlation[argb:(arge + 1)], kind='cubic')
+                    
+                    slags = np.linspace(lags[argb], lags[arge], 
+                        4*interpolate + 1)
+                        
                     scorrelation = interp(slags)
+                    smaxcorr = np.max(scorrelation)
+                    smaxlag = slags[np.argmax(scorrelation)]
                     
-                    maxcorr = np.max(scorrelation)
-                    maxlag = slags(np.argmax(scorrelation))
+                    #interp = interp1d(lags, correlation, kind='cubic')
+                    #scorrelation = interp(slags)
+                    #
+                    #maxcorr = np.max(scorrelation)
+                    #maxlag = slags[np.argmax(scorrelation)]
                     
-                    coeff[pos,est] = maxcorr
+                    if retcoeff:
+                        coeff[pos,est] = smaxcorr
                     
                     if maxcorr > threshold:
-                        velocity[pos,est] = maxlag*prf/interleave
+                        velocity[pos,est] = smaxlag*prf/interleave
                     else:
                         velocity[pos,est] = 0
                 
                 else:
                     
-                    maxcorr = np.max(correlation)
-                    maxlag = lags(np.argmax(correlation))
+                    #maxcorr = np.max(correlation)
+                    maxlag = lags[maxarg]
                     
-                    coeff[pos,est] = maxcorr
+                    if retcoeff:
+                        coeff[pos,est] = maxcorr
                     
                     if maxcorr > threshold:
                         velocity[pos,est] = maxlag*prf/interleave
@@ -100,7 +123,7 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
 def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None, 
     interleave=1, ensemble=1, gate=1, **kwargs):
     
-    if bfdata.ndim == 3:
+    if len(bfdata.shape) == 3:
         npos, nsample, nframe = bfdata.shape
     else:
         nsample, nframe = bfdata.shape

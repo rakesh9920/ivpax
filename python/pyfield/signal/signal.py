@@ -1,4 +1,4 @@
-from scipy.signal import correlate, butter, filtfilt
+from scipy.signal import correlate, butter, filtfilt, fftconvolve
 from scipy.fftpack import fft, ifft, fftshift, ifftshift
 import numpy as np
 
@@ -14,10 +14,13 @@ def iffts(x, *args, **kwargs):
 
 def xcorr(in1, in2, mode='full', norm=True):
     
+    # note: fftconvolve is much faster than correlate
     if norm:
-        xc = correlate(in1, in2, mode)/np.sqrt(np.sum(in1**2)*np.sum(in2**2))
+        #xc = correlate(in1, in2, mode)/np.sqrt(np.sum(in1**2)*np.sum(in2**2))
+        xc = fftconvolve(in1, in2[::-1], mode)/np.sqrt(np.sum(in1**2)*np.sum(in2**2))
     else:
-        xc = correlate(in1, in2, mode)
+        #xc = correlate(in1, in2, mode)
+        xc = fftconvolve(in1, in2[::-1], mode)
     
     return xc
 

@@ -21,16 +21,16 @@ def write_view(view_path):
 
 if __name__ == '__main__':
     
-    file_path = 'simple_lumen_experiments.hdf5'
-    input_key = 'field/rfdata/00000'
+    file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
+    input_key = 'field/rfdata/raw/00000'
     view_key = 'view/view0'
-    output_key = 'bfdata/bf00000'
+    output_key = 'bfdata/00000'
     
-    write_view((file_path, view_key))
+    #write_view((file_path, view_key))
     
     bf = Beamformer()
     
-    opt = { 'nwin': 201,
+    opt = { 'nwin': 401,
             'resample': 1,
             'chmask': False,
             'planetx': True,
@@ -39,10 +39,10 @@ if __name__ == '__main__':
             
     bf.set_options(**opt)
     
-    bf.input_path = (file_path, view_key)
+    bf.input_path = (file_path, input_key)
     bf.output_path = (file_path, output_key)
     bf.view_path = (file_path, view_key)
     
-    bf.start(nproc=2)
+    bf.start(nproc=2, frames=None)
     
     print bf

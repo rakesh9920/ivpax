@@ -29,7 +29,7 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         
         if frames is None:          
             
-            if rfdata.ndim == 3:
+            if len(rfdata.shape) == 3:
                 nframe = rfdata.shape[2]
             else:
                 nframe = 1
@@ -82,8 +82,8 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         pointsperchunk = min(np.ceil(float(npos)/nproc).astype(int), 
             maxpointsperchunk)
         
-        progress.total.value = np.ceil(float(nframe)/framesperchunk) * \
-            np.ceil(float(npos)/pointsperchunk)
+        progress.total.value = int(np.ceil(float(nframe)/framesperchunk) * 
+            np.ceil(float(npos)/pointsperchunk))
         progress.reset()
         
         # divide rf data into groups of frames for processing
@@ -91,10 +91,10 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
             
             adjusted_idx = slice(start_frame + frame_idx.start, 
                 start_frame + frame_idx.stop)
-                
+            
             rf = rfdata[:,:,adjusted_idx]
             nchunk = 0
-            
+
             # divide field positions into chunks and send to workers
             for pos_idx in iter(chunks(range(npos), pointsperchunk)):
                 
@@ -316,8 +316,8 @@ class Beamformer():
         delegator.start() 
         self.delegator.append(delegator)
         
-        #self.in_queue = in_queue
-        #self.out_queue = out_queue
+        self.in_queue = in_queue
+        self.out_queue = out_queue
          
     def join(self, timeout=None):
         
