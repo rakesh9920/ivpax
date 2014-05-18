@@ -1,6 +1,7 @@
 # pyfield / extra.py
 
 from pyfield.signal import wgn
+
 from scipy import signal as sig
 from scipy import fftpack as ft
 from scipy.interpolate import interp1d
@@ -21,7 +22,7 @@ def iffts(x, *args, **kwargs):
 
 def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
     
-    area = 1.9838392692290149e-05
+    #area = 1.9838392692290149e-05
     
     nfft = 2**13
     freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
@@ -38,7 +39,7 @@ def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
 def bsc_to_fir(bsc, c=None, rho=None, area=None, ns=None, fs=None, deriv=True,
     ntap=100):
     
-    area = 1.9838392692290149e-05
+    #area = 1.9838392692290149e-05
     
     bsc = bsc.reshape((-1, 2))
     

@@ -1,4 +1,4 @@
-# scripts / make_simple_lumen_scatterers.py
+# scripts / simple_lumen_make_scatterers.py
 
 from pyfield.field import sct_rectangle
 
@@ -7,6 +7,17 @@ import numpy as np
 import scipy as sp
 from scipy.integrate import ode
 
+######################### SET SCRIPT PARAMETERS HERE ###########################
+file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
+out_key = 'field/targdata/fluid2'
+ns = 20*1000**3
+nframe = 20
+prf = 1000
+range_x = (-0.01, 0.01)
+range_y = (-0.01, 0.01)
+range_z = (0.01, 0.04)
+################################################################################
+    
 #def velocity_field(x, y, z, cat=False):
 #    
 #    omega = 1.33 # angular velocity in rad/s
@@ -77,16 +88,17 @@ def trajectory2(ipos, t, ode_obj):
     return ode_obj.y
         
 if __name__ == '__main__':
-      
+    
+    # set script parameters
     # lumen dia = 15mm, lumen thickness = 3mm, height = 30mm
-    ns = 20*1000**3
-    nframe = 2
-    prf = 1000
-    file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
-    out_key = 'field/targdata/fluid2'
-    range_x = (-0.01, 0.01)
-    range_y = (-0.01, 0.01)
-    range_z = (0.01, 0.04)
+    #file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
+    #out_key = 'field/targdata/fluid2'
+    #ns = 20*1000**3
+    #nframe = 2
+    #prf = 1000
+    #range_x = (-0.01, 0.01)
+    #range_y = (-0.01, 0.01)
+    #range_z = (0.01, 0.04)
     
     out_path = (file_path, out_key)
 
@@ -130,7 +142,7 @@ if __name__ == '__main__':
         for f in xrange(1, nframe):
             
             new_fluid = np.apply_along_axis(trajectory2, 1, fluid, 
-                float(nframe)/prf, solver)
+                float(f)/prf, solver)
             fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)
             
         fluid_dset.attrs['target_density'] = ns
