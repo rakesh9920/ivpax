@@ -141,6 +141,7 @@ if __name__ == '__main__':
 
         for f in xrange(1, nframe):
             
+            print f
             new_fluid = np.apply_along_axis(trajectory2, 1, fluid, 
                 float(f)/prf, solver)
             fluid_dset[:,:,f] = np.concatenate((new_fluid, fluid_amp), axis=1)

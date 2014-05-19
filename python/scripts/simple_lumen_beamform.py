@@ -8,11 +8,12 @@ from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
-input_key = 'field/rfdata/raw/00001'
+input_key = 'field/rfdata/blood/fluid2'
 view_key = 'view/view0'
-sub_rx_no = 0
-output_key = 'bfdata/00001_sub' + '{:01d}'.format(sub_rx_no)
-nproc = 2
+sub_rx_no = 15
+#output_key = 'bfdata/fluid2_sub' + '{:01d}'.format(sub_rx_no)
+output_key = 'bfdata/fluid2_full'
+nproc = 3
 frames = None
 sub_rx_positions = np.array([[-0.018, 0, 0],
                             [-0.0156, 0, 0],
@@ -30,8 +31,9 @@ sub_rx_positions = np.array([[-0.018, 0, 0],
                             [0.0132, 0, 0],
                             [0.0156, 0, 0],
                             [0.018, 0, 0]])
-chmask = np.zeros(128)
-chmask[sub_rx_no*8:sub_rx_no*8+8] = 1
+#chmask = np.zeros(128)
+#chmask[sub_rx_no*8:sub_rx_no*8+8] = 1
+chmask = False
 opt = { 'nwin': 401,
         'resample': 1,
         'chmask': chmask,
@@ -58,7 +60,7 @@ def write_view(view_path):
 
 if __name__ == '__main__':
     
-    #write_view((file_path, view_key))
+    write_view((file_path, view_key))
     
     bf = Beamformer()
         
@@ -71,13 +73,13 @@ if __name__ == '__main__':
     
     print bf
     stdout.flush()
-    bf.join()
+    #bf.join()
     
-    with h5py.File(file_path, 'a') as root:
-        
-        bfdata = root[output_key]
-        bfdata.attrs['sub_rx_no'] = sub_rx_no
-        bfdata.attrs['sub_rx_position'] = sub_rx_positions[sub_rx_no,:]
+    #with h5py.File(file_path, 'a') as root:
+    #    
+    #    bfdata = root[output_key]
+    #    bfdata.attrs['sub_rx_no'] = sub_rx_no
+    #    bfdata.attrs['sub_rx_position'] = sub_rx_positions[sub_rx_no,:]
     
     
     

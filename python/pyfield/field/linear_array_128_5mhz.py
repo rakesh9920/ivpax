@@ -23,6 +23,7 @@ def get_prms():
     prms['sound_speed'] = 1540
     prms['sample_frequency'] = fs
     prms['center_frequency'] = fc
+    prms['bandwidth'] = fc*fbw
     prms['use_attenuation'] = 1
     prms['attenuation'] = 0
     prms['frequency_attenuation'] = 0

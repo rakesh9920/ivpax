@@ -7,8 +7,8 @@ import h5py
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
 bsc_key = 'field/bsc/blood_shung_hmtc8'
-raw_key = 'field/rfdata/raw/00000'
-out_key = 'field/rfdata/blood/00000'
+raw_key = 'field/rfdata/raw/fluid2'
+out_key = 'field/rfdata/blood/fluid2'
 ################################################################################
 
 if __name__ == '__main__':

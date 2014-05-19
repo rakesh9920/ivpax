@@ -94,7 +94,7 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
                         coeff[pos,est] = smaxcorr
                     
                     if maxcorr > threshold:
-                        velocity[pos,est] = smaxlag*prf/interleave
+                        velocity[pos,est] = -smaxlag*prf/interleave
                     else:
                         velocity[pos,est] = 0
                 
@@ -107,7 +107,7 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
                         coeff[pos,est] = maxcorr
                     
                     if maxcorr > threshold:
-                        velocity[pos,est] = maxlag*prf/interleave
+                        velocity[pos,est] = -maxlag*prf/interleave
                     else:
                         velocity[pos,est] = 0
         
