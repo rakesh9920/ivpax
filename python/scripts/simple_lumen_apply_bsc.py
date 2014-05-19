@@ -5,10 +5,10 @@ from pyfield.field import apply_bsc
 import h5py
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
+file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
 bsc_key = 'field/bsc/blood_shung_hmtc8'
-raw_key = 'field/rfdata/raw/00001'
-out_key = 'field/rfdata/blood/00001'
+raw_key = 'field/rfdata/raw/00000'
+out_key = 'field/rfdata/blood/00000'
 ################################################################################
 
 if __name__ == '__main__':

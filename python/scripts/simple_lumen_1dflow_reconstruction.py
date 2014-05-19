@@ -3,7 +3,7 @@
 from pyfield.flow import Reconstructor
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
+file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
 input_key = 'bfdata/00000'
 output_key = 'flowdata/00000'
 coeff_key = ''

@@ -7,7 +7,7 @@ import h5py
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/simple lumen flow/simple_lumen_experiments.hdf5'
+file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
 input_key = 'field/rfdata/raw/00001'
 view_key = 'view/view0'
 sub_rx_no = 0
