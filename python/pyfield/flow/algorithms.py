@@ -6,14 +6,16 @@ from scipy.interpolate import interp1d
 import h5py
 
 def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1, 
-    interpolate=1, resample=1, threshold=0, retcoeff=False, hdf5=False,
-    vel_key=None, coeff_key=None, **kwargs):
+    interpolate=1, resample=1, threshold=0, retcoeff=False, vel_key=None, 
+    coeff_key=None, **kwargs):
     
     if isinstance(bfdata, tuple):
         hdf5 = True
         root = h5py.File(bfdata[0], 'a')
         bfdata = root[bfdata[1]][:] # copy all bfdata to memory... more memory
             # intensive but much much faster than looped access
+    else:
+        hdf5 = False
     
     try:
         if len(bfdata.shape) == 3:
@@ -39,7 +41,7 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
                 coeff = root.create_dataset(coeff_key, shape=(npos, nestimate), 
                     dtype='float', compression='gzip')
         else:
-            velocity = np.zeros(npos, nestimate) 
+            velocity = np.zeros((npos, nestimate)) 
             
             if retcoeff:
                 coeff = np.zeros(velocity.shape)
@@ -121,47 +123,80 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
         root.close()
 
 def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None, 
-    interleave=1, ensemble=1, gate=1, **kwargs):
+    interleave=1, ensemble=1, gate=1, resample=1, vel_key=None, **kwargs):
     
-    if len(bfdata.shape) == 3:
-        npos, nsample, nframe = bfdata.shape
+    if isinstance(bfdata, tuple):
+        
+        hdf5 = True
+        root = h5py.File(bfdata[0], 'a')
+        bfdata = root[bfdata[1]][:] # copy all bfdata to memory... more memory
+            # intensive but much much faster than looped access
     else:
-        nsample, nframe = bfdata.shape
-        npos = 1
-    
-    midsample = np.floor(nsample/2).astype(int)
-    gate_start = midsample - np.floor(gate/2.0)
-    gate_stop = gate_start + gate
-    
-    nestimate = nframe - interleave - ensemble + 1
-    
-    velocity = np.zeros(npos, nestimate)
-    
-    for pos in xrange(npos):
+        hdf5 = False
         
-        I, Q = iqdemod(bfdata[pos,:,:], fc, bw, fs, axis=0)
+    try:       
+         
+        if len(bfdata.shape) == 3:
+            npos, nsample, nframe = bfdata.shape
+        else:
+            nsample, nframe = bfdata.shape
+            npos = 1
         
-        I1 = I[gate_start:gate_stop,:]
-        Q1 = Q[gate_start:gate_stop,:]
+        midsample = np.floor(nsample/2).astype(int)
+        gate_start = midsample - np.floor(gate/2.0)
+        gate_stop = gate_start + gate
         
-        delta_phi = np.zeros((gate, nestimate))
-        for est in xrange(nestimate):
+        nestimate = nframe - interleave - ensemble + 1
+        
+        #if hdf5:
+        #    
+        #    if vel_key in root:
+        #        del root[vel_key]
+        #        
+        #    velocity = root.create_dataset(vel_key, shape=(npos, nestimate), 
+        #        dtype='float', compression='gzip')
+        #    
+        #else:
             
-            idx1 = np.arange(est, est + ensemble)
-            idx2 = idx1 + interleave
-
-            for g in xrange(gate):
+        velocity = np.zeros((npos, nestimate)) 
+            
+        for pos in xrange(npos):
+            
+            print pos
+            
+            I, Q = iqdemod(bfdata[pos,:,:], fc, bw, fs*resample, axis=0)
+            
+            I1 = I[gate_start:gate_stop,:]
+            Q1 = Q[gate_start:gate_stop,:]
+            
+            delta_phi = np.zeros((gate, nestimate))
+            for est in xrange(nestimate):
                 
-                numer = np.sum(Q1(g,idx2)*I1(g,idx1) - I1(g,idx2)*Q1(g,idx1))
-                denom = np.sum(I1(g,idx2)*I1(g,idx1) + Q1(g,idx2)*Q1(g,idx1))
-            
-                delta_phi[g,est] += np.mean(np.arctan2(numer, denom))
-        
-        
-            velocity[pos,est] = -np.mean(delta_phi[:,est])/interleave * \
-                prf*c/(4*np.pi*fc)
+                idx1 = np.arange(est, est + ensemble)
+                idx2 = idx1 + interleave
     
-    return velocity                
+                for g in xrange(gate):
+                    
+                    numer = np.sum(Q1[g,idx2]*I1[g,idx1] - I1[g,idx2]*Q1[g,idx1])
+                    denom = np.sum(I1[g,idx2]*I1[g,idx1] + Q1[g,idx2]*Q1[g,idx1])
+                
+                    delta_phi[g,est] += np.mean(np.arctan2(numer, denom))
+            
+            
+                velocity[pos,est] = np.mean(delta_phi[:,est])/interleave * \
+                    prf*c/(4*np.pi*fc)
+        
+        if hdf5:
+            if vel_key in root:
+                del root[vel_key]
+                
+            velocity = root.create_dataset(vel_key, data=velocity, 
+                compression='gzip')
+        else:
+            return velocity
+                    
+    finally:
+        root.close()           
 
 def corr_match_doppler():
 	pass		

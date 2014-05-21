@@ -73,5 +73,9 @@ class Reconstructor():
         else:
             
             pass
-     
+        
+        with h5py.File(file_path, 'a') as root:
+            
+            for k, v in root[input_key].attrs.iteritems():
+                root[vel_key].attrs.create(k, v)
             

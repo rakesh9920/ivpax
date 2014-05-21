@@ -125,9 +125,9 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         bfdata.attrs.create('plane_transmit', options['planetx'])
         bfdata.attrs.create('channel_mask', options['chmask'])
         
-        bfdata.dims[0].label = 'position_no'
-        bfdata.dims[1].label = 'sample_no'
-        bfdata.dims[2].label = 'frame_no'
+        #bfdata.dims[0].label = 'position_no'
+        #bfdata.dims[1].label = 'sample_no'
+        #bfdata.dims[2].label = 'frame_no'
         
     except Exception as e:
         
