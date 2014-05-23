@@ -5,9 +5,9 @@ from pyfield.field import Simulation
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
-input_key = 'field/targdata/fluid2'
-output_key = 'field/rfdata/raw/fluid2'
+file_path = './data/simple lumen flow/even_simpler_lumen_data.hdf5'
+input_key = 'field/targdata/fluid0'
+output_key = 'field/rfdata/raw/fluid0'
 script_path = 'pyfield.field.linear_array_128_5mhz'
 nproc = 4
 frames = None
