@@ -3,9 +3,11 @@
 from multiprocessing import Process, Queue, current_process
 import numpy as np
 import h5py
-from . import Field
-from pyfield.util import chunks, align_and_sum, Progress
 import time
+
+from pyfield.field import Field
+from pyfield.util import chunks, align_and_sum, Progress
+
 
 def work(in_queue, out_queue, script):
     

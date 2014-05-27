@@ -80,7 +80,7 @@ class Field:
         f2.shutdownlib.argtypes = None
         f2.cleanup.restype = None
         f2.cleanup.argtypes = [_c_double_p]
-        f2.f2_field_init.restype = ct.c_int
+        f2.f2_field_init.restype = None
         f2.f2_field_init.argtypes = [ct.c_int]
         f2.f2_field_end.restype = None
         f2.f2_field_end.argtypes = None
