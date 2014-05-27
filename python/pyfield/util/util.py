@@ -1,20 +1,22 @@
 # pyfield / util / util.py
 
 import numpy as np
-from multiprocessing import Value
+import multiprocessing as mp
+import h5py
 import time
 import scipy.fftpack as ft
-from pyfield.signal import ffts, iffts
-import h5py
+
+import pyfield.signal as signal
+#from multiprocessing import Value
 
 class Progress():
     
     def __init__(self, total=None):
-        self.counter = Value('i', 0)
-        self.total = Value('i', 0)
+        self.counter = mp.Value('i', 0)
+        self.total = mp.Value('i', 0)
         self.init_time = None
-        self.elapsed_time = Value('f', 0)
-        self.fraction_done = Value('f', 0)
+        self.elapsed_time = mp.Value('f', 0)
+        self.fraction_done = mp.Value('f', 0)
     
     def increment(self):
         
@@ -72,7 +74,7 @@ def quickfft(x, fs=1, n=None, dbscale=True, one_sided=True):
     if n is None:
         n = 2**nextpow2(x.size)
     
-    amp = np.abs(ffts(x, n, fs=fs))
+    amp = np.abs(signal.ffts(x, n, fs=fs))
     freq = ft.fftshift(ft.fftfreq(n, 1/fs))
     
     if dbscale:

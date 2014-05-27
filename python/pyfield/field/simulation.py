@@ -1,13 +1,15 @@
 # pyfield / field / simulation.py
 
-from multiprocessing import Process, Queue, current_process
+import multiprocessing as mp
 import numpy as np
 import h5py
 import time
 
-from pyfield.field import Field
-from pyfield.util import chunks, align_and_sum, Progress
-
+import pyfield.field as field
+import pyfield.util as util
+#from multiprocessing import Process, Queue, current_process
+#from pyfield.field import Field
+#from pyfield.util import chunks, align_and_sum, Progress
 
 def work(in_queue, out_queue, script):
     
@@ -15,8 +17,8 @@ def work(in_queue, out_queue, script):
        
         def_script = __import__(script, fromlist=['asdf'])
         
-        f2 = Field()
-        f2.field_init(-1, current_process().name + '_log.txt')
+        f2 = field.Field()
+        f2.field_init(-1, mp.current_process().name + '_log.txt')
         #f2.field_init(-1) # must have diary output for worker to join properly 
         # for some strange reason
         (tx_aperture, rx_aperture) = def_script.get_apertures(f2)
@@ -147,7 +149,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
         
         for frame in xrange(start_frame, stop_frame):
             
-            for targ_idx in chunks(range(ntarget), targetsperchunk):
+            for targ_idx in util.chunks(range(ntarget), targetsperchunk):
                 
                 if len(targdata.shape) == 3:
                     in_queue.put(targdata[targ_idx,:,frame])
@@ -168,7 +170,7 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
                     raise item
             
                 scat, t0 = item
-                scat_t, t0_t = align_and_sum(scat_t, t0_t, scat, t0, fs)
+                scat_t, t0_t = util.align_and_sum(scat_t, t0_t, scat, t0, fs)
                 
                 progress.increment()
             
@@ -243,7 +245,7 @@ class Simulation():
     
     def __init__(self):
         self.set_options()
-        self.progress = Progress()
+        self.progress = util.Progress()
     
     def __str__(self):
         string = []
@@ -287,20 +289,20 @@ class Simulation():
         
         self.reset()
         
-        in_queue = Queue();
-        out_queue = Queue();
+        in_queue = mp.Queue();
+        out_queue = mp.Queue();
         
-        progress = Progress()
+        progress = util.Progress()
         # start worker processes
         for w in xrange(nproc):
-            w = Process(target=work, name=('Worker' + str(w)), args=(in_queue, 
+            w = mp.Process(target=work, name=('Worker' + str(w)), args=(in_queue, 
                 out_queue, self.script_path))
             w.start()
             self.workers.append(w)  
             time.sleep(0.25)   
         
         # start delegator
-        delegator = Process(target=delegate, args=(in_queue, out_queue,
+        delegator = mp.Process(target=delegate, args=(in_queue, out_queue,
             self.input_path, self.script_path, self.output_path, self.options, 
             nproc, frames, progress))
         delegator.start()

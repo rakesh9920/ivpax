@@ -1,14 +1,22 @@
 # pyfield / extra.py
 
-from pyfield.signal import wgn
-
-from scipy import signal as sig
-from scipy import fftpack as ft
-from scipy.interpolate import interp1d
 import numpy as np
 import h5py
-from matplotlib import pyplot as pp
+import scipy.signal as sig
+import scipy.fftpack as ft
+import scipy.interpolate as interpolate
+import matplotlib.pyplot as pp
 from mpl_toolkits.mplot3d import Axes3D
+
+import pyfield.signal as signal
+
+#from scipy import signal as sig
+#from scipy import fftpack as ft
+#from scipy.interpolate import interp1d
+#from matplotlib import pyplot as pp
+
+#from pyfield.signal import wgn
+#import mpl_toolkits.mplot3d as mp3d
 
 def ffts(x, *args, **kwargs):
     
@@ -28,7 +36,7 @@ def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
     freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
     #fidx = np.argmin(np.abs(freq[nfft/2:,None] - bsc[None,:,0]), axis=0) + nfft/2
     
-    f_interp = interp1d(bsc[:,0], bsc[:,1], kind='linear')
+    f_interp = interpolate.interp1d(bsc[:,0], bsc[:,1], kind='linear')
     
     freq_resp = 2*np.pi/(rho*c*area*np.sqrt(ns))*np.sqrt(f_interp(np.abs(freq)))
     
@@ -125,10 +133,10 @@ def apply_wgn(inpath, outpath, dbw=1, write=False, loop=False):
     if loop:
         
         for f in xrange(indata.shape[2]):
-            outdata[:,:,f] = indata[:,:,f] + wgn(indata.shape[0:2], dbw)
+            outdata[:,:,f] = indata[:,:,f] + signal.wgn(indata.shape[0:2], dbw)
             
     else:
-        outdata[:] = indata[:] + wgn(indata.shape, dbw)
+        outdata[:] = indata[:] + signal.wgn(indata.shape, dbw)
         
 # Reference for xdc_get:
 # number of elements = size(Info, 2);

@@ -4,8 +4,8 @@ from scipy import signal as sig
 
 def get_prms():
     
-    fc = 5e6
-    fbw = 1
+    fc = 12e6
+    fbw = 0.80
     fs = 100e6
 
     #impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));
@@ -27,7 +27,7 @@ def get_prms():
     prms['use_attenuation'] = 1
     prms['attenuation'] = 0
     prms['frequency_attenuation'] = 0
-    prms['attenuation_center_frequency'] = 5e6
+    prms['attenuation_center_frequency'] = fc
     prms['tx_impulse_response'] = impulse_response
     prms['rx_impulse_response'] = impulse_response
     prms['tx_excitation'] = excitation
