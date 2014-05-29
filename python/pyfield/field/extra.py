@@ -34,7 +34,6 @@ def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
     
     nfft = 2**13
     freq = ft.fftshift(ft.fftfreq(nfft, 1/fs))
-    #fidx = np.argmin(np.abs(freq[nfft/2:,None] - bsc[None,:,0]), axis=0) + nfft/2
     
     f_interp = interpolate.interp1d(bsc[:,0], bsc[:,1], kind='linear')
     
@@ -46,8 +45,6 @@ def bsc_to_filt(bsc, c=None, rho=None, area=None, ns=None, fs=None):
 
 def bsc_to_fir(bsc, c=None, rho=None, area=None, ns=None, fs=None, deriv=True,
     ntap=100):
-    
-    #area = 1.9838392692290149e-05
     
     bsc = bsc.reshape((-1, 2))
     
@@ -89,6 +86,13 @@ def apply_bsc(inpath, outpath, bsc=None, method='fir', write=False, loop=False):
     attrs = ['sound_speed', 'density', 'area', 'target_density', 
         'sample_frequency']
     params = {k : indata.attrs.get(a) for k,a in zip(keys, attrs)}
+    
+    # insert start (dc) and end (nyquist) points if necessary
+    if bsc[0,0] != 0:
+        bsc = np.insert(bsc, 0, 0, axis=0)
+    
+    if bsc[-1,0] != params['fs']/2:
+        bsc = np.append(bsc, [[params['fs']/2, 0]], axis=0)
     
     if method.lower() == 'ifft':
         filt = bsc_to_filt(bsc, **params)
