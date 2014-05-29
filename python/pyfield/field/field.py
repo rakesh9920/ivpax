@@ -111,6 +111,9 @@ class Field:
         f2.f2_xdc_linear_array.restype = ct.c_int
         f2.f2_xdc_linear_array.argtypes = [ct.c_int, ct.c_double, ct.c_double,
             ct.c_double, ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo)]
+        f2.f2_xdc_focused_array.restype = ct.c_int
+        f2.f2_xdc_focused_array.argtypes = [ct.c_int, ct.c_double, ct.c_double,
+            ct.c_double, ct.c_double, ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo)]
         f2.f2_calc_scat.restype = _ArrayInfo
         f2.f2_calc_scat.argtypes = [ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo),
             ct.POINTER(_ArrayInfo)]
@@ -215,6 +218,14 @@ class Field:
     def xdc_concave(self, radius, focus, elsize):
         
         return self.libf2.f2_xdc_concave(radius, focus, elsize)
+    
+    def xdc_focused_array(self, nele, width, height, kerf, rfocus, nsubx,
+        nsuby, focus):
+        
+        focus = _checkArray(focus, orient="row")
+        
+        return self.libf2.f2_xdc_focused_array(nele, width, height, kerf, 
+            rfocus, nsubx, nsuby, ct.byref(_getArrayInfo(focus)))
     
     def xdc_focus_times(self, aperture, times, delays):
         

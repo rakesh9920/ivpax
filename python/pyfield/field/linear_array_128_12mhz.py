@@ -1,11 +1,10 @@
 import numpy as np
-import scipy as sp
 from scipy import signal as sig
 
 def get_prms():
     
-    fc = 5e6
-    fbw = 1
+    fc = 12e6
+    fbw = 0.80
     fs = 100e6
 
     #impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));

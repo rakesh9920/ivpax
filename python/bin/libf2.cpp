@@ -359,6 +359,28 @@ int f2_xdc_linear_array(int nele_, double width_, double height_, double kerf_,
     return (int) res.Get(1,1,1);
 }
 
+int f2_xdc_focused_array(int nele_, double width_, double height_, double kerf_, 
+        double rfocus_, int nsubx_, int nsuby_, ArrayInfo * focus_)
+{
+    mwArray nele (nele_);
+    mwArray width (width_);
+    mwArray height (height_);
+    mwArray kerf (kerf_);
+    mwArray rfocus (rfocus_);
+    mwArray nsubx (nsubx_);
+    mwArray nsuby (nsuby_);
+    int nrows = focus_->nrows;
+    int ncols = focus_->ncols;
+    mwArray focus ((mwSize) nrows, (mwSize) ncols, mxDOUBLE_CLASS, mxREAL);
+    focus.SetData(focus_->ptr, nrows*ncols);
+    mwArray res;
+    
+    xdc_focused_array(1, res, nele, width, height, kerf, rfocus, nsubx, nsuby, 
+            focus);
+    
+    return (int) res.Get(1,1,1);  
+}
+
 void cleanup(double * array) {
     delete [] array;
 }

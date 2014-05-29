@@ -25,8 +25,10 @@ if __name__ == '__main__':
     f2.xdc_excitation(Th1, excitation)
     f2.xdc_focus_times(Th1, np.zeros((1,1)), np.zeros((1,1)))
     
-    Th2 = f2.xdc_linear_array(128, 300e-6, 300e-6, 150e-6, 1, 1, 
-        np.array([0, 0, 300]))
+    #Th2 = f2.xdc_linear_array(128, 300e-6, 300e-6, 150e-6, 1, 1, 
+        #np.array([0, 0, 300]))
+    Th2 = f2.xdc_focused_array(128, 300e-6, 300e-6, 150e-6, 0.02, 1, 1, 
+        np.array([0, 0, 0.02]))
     f2.xdc_impulse(Th2, impulse_response)
     f2.xdc_excitation(Th2, excitation)
     f2.xdc_focus_times(Th2, np.zeros((1,1)), np.zeros((1,128)))

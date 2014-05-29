@@ -17,3 +17,4 @@ xdc_quantization
 xdc_triangles
 xdc_convex_array
 xdc_convex_focused_array
+xdc_focused_array

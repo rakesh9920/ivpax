@@ -205,8 +205,8 @@ def xdc_draw(file_path, fig=None, wireframe=False):
                 vert_y[:,ele].reshape((2,2)), vert_z[:,ele].reshape((2,2)),
                 color=colors[int(phys_no[ele] % len(colors))])
      
-    #ax.auto_scale_xyz([-max_dim, max_dim], [-max_dim, max_dim], [0, max_dim*2])
-    #fig.show()
+    ax.auto_scale_xyz([-max_dim, max_dim], [-max_dim, max_dim], [0, max_dim*2])
+    fig.show()
 
 def xdc_load_info(file_path):
     

@@ -1,11 +1,12 @@
 import numpy as np
-import scipy as sp
 from scipy import signal as sig
+
+rfocus = 0.015
 
 def get_prms():
     
-    fc = 5e6
-    fbw = 1
+    fc = 12e6
+    fbw = 0.80
     fs = 100e6
 
     #impulse_response = sp.sin(2*sp.pi*fc*np.arange(0,1/fc + 1/fs,1/fs));
@@ -38,6 +39,7 @@ def get_prms():
     centers = (np.arange(0,128) - 63.5)*300e-6
     prms['tx_positions'] = np.zeros((1,3))
     prms['rx_positions'] = np.hstack((centers[:,None], np.zeros((128,2))))
+    prms['elevation_focus'] = rfocus
     
     return prms 
 
@@ -51,7 +53,7 @@ def get_apertures(f2):
     f2.set_field('att_f0', prms['attenuation_center_frequency'])
     f2.set_field('use_att', prms['use_attenuation'])
     
-    Th = f2.xdc_linear_array(128, 290e-6, 0.003, 10e-6, 1, 1, 
+    Th = f2.xdc_focused_array(128, 290e-6, 0.01, 10e-6, rfocus, 1, 30, 
         np.array([0, 0, 300])) 
     f2.xdc_impulse(Th, prms['tx_impulse_response'])
     f2.xdc_excitation(Th, prms['tx_excitation'])

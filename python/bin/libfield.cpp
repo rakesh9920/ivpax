@@ -1,12 +1,12 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Mon May 26 11:55:22 2014
+// Date: Thu May 29 14:20:19 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
 // "-B" "functionlist.txt" "calc_scat" "calc_scat_multi" "field_end"
 // "field_init" "set_field" "xdc_2d_array" "xdc_concave" "xdc_excitation"
 // "xdc_focus_times" "xdc_free" "xdc_get" "xdc_impulse" "xdc_linear_array"
 // "xdc_piston" "xdc_rectangles" "xdc_quantization" "xdc_triangles"
-// "xdc_convex_array" "xdc_convex_focused_array" 
+// "xdc_convex_array" "xdc_convex_focused_array" "xdc_focused_array" 
 //
 
 #include <stdio.h>
@@ -16,6 +16,27 @@
 static HMCRINSTANCE _mcr_inst = NULL;
 
 
+#if defined( _MSC_VER) || defined(__BORLANDC__) || defined(__WATCOMC__) || defined(__LCC__)
+#ifdef __LCC__
+#undef EXTERN_C
+#endif
+#include <windows.h>
+
+static char path_to_dll[_MAX_PATH];
+
+BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, void *pv)
+{
+    if (dwReason == DLL_PROCESS_ATTACH)
+    {
+        if (GetModuleFileName(hInstance, path_to_dll, _MAX_PATH) == 0)
+            return FALSE;
+    }
+    else if (dwReason == DLL_PROCESS_DETACH)
+    {
+    }
+    return TRUE;
+}
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -65,9 +86,11 @@ bool MW_CALL_CONV libfieldInitializeWithHandlers(
     return true;
   if (!mclmcrInitialize())
     return false;
+  if (!GetModuleFileName(GetModuleHandle("libfield"), path_to_dll, _MAX_PATH))
+    return false;
     {
         mclCtfStream ctfStream = 
-            mclGetEmbeddedCtfStream((void *)(libfieldInitializeWithHandlers));
+            mclGetEmbeddedCtfStream(path_to_dll);
         if (ctfStream) {
             bResult = mclInitializeComponentInstanceEmbedded(   &_mcr_inst,
                                                                 error_handler, 
@@ -229,6 +252,13 @@ bool MW_CALL_CONV mlxXdc_convex_focused_array(int nlhs, mxArray *plhs[], int nrh
   return mclFeval(_mcr_inst, "xdc_convex_focused_array", nlhs, plhs, nrhs, prhs);
 }
 
+LIB_libfield_C_API 
+bool MW_CALL_CONV mlxXdc_focused_array(int nlhs, mxArray *plhs[], int nrhs, mxArray 
+                                       *prhs[])
+{
+  return mclFeval(_mcr_inst, "xdc_focused_array", nlhs, plhs, nrhs, prhs);
+}
+
 LIB_libfield_CPP_API 
 void MW_CALL_CONV calc_scat(int nargout, mwArray& scat, mwArray& start_time, const 
                             mwArray& Th1, const mwArray& Th2, const mwArray& points, 
@@ -371,5 +401,15 @@ void MW_CALL_CONV xdc_convex_focused_array(int nargout, mwArray& Th, const mwArr
                                            const mwArray& focus)
 {
   mclcppMlfFeval(_mcr_inst, "xdc_convex_focused_array", nargout, 1, 9, &Th, &no_elements, &width, &height, &kerf, &Rconvex, &Rfocus, &no_sub_x, &no_sub_y, &focus);
+}
+
+LIB_libfield_CPP_API 
+void MW_CALL_CONV xdc_focused_array(int nargout, mwArray& Th, const mwArray& no_elements, 
+                                    const mwArray& width, const mwArray& height, const 
+                                    mwArray& kerf, const mwArray& Rfocus, const mwArray& 
+                                    no_sub_x, const mwArray& no_sub_y, const mwArray& 
+                                    focus)
+{
+  mclcppMlfFeval(_mcr_inst, "xdc_focused_array", nargout, 1, 8, &Th, &no_elements, &width, &height, &kerf, &Rfocus, &no_sub_x, &no_sub_y, &focus);
 }
 

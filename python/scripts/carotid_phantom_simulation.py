@@ -5,10 +5,11 @@ from pyfield.field import Simulation
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
+# names = {'dermis', 'fat', 'artery', 'plaque', 'blood'}
 file_path = './data/carotid_phantom_data.hdf5'
 input_key = 'field/targdata/dermis'
 output_key = 'field/rfdata/raw/dermis'
-script_path = 'pyfield.field.linear_array_128_5mhz'
+script_path = 'pyfield.field.linear_focused_array_128_12mhz'
 nproc = 4
 frames = None
 opt = { 'maxtargetsperchunk': 20000,
