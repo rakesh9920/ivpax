@@ -1,6 +1,6 @@
 # scripts / carotid_phantom_beamform.py
 
-from pyfield.beamform import Beamformer
+from pyfield.beamform import Beamformer, envelope, imdisp
 
 import numpy as np
 import h5py
@@ -15,7 +15,7 @@ nproc = 1
 frames = None
 chmask = False
 
-opt = { 'nwin': 201,
+opt = { 'nwin': 101,
         'resample': 1,
         'chmask': chmask,
         'planetx': True,
@@ -27,8 +27,8 @@ opt = { 'nwin': 201,
 def write_view(view_path):
     
     #x, y, z = np.mgrid[-0.01:0.01:40j,, 0:0.04:80j]
-    x, y, z = np.meshgrid(np.linspace(-0.01, 0.01, 80, endpoint=True),
-        0, np.linspace(-0.01, 0.01, 80, endpoint=True))
+    x, y, z = np.meshgrid(np.linspace(-0.02, 0.02, 800, endpoint=True),
+        0, np.linspace(0, 0.03, 600, endpoint=True))
     ngrid = x.size
 
     grid = np.concatenate((x.reshape((ngrid, -1)), y.reshape((ngrid, -1)),
@@ -57,7 +57,14 @@ if __name__ == '__main__':
     print bf
     stdout.flush()
     #bf.join()
-
+#
+#    with h5py.File(file_path, 'r') as root:
+#        bfdata = np.squeeze(root[output_key][:])
+#    
+#    envdata = envelope(bfdata, axis=1)
+#    img = envdata[:,100].reshape((800, 600))
+#    
+#    imdisp(img.T, dyn=30)
     
     
     
