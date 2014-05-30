@@ -725,7 +725,7 @@ class Simulation():
         self.delegator = []
         
 
-def work_multi(in_queue, out_queue, script):
+def work_synth(in_queue, out_queue, script):
     
     try:
        
@@ -742,8 +742,8 @@ def work_multi(in_queue, out_queue, script):
             points = data[:,0:3]
             amp = data[:,3]
             
-            (scat, t0) = f2.calc_scat_multi(tx_aperture, rx_aperture, 
-                points, amp)
+            scat, t0 = f2.calc_scat_all(tx_aperture, rx_aperture, 
+                points, amp, 1)
                 
             out_queue.put((scat, t0))
         
@@ -757,57 +757,8 @@ def work_multi(in_queue, out_queue, script):
         out_queue.put(e)
         #out_queue.put("failed on %s with: %s" % (current_process().name,
         #    e.message))
-
-def align_write_multi(dataset, array1, t1, frame):
-    
-    fs = dataset.attrs.get('sample_frequency')
-    t0 = dataset.attrs.get('start_time')
-    dims0 = dataset.shape
-    
-    # determine frontpad for dim 0 (time sample)
-    s0 = round(t0*fs)
-    s1 = round(t1*fs)
-    
-    if s0 > s1:
-        fpad1, fpad0 = 0, s0 - s1             
-    elif s0 < s1:
-        fpad1, fpad0 = s1 - s0, 0
-    else:
-        fpad1, fpad0 = 0, 0
-    
-    # determine backpad for dim 0 (time sample)
-    nsample0 = dims0[0] + fpad0    
-    nsample1 = array1.shape[0] + fpad1
-
-    if nsample1 > nsample0:
-        bpad1, bpad0 = 0, nsample1 - nsample0
-    elif nsample1 < nsample0:
-        bpad1, bpad0 = nsample0 - nsample1, 0
-    else:
-        bpad1, bpad0 = 0, 0
-    
-    # determine depth backpad for dim 2 (frame no)
-    dpad0 = frame + 1 - dims0[2]
-    if dpad0 < 0: 
-        dpad0 = 0
-    
-    # resize dataset if necessary
-    dataset.resize(dataset.shape[0] + fpad0 + bpad0, axis=0)
-    dataset.resize(dataset.shape[2] + dpad0, axis=2)
-    
-    pad_width0 = [(fpad0, bpad0), (0, 0), (0, dpad0)]
-    pad_width1 = [(fpad1, bpad1), (0, 0)]
-
-    #array0 = dataset[:dims0[0],:,:dims0[2]].copy()
-    dataset[:] = np.pad(dataset[:dims0[0],:,:dims0[2]], pad_width0, 
-        mode='constant')
-    #dataset[:dims0[0],:,:dims0[2]] = np.pad(array0, pad_width0, 
-    #    mode='constant')
-    
-    dataset[:,:,frame] = np.pad(array1, pad_width1, mode='constant')
-    dataset.attrs.create('start_time', min(t0, t1))
-
-def delegate_multi(in_queue, out_queue, input_path, script_path, output_path, 
+        
+def delegate_synth(in_queue, out_queue, input_path, script_path, output_path, 
     options, nproc, frames, progress):
     
     input_file = input_path[0]
@@ -822,7 +773,7 @@ def delegate_multi(in_queue, out_queue, input_path, script_path, output_path,
     
     # get parameters from field ii script
     field_prms = __import__(script_path, fromlist=['asdf']).get_prms()
-    nchannel = field_prms['rx_positions'].shape[0]
+    nchannel = (field_prms['rx_positions'].shape[0])**2
     fs = field_prms['sample_frequency']
     
     # open output file
@@ -947,8 +898,7 @@ def delegate_multi(in_queue, out_queue, input_path, script_path, output_path,
         if output_file != input_file:
             output_root.close()
 
-             
-class SimulationMulti():
+class SynthSimulation():
     
     workers = []
     delegator = []
@@ -1009,14 +959,14 @@ class SimulationMulti():
         progress = util.Progress()
         # start worker processes
         for w in xrange(nproc):
-            w = Process(target=work, name=('Worker' + str(w)), args=(in_queue, 
+            w = Process(target=work_synth, name=('Worker' + str(w)), args=(in_queue, 
                 out_queue, self.script_path))
             w.start()
             self.workers.append(w)  
             time.sleep(0.25)   
         
         # start delegator
-        delegator = Process(target=delegate, args=(in_queue, out_queue,
+        delegator = Process(target=delegate_synth, args=(in_queue, out_queue,
             self.input_path, self.script_path, self.output_path, self.options, 
             nproc, frames, progress))
         delegator.start()

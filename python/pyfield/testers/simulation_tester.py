@@ -1,24 +1,30 @@
 # pyfield / testers / simulation_tester.py
 
-from pyfield.field import Simulation, sct_cube
+from pyfield.field import Simulation, SynthSimulation, sct_cube
 import h5py
 import numpy as np
-import scipy as sp
     
 if __name__ == '__main__': 
     
-    file_path = './data/testdata.hdf5'
-    input_key = 'field/targdata/0'
-    output_key = 'field/rfdata/0'
-    script_path = 'pyfield.field.focused_piston_f4'
+    file_path = './data/testdata.h5'
+    input_key = 'field/targdata/tester'
+    output_key = 'field/rfdata/tester'
+    script_path = 'pyfield.field.linear_focused_array_128_12mhz'
     
-    #root = h5py.File(file_path, 'a')
+    with h5py.File(file_path, 'a') as root:
     
-    #if 'field/targdata/0' in root:
-    #    del root['field/targdata/0']
+        if input_key in root:
+            del root[input_key]
+            
+        targdata = sct_cube((file_path, input_key),
+            (0.01, 0.01, 0.01), (0,0,0.10), (0,0,0), 1, 1000**3, 1)
+            
+        amp = np.ones((targdata.shape[0], 1))
+            
+        root.create_dataset(input_key, data=np.c_[targdata, amp], 
+            compression='gzip')
         
-    sct_cube((file_path, input_key),
-        (0.01, 0.01, 0.01), (0,0,0.10), (0,0,0), 1, 1000**3, 1)
+        root[input_key].attrs.create('target_density', 1000**3)
         
     #targ = root.create_dataset('field/targdata/0', shape=(1, 4, 1), 
         #dtype='double', compression='gzip')
@@ -36,7 +42,7 @@ if __name__ == '__main__':
         
     #root.close()
     
-    sim = Simulation()
+    sim = SynthSimulation()
     
     sim.script_path = script_path
     sim.input_path = (file_path, input_key)
@@ -46,13 +52,8 @@ if __name__ == '__main__':
             'overwrite': True }
     sim.set_options(**opt)
     
-    sim.start(nproc=4)
+    sim.start(nproc=1)
     print sim
     
-    #sim.join()
-    
-    #root = h5py.File(sim.output_path[0], 'a')
-    #rfdata = root[sim.output_path[1]][:]
-    #root.close()
 
 
