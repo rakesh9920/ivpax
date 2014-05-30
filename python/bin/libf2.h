@@ -44,7 +44,7 @@ struct ArrayInfo f2_calc_scat_multi(int, int, ArrayInfo *, ArrayInfo *);
 struct ArrayInfo f2_calc_h(double, ArrayInfo *);
 struct ArrayInfo f2_calc_hhp(double, double, ArrayInfo *);
 struct ArrayInfo f2_calc_hp(double, ArrayInfo *);
-
+struct ArrayInfo f2_calc_scat_all(int, int, ArrayInfo *, ArrayInfo *, int);
 }
 
 mwArray convertToMwArray(ArrayInfo *);

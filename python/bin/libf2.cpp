@@ -326,6 +326,37 @@ struct ArrayInfo f2_calc_scat_multi(int Th1_, int Th2_, ArrayInfo * points_,
     return scat;
 }
 
+struct ArrayInfo f2_calc_scat_all(int Th1_, int Th2_, ArrayInfo * points_, 
+        ArrayInfo * amplitudes_, int dec_)
+{
+    // initialize mwArrays
+    mwArray Th1 (Th1_);
+    mwArray Th2 (Th2_);
+    mwArray points = convertToMwArray(points_);
+    mwArray amplitudes = convertToMwArray(amplitudes_);
+    mwArray dec (dec_);
+    mwArray res1, res2;
+    
+    // call function
+    calc_hhp(2, res1, res2, Th1, Th2, points, amplitudes, dec);
+    
+    // initialize c data
+    ArrayInfo scat;
+    
+    //arrShape scatShape;
+    mwArray dims = res1.GetDimensions();
+    scat.nrows = (int) dims.Get(2,1,1);
+    scat.ncols = (int) dims.Get(2,1,2);
+    scat.ptr = new double [scat.nrows*scat.ncols];
+    
+    // get results from mwArrays
+    res1.GetData(scat.ptr, scat.nrows*scat.ncols);
+    scat.t0 = (double) res2.Get(1,1,1);
+
+    return scat;     
+    
+}
+
 int f2_xdc_2d_array(int nelex_, int neley_, double width_, double height_, 
         double kerfx_, double kerfy_, ArrayInfo * enabled_,
         int nsubx_, int nsuby_, ArrayInfo * focus_)
