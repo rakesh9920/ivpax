@@ -49,6 +49,7 @@ if __name__ == '__main__':
     scat4, t04 = f2.calc_h(Th2, points)
     scat5, t05 = f2.calc_hp(Th2, points)
     scat6, t06 = f2.calc_hhp(Th2, Th2, points)
+    scat7, t07 = f2.calc_scat_all(Th2, Th2, points, amplitudes, 1)
     
     f2.xdc_free(Th1)
     f2.xdc_free(Th2)

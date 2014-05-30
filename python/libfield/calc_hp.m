@@ -23,5 +23,5 @@ function [hp, start_time] = calc_hp (Th, points)
 %  Call the C-part of the program to show aperture
 
   [hp, start_time] = Mat_field (4002,Th,points);
-
+end
 

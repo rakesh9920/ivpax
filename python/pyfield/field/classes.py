@@ -121,6 +121,15 @@ class Field:
         f2.f2_calc_scat_multi.restype = _ArrayInfo
         f2.f2_calc_scat_multi.argtypes = [ct.c_int, ct.c_int, 
             ct.POINTER(_ArrayInfo), ct.POINTER(_ArrayInfo)]
+        f2.f2_calc_scat_all.restype = _ArrayInfo
+        f2.f2_calc_scat_all.argtypes = [ct.c_int, ct.c_int, 
+            ct.POINTER(_ArrayInfo), ct.POINTER(_ArrayInfo), ct.c_int]
+        f2.f2_calc_h.restype = _ArrayInfo
+        f2.f2_calc_h.argtypes = [ct.c_int, ct.POINTER(_ArrayInfo)]
+        f2.f2_calc_hhp.restype = _ArrayInfo
+        f2.f2_calc_hhp.argtypes = [ct.c_int, ct.c_int, ct.POINTER(_ArrayInfo)]
+        f2.f2_calc_hp.restype = _ArrayInfo
+        f2.f2_calc_hp.argtypes = [ct.c_int, ct.POINTER(_ArrayInfo)]
         
         # initialize libf2
         if diarypath is None:

@@ -1,13 +1,13 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Thu May 29 17:09:28 2014
+// Date: Fri May 30 14:27:15 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
-// "-B" "functionlist.txt" "calc_scat" "calc_scat_multi" "calc_h" "calc_hhp"
-// "calc_hp" "field_end" "field_init" "set_field" "xdc_2d_array" "xdc_concave"
-// "xdc_excitation" "xdc_focus_times" "xdc_free" "xdc_get" "xdc_impulse"
-// "xdc_linear_array" "xdc_piston" "xdc_rectangles" "xdc_quantization"
-// "xdc_triangles" "xdc_convex_array" "xdc_convex_focused_array"
-// "xdc_focused_array" 
+// "-B" "functionlist.txt" "calc_scat" "calc_scat_multi" "calc_scat_all"
+// "calc_h" "calc_hhp" "calc_hp" "field_end" "field_init" "set_field"
+// "xdc_2d_array" "xdc_concave" "xdc_excitation" "xdc_focus_times" "xdc_free"
+// "xdc_get" "xdc_impulse" "xdc_linear_array" "xdc_piston" "xdc_rectangles"
+// "xdc_quantization" "xdc_triangles" "xdc_convex_array"
+// "xdc_convex_focused_array" "xdc_focused_array" 
 //
 
 #include <stdio.h>
@@ -145,6 +145,12 @@ LIB_libfield_C_API
 bool MW_CALL_CONV mlxCalc_scat_multi(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[])
 {
   return mclFeval(_mcr_inst, "calc_scat_multi", nlhs, plhs, nrhs, prhs);
+}
+
+LIB_libfield_C_API 
+bool MW_CALL_CONV mlxCalc_scat_all(int nlhs, mxArray *plhs[], int nrhs, mxArray *prhs[])
+{
+  return mclFeval(_mcr_inst, "calc_scat_all", nlhs, plhs, nrhs, prhs);
 }
 
 LIB_libfield_C_API 
@@ -292,6 +298,14 @@ void MW_CALL_CONV calc_scat_multi(int nargout, mwArray& scat, mwArray& start_tim
                                   points, const mwArray& amplitudes)
 {
   mclcppMlfFeval(_mcr_inst, "calc_scat_multi", nargout, 2, 4, &scat, &start_time, &Th1, &Th2, &points, &amplitudes);
+}
+
+LIB_libfield_CPP_API 
+void MW_CALL_CONV calc_scat_all(int nargout, mwArray& scat, mwArray& start_time, const 
+                                mwArray& Th1, const mwArray& Th2, const mwArray& points, 
+                                const mwArray& amplitudes, const mwArray& dec_factor)
+{
+  mclcppMlfFeval(_mcr_inst, "calc_scat_all", nargout, 2, 5, &scat, &start_time, &Th1, &Th2, &points, &amplitudes, &dec_factor);
 }
 
 LIB_libfield_CPP_API 

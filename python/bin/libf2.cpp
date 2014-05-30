@@ -338,7 +338,7 @@ struct ArrayInfo f2_calc_scat_all(int Th1_, int Th2_, ArrayInfo * points_,
     mwArray res1, res2;
     
     // call function
-    calc_hhp(2, res1, res2, Th1, Th2, points, amplitudes, dec);
+    calc_scat_all(2, res1, res2, Th1, Th2, points, amplitudes, dec);
     
     // initialize c data
     ArrayInfo scat;
@@ -353,8 +353,7 @@ struct ArrayInfo f2_calc_scat_all(int Th1_, int Th2_, ArrayInfo * points_,
     res1.GetData(scat.ptr, scat.nrows*scat.ncols);
     scat.t0 = (double) res2.Get(1,1,1);
 
-    return scat;     
-    
+    return scat;       
 }
 
 int f2_xdc_2d_array(int nelex_, int neley_, double width_, double height_, 
