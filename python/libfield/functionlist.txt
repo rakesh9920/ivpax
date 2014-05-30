@@ -1,5 +1,8 @@
 calc_scat
 calc_scat_multi
+calc_h
+calc_hhp
+calc_hp
 field_end
 field_init
 set_field

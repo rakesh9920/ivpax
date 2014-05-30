@@ -41,6 +41,9 @@ int f2_xdc_concave(double, double, double);
 double f2_xdc_focused_array(double, double, double, double, double, double, double, ArrayInfo *);
 struct ArrayInfo f2_calc_scat(int, int, ArrayInfo *, ArrayInfo *);
 struct ArrayInfo f2_calc_scat_multi(int, int, ArrayInfo *, ArrayInfo *);
+struct ArrayInfo f2_calc_h(double, ArrayInfo *);
+struct ArrayInfo f2_calc_hhp(double, double, ArrayInfo *);
+struct ArrayInfo f2_calc_hp(double, ArrayInfo *);
 
 }
 

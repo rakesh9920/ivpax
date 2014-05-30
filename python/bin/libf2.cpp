@@ -206,6 +206,83 @@ struct ArrayInfo f2_calc_scat(int Th1_, int Th2_, ArrayInfo * points_,
     
     return scat;
 }
+struct ArrayInfo f2_calc_h(double Th_, ArrayInfo * points_)
+{
+    // initialize mwArrays
+    mwArray Th (Th_);
+    mwArray points = convertToMwArray(points_);
+    mwArray res1, res2;
+    
+    // call function
+    calc_h(2, res1, res2, Th, points);
+    
+    // initialize c data
+    ArrayInfo scat;
+    
+    //arrShape scatShape;
+    mwArray dims = res1.GetDimensions();
+    scat.nrows = (int) dims.Get(2,1,1);
+    scat.ncols = (int) dims.Get(2,1,2);
+    scat.ptr = new double [scat.nrows*scat.ncols];
+    
+    // get results from mwArrays
+    res1.GetData(scat.ptr, scat.nrows*scat.ncols);
+    scat.t0 = (double) res2.Get(1,1,1);
+
+    return scat;    
+}
+
+struct ArrayInfo f2_calc_hhp(double Th1_, double Th2_ , ArrayInfo * points_)
+{
+    // initialize mwArrays
+    mwArray Th1 (Th1_);
+    mwArray Th2 (Th2_);
+    mwArray points = convertToMwArray(points_);
+    mwArray res1, res2;
+    
+    // call function
+    calc_hhp(2, res1, res2, Th1, Th2, points);
+    
+    // initialize c data
+    ArrayInfo scat;
+    
+    //arrShape scatShape;
+    mwArray dims = res1.GetDimensions();
+    scat.nrows = (int) dims.Get(2,1,1);
+    scat.ncols = (int) dims.Get(2,1,2);
+    scat.ptr = new double [scat.nrows*scat.ncols];
+    
+    // get results from mwArrays
+    res1.GetData(scat.ptr, scat.nrows*scat.ncols);
+    scat.t0 = (double) res2.Get(1,1,1);
+
+    return scat;      
+}
+struct ArrayInfo f2_calc_hp(double Th_, ArrayInfo * points_)
+{    
+    // initialize mwArrays
+    mwArray Th (Th_);
+    mwArray points = convertToMwArray(points_);
+    mwArray res1, res2;
+    
+    // call function
+    calc_hp(2, res1, res2, Th, points);
+    
+    // initialize c data
+    ArrayInfo scat;
+    
+    //arrShape scatShape;
+    mwArray dims = res1.GetDimensions();
+    scat.nrows = (int) dims.Get(2,1,1);
+    scat.ncols = (int) dims.Get(2,1,2);
+    scat.ptr = new double [scat.nrows*scat.ncols];
+    
+    // get results from mwArrays
+    res1.GetData(scat.ptr, scat.nrows*scat.ncols);
+    scat.t0 = (double) res2.Get(1,1,1);
+
+    return scat;    
+}
 
 struct ArrayInfo f2_calc_scat_multi(int Th1_, int Th2_, ArrayInfo * points_, 
         ArrayInfo * amplitudes_)

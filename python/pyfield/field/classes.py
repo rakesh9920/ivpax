@@ -236,6 +236,51 @@ class Field:
         
         self.libf2.f2_xdc_focus_times(aperture, ct.byref(_getArrayInfo(times)),
             ct.byref(_getArrayInfo(delays)))
+            
+    def calc_h(self, aperture, points):
+        
+        # check and convert input arrays for compatibility with libf2
+        points = _checkArray(points, orient="row")
+            
+        # get array info and call libf2
+        scatinfo = self.libf2.f2_calc_h(aperture, 
+            ct.byref(_getArrayInfo(points)))
+    
+        # copy result to python memory and delete from dll memory
+        scat, t0 = _copyArray(scatinfo)
+        self._deleteArray(scatinfo)
+        
+        return scat, t0
+        
+    def calc_hhp(self, aperture1, aperture2, points):
+
+        # check and convert input arrays for compatibility with libf2
+        points = _checkArray(points, orient="row")
+            
+        # get array info and call libf2
+        scatinfo = self.libf2.f2_calc_hhp(aperture1, aperture2, 
+            ct.byref(_getArrayInfo(points)))
+    
+        # copy result to python memory and delete from dll memory
+        scat, t0 = _copyArray(scatinfo)
+        self._deleteArray(scatinfo)
+        
+        return scat, t0
+        
+    def calc_hp(self, aperture, points):
+
+        # check and convert input arrays for compatibility with libf2
+        points = _checkArray(points, orient="row")
+            
+        # get array info and call libf2
+        scatinfo = self.libf2.f2_calc_hp(aperture, 
+            ct.byref(_getArrayInfo(points)))
+    
+        # copy result to python memory and delete from dll memory
+        scat, t0 = _copyArray(scatinfo)
+        self._deleteArray(scatinfo)
+        
+        return scat, t0
         
     def calc_scat(self, txaperture, rxaperture, points, amplitudes):
         

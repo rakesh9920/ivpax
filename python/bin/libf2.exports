@@ -12,6 +12,9 @@ f2_xdc_rectangles
 f2_xdc_get
 f2_xdc_2d_array
 f2_calc_scat_multi
+f2_calc_h
+f2_calc_hhp
+f2_calc_hp
 f2_set_field
 f2_xdc_focus_times
 f2_xdc_free

@@ -4,6 +4,9 @@ libfieldTerminate
 libfieldPrintStackTrace
 mlxCalc_scat
 mlxCalc_scat_multi
+mlxCalc_h
+mlxCalc_hhp
+mlxCalc_hp
 mlxField_end
 mlxField_init
 mlxSet_field

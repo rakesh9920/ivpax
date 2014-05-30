@@ -50,3 +50,5 @@ if __name__ == '__main__':
                 axis=1)
             
             root.create_dataset(tkey, data=tdata, compression='gzip')
+            
+            root[tkey].attrs.create('target_density', target_density)

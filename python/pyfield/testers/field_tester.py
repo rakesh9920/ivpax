@@ -43,9 +43,12 @@ if __name__ == '__main__':
     
     points = np.array([[0, 0, 0.05],[0, 0, 0.06]])
     amplitudes = np.array([[1],[2]])
-    (scat1,t01) = f2.calc_scat(Th1, Th1, points, amplitudes)
-    (scat2, t02) = f2.calc_scat_multi(Th2, Th2, points, amplitudes)
-    (scat3, t03) = f2.calc_scat_multi(Th3, Th3, points, amplitudes)
+    scat1,t01 = f2.calc_scat(Th1, Th1, points, amplitudes)
+    scat2, t02 = f2.calc_scat_multi(Th2, Th2, points, amplitudes)
+    scat3, t03 = f2.calc_scat_multi(Th3, Th3, points, amplitudes)
+    scat4, t04 = f2.calc_h(Th2, points)
+    scat5, t05 = f2.calc_hp(Th2, points)
+    scat6, t06 = f2.calc_hhp(Th2, Th2, points)
     
     f2.xdc_free(Th1)
     f2.xdc_free(Th2)
