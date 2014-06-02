@@ -8,7 +8,7 @@ import h5py
 
 file_path = './data/carotid_phantom_data.hdf5'
 key = 'field/targdata/'
-img = np.mean(imread('./data/carotid_artery_map.bmp'), axis=2)
+img = np.mean(imread('./data/carotid_phantom_map.bmp'), axis=2)
 npixelz, npixelx = img.shape
 levels = np.unique(img)
 #tissue = ('dermis', 'fat', 'artery', 'plaque', 'blood')

@@ -1,33 +1,44 @@
 # scripts / carotid_phantom_simulation.py
 
-from pyfield.field import Simulation
+from pyfield.field import Simulation, SynthSimulation
 
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 # names = {'dermis', 'fat', 'artery', 'plaque', 'blood'}
-file_path = './data/carotid_phantom_data.hdf5'
-input_key = 'field/targdata/dermis'
-output_key = 'field/rfdata/raw/dermis'
-script_path = 'pyfield.field.linear_focused_array_128_12mhz'
-nproc = 4
+file_path = './data/carotid_phantom_data.h5'
+input_group = 'field/targdata/'
+output_group = 'field/rfdata/raw/'
+script_path = 'pyfield.field.linear_focused_array_256_12mhz'
+#tissue_names = ['dermis', 'fat', 'artery', 'plaque', 'blood']
+tissue_names = ['artery']
+nproc = 2
 frames = None
-opt = { 'maxtargetsperchunk': 20000,
+opt = { 'maxtargetsperchunk': 5000,
         'maxframesperchunk': 1000,
         'overwrite': True }
 ################################################################################
 
 if __name__ == '__main__':
-
-    sim = Simulation()
-    sim.input_path = (file_path, input_key)
-    sim.output_path = (file_path, output_key)
-    sim.script_path = script_path
-    sim.set_options(**opt)
-
-    sim.start(nproc=nproc, frames=frames)
-    print sim
-    stdout.flush()
+    
+    for tissue in tissue_names:
+        
+        input_key = input_group + tissue
+        output_key = output_group + tissue
+        
+        sim = Simulation()
+        #sim = SynthSimulation()
+        sim.input_path = (file_path, input_key)
+        sim.output_path = (file_path, output_key)
+        sim.script_path = script_path
+        sim.set_options(**opt)
+    
+        sim.start(nproc=nproc, frames=frames)
+        print sim
+        stdout.flush()
+        
+        #sim.join()
+        
         
     
     
