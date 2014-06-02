@@ -407,7 +407,7 @@ class Field:
      
     def xdc_shift(self, th, org, free=False):
         
-        if org.ndims == 1:
+        if org.ndim == 1:
             org = org[None,:]
         
         info = self.xdc_get(th, 'rect')

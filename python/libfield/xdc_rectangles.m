@@ -39,23 +39,25 @@ function Th = xdc_rectangles (rect, center, focus)
 
 %  Check that all parameters are valid
 
-  [n,m] = size(rect);
-  if (m~=19)
-    error ('Field error: Not sufficient coordinates for rectangles')
-    end
-
-  [n,m] = size(center);
-  if (m~=3)
-    error ('Field error: Not correct size for center points')
-    end
-
-  [n,m] = size(focus);
-  if (n~=1) | (m~=3)
-    error ('Field error: Not correct size for focus point')
-    end
+%   [n,m] = size(rect);
+%   if (m~=19)
+%     error ('Field error: Not sufficient coordinates for rectangles')
+%     end
+% 
+%   [n,m] = size(center);
+%   if (m~=3)
+%     error ('Field error: Not correct size for center points')
+%     end
+% 
+%   [n,m] = size(focus);
+%   if (n~=1) | (m~=3)
+%     error ('Field error: Not correct size for focus point')
+%     end
 
 %  Call the C-part of the program to create aperture
 
   Th = Mat_field (1021, rect, center, focus);
+  
+end
 
 
