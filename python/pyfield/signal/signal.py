@@ -14,6 +14,17 @@ def iffts(x, *args, **kwargs):
 
 def xcorr(in1, in2, mode='full', norm=True):
     
+    in1 = in1.ravel()
+    in2 = in2.ravel()
+    
+    size1 = in1.size
+    size2 = in2.size
+    
+    if size1 > size2:
+        in2 = np.pad(in2, (0, size1-size2), mode='constant')
+    elif size2 > size1:
+        in1 = np.pad(in1, (0, size2-size1), mode='constant')
+    
     # note: fftconvolve is much faster than correlate
     if norm:
         #xc = correlate(in1, in2, mode)/np.sqrt(np.sum(in1**2)*np.sum(in2**2))
@@ -23,6 +34,15 @@ def xcorr(in1, in2, mode='full', norm=True):
         xc = fftconvolve(in1, in2[::-1], mode)
     
     return xc
+
+def xcorr2(in1, in2, mode='full', norm=True, fs=1):
+    
+    xc = xcorr(in1, in2, mode=mode, norm=norm)
+    nsample = xc.shape[0]
+    
+    lags = (np.arange(1, nsample + 1) - (nsample + 1)/2.0)/fs
+    
+    return xc, lags
 
 def lowpass(in1, fh, fs, order=6, axis=-1):
     

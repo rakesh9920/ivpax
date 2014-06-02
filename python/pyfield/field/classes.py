@@ -97,6 +97,9 @@ class Field:
         f2.f2_xdc_focus_times.restype = None
         f2.f2_xdc_focus_times.argtypes = [ct.c_int, ct.POINTER(_ArrayInfo),
             ct.POINTER(_ArrayInfo)]
+        f2.f2_xdc_apodization.restype = None
+        f2.f2_xdc_apodization.argtypes = [ct.c_int, ct.POINTER(_ArrayInfo),
+            ct.POINTER(_ArrayInfo)]
         f2.f2_xdc_get.restype = _ArrayInfo
         f2.f2_xdc_get.argtypes =[ct.c_double, ct.c_char_p]
         f2.f2_xdc_rectangles.restype = ct.c_int
@@ -245,8 +248,17 @@ class Field:
         
         self.libf2.f2_xdc_focus_times(aperture, ct.byref(_getArrayInfo(times)),
             ct.byref(_getArrayInfo(delays)))
+    
+    def xdc_apodization(self, aperture, times, apod):
+        
+        # check and convert input arrays for compatibility with libf2
+        times = _checkArray(times, orient="col")
+        apod = _checkArray(apod, orient="row")
+        
+        self.libf2.f2_xdc_apodization(aperture, ct.byref(_getArrayInfo(times)),
+            ct.byref(_getArrayInfo(apod)))
             
-    def calc_h(self, aperture, points):
+    def calc_h(self, aperture, points, fs=1):
         
         # check and convert input arrays for compatibility with libf2
         points = _checkArray(points, orient="row")
@@ -259,7 +271,7 @@ class Field:
         scat, t0 = _copyArray(scatinfo)
         self._deleteArray(scatinfo)
         
-        return scat, t0
+        return scat*fs, t0
         
     def calc_hhp(self, aperture1, aperture2, points):
 
@@ -361,7 +373,7 @@ class Field:
     # width = Rect(15,:)
     # height = Rect(16,:)
     # center = Rect(17:19,:)  
-
+    
     def xdc_save(self, file_path, aperture):
         
         info = self.xdc_get(aperture, 'rect')
@@ -392,6 +404,35 @@ class Field:
             self.xdc_focus_times(aperture, focus_times, focus_delays)
         
         return aperture
+     
+    def xdc_shift(self, th, org, free=False):
+        
+        if org.ndims == 1:
+            org = org[None,:]
+        
+        info = self.xdc_get(th, 'rect')
+        focus = self.xdc_get(th, 'focus')
+        
+        rect = np.zeros((19, info.shape[1]))
+        rect[0,:] = info[0,:]
+        rect[1:13,:] = info[10:22,:] + np.tile(org.T, (4,1))
+        rect[13,:] = info[4,:]
+        rect[14,:] = info[2,:]
+        rect[15,:] = info[3,:]
+        rect[16:19,:] = info[7:10,:] + org.T
+        
+        centers = rect[16:19,:].T
+        
+        focus_times = focus[:,0]
+        focus_delays = focus[:,1:]
+        
+        new_th = self.xdc_rectangles(rect, centers, np.array([[0, 0, 300]]))
+        self.xdc_focus_times(new_th, focus_times, focus_delays)
+        
+        if free:
+            self.xdc_free(th)
+            
+        return new_th
      
 from multiprocessing import Process, Queue, current_process
 import h5py

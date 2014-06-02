@@ -9,10 +9,10 @@ from sys import stdout
 file_path = './data/carotid_phantom_data.h5'
 input_group = 'field/targdata/'
 output_group = 'field/rfdata/raw/'
-script_path = 'pyfield.field.linear_focused_array_256_12mhz'
-#tissue_names = ['dermis', 'fat', 'artery', 'plaque', 'blood']
-tissue_names = ['artery']
-nproc = 2
+script_path = 'pyfield.field.linear_focused_array_256_6mhz'
+tissue_names = ['dermis', 'fat', 'artery', 'plaque', 'blood']
+#tissue_names = ['dermis']
+nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,
         'maxframesperchunk': 1000,
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         print sim
         stdout.flush()
         
-        #sim.join()
+        sim.join()
         
         
     

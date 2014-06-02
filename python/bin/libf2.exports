@@ -22,6 +22,7 @@ f2_xdc_free
 f2_xdc_linear_array
 f2_xdc_concave
 f2_xdc_focused_array
+f2_xdc_apodization
 
 *f2_xdc_get_rect
 *f2_xdc_convex_array

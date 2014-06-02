@@ -6,7 +6,7 @@ from matplotlib.pylab import imread
 import numpy as np
 import h5py
 
-file_path = './data/carotid_phantom_data.hdf5'
+file_path = './data/carotid_phantom_data.h5'
 key = 'field/targdata/'
 img = np.mean(imread('./data/carotid_phantom_map.bmp'), axis=2)
 npixelz, npixelx = img.shape

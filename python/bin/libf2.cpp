@@ -155,6 +155,15 @@ void f2_xdc_focus_times(int Th_, ArrayInfo * times_, ArrayInfo * delays_)
     std::cout << "Field II: focus times set\n";
     std::cout.flush();
 }
+void f2_xdc_apodization(int Th_, ArrayInfo * times_, ArrayInfo * apod_)
+{
+    mwArray Th (Th_);
+    mwArray times = convertToMwArray(times_);
+    mwArray apod = convertToMwArray(apod_);
+    mwArray res;
+    
+    xdc_apodization(0, res, Th, times, apod); 
+}
 
 void f2_xdc_free(int Th_)
 {

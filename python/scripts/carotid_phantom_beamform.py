@@ -11,7 +11,7 @@ file_path = './data/carotid_phantom_data.h5'
 input_key = 'field/rfdata/full'
 view_key = 'view/view0'
 output_key = 'bfdata/full'
-nproc = 1
+nproc = 12
 frames = None
 chmask = False
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     print bf
     stdout.flush()
     #bf.join()
-#
+##
 #    with h5py.File(file_path, 'r') as root:
 #        bfdata = np.squeeze(root[output_key][:])
 #    

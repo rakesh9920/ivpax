@@ -26,4 +26,5 @@ mlxXdc_triangles
 mlxXdc_convex_array
 mlxXdc_convex_focused_array
 mlxXdc_focused_array
+mlxXdc_apodization
 
