@@ -68,18 +68,19 @@ if __name__ == '__main__':
     f2.xdc_focus_times(tx, np.zeros((1,1)), np.zeros((1,128)))
     #f2.xdc_focus_times(tx, np.zeros((1,1)), txdelays)
     
-    rx = f2.xdc_linear_array(128, 290e-6, 0.01, 10e-6, 1, 1, 
+    rx = f2.xdc_linear_array(16, 290e-6, 0.01, 10e-6, 1, 1, 
         np.array([0, 0, 300])) 
+    org = np.mean(centers[0:16,:], axis=0)
+    rx = f2.xdc_shift(rx, org, free=True)
     f2.xdc_impulse(rx, prms['tx_impulse_response'])
     f2.xdc_excitation(rx, prms['tx_excitation'])
-    #f2.xdc_focus_times(rx, np.zeros((1,1)), np.zeros((1,128)))
-    f2.xdc_focus_times(rx, np.zeros((1,1)), txdelays)
+    f2.xdc_focus_times(rx, np.zeros((1,1)), txdelays[:,0:16])
     
-    apod = np.zeros((1, 128))
-    apod[:,0:128] = 1
-    f2.xdc_apodization(rx, np.zeros((1,1)), apod)
+    #apod = np.zeros((1, 128))
+    #apod[:,0:128] = 1
+    #f2.xdc_apodization(rx, np.zeros((1,1)), apod)
     
-    h1, t01 = f2.calc_h(tx, pos1, fs=fs)
+    h1, t01 = f2.calc_h(rx, pos1, fs=fs)
     h1 = np.pad(h1, ((np.round(t01*fs), 0), (0,0)), mode='constant')
     h2, t02 = f2.calc_h(tx, pos1, fs=fs)
     h2 = np.pad(h2, ((np.round(t02*fs), 0), (0,0)), mode='constant')

@@ -411,29 +411,30 @@ class Field:
             org = org[None,:]
         
         info = self.xdc_get(th, 'rect')
-        focus = self.xdc_get(th, 'focus')
+        #focus = self.xdc_get(th, 'focus')
         
         rect = np.zeros((19, info.shape[1]))
-        rect[0,:] = info[0,:]
+        rect[0,:] = info[0,:] + 1 # start idx is 0 but rect requires start as 1
         rect[1:13,:] = info[10:22,:] + np.tile(org.T, (4,1))
         rect[13,:] = info[4,:]
         rect[14,:] = info[2,:]
         rect[15,:] = info[3,:]
         rect[16:19,:] = info[7:10,:] + org.T
         
-        nphys = (np.max(rect[0,:]) + 1).astype(int)
+        nphys = np.max(rect[0,:]).astype(int)
         
         centers = np.zeros((nphys, 3))  
-        for phys in xrange(nphys):
+        for phys in xrange(1, nphys + 1):
             
             idx = np.argwhere(rect[0,:] == phys)[0]
-            centers[phys,:] = rect[16:19,idx].T
+            centers[phys-1,:] = rect[16:19,idx].T
         
-        focus_times = focus[0,:].T
-        focus_delays = focus[1:,:].T
+        # FYI impulse and excitation must be set before focus timeline
+        #focus_times = focus[0,:].T
+        #focus_delays = focus[1:,:].T
         
         new_th = self.xdc_rectangles(rect.T, centers, np.array([[0, 0, 300]]))
-        self.xdc_focus_times(new_th, focus_times, focus_delays)
+        #self.xdc_focus_times(new_th, focus_times, focus_delays)
         
         if free:
             self.xdc_free(th)
