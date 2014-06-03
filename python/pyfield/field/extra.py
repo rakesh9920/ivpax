@@ -162,7 +162,7 @@ def apply_wgn(inpath, outpath, dbw=1, write=False, loop=False):
 # height = Rect(16,:)
 # center = Rect(17:19,:)
 
-def xdc_draw(file_path, fig=None, wireframe=False):
+def xdc_draw(file_path, ax=None, wireframe=False, color='b', lw=0.2):
     
     with np.load(file_path) as varz:
     
@@ -177,10 +177,9 @@ def xdc_draw(file_path, fig=None, wireframe=False):
     
     nelement = phys_no.shape[0]
     
-    if fig is None:
+    if ax is None:
         fig = pp.figure()
-        
-    ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection='3d')
     
     vert_x = vertices[[0, 3, 9, 6],:]
     vert_y = vertices[[1, 4, 10, 7],:]
@@ -197,7 +196,7 @@ def xdc_draw(file_path, fig=None, wireframe=False):
             
             ax.plot_wireframe(vert_x[:,ele].reshape((2,2)), 
                 vert_y[:,ele].reshape((2,2)), vert_z[:,ele].reshape((2,2)), 
-                color='r', linewidths=0.2)
+                color=color, linewidths=lw)
     else:
         for ele in xrange(nelement):
             
@@ -206,7 +205,8 @@ def xdc_draw(file_path, fig=None, wireframe=False):
                 color=colors[int(phys_no[ele] % len(colors))])
      
     ax.auto_scale_xyz([-max_dim, max_dim], [-max_dim, max_dim], [0, max_dim*2])
-    fig.show()
+    
+    return ax
 
 def xdc_load_info(file_path):
     

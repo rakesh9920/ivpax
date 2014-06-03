@@ -215,7 +215,7 @@ struct ArrayInfo f2_calc_scat(int Th1_, int Th2_, ArrayInfo * points_,
     
     return scat;
 }
-struct ArrayInfo f2_calc_h(double Th_, ArrayInfo * points_)
+struct ArrayInfo f2_calc_h(int Th_, ArrayInfo * points_)
 {
     // initialize mwArrays
     mwArray Th (Th_);
@@ -241,7 +241,7 @@ struct ArrayInfo f2_calc_h(double Th_, ArrayInfo * points_)
     return scat;    
 }
 
-struct ArrayInfo f2_calc_hhp(double Th1_, double Th2_ , ArrayInfo * points_)
+struct ArrayInfo f2_calc_hhp(int Th1_, int Th2_ , ArrayInfo * points_)
 {
     // initialize mwArrays
     mwArray Th1 (Th1_);
@@ -267,7 +267,7 @@ struct ArrayInfo f2_calc_hhp(double Th1_, double Th2_ , ArrayInfo * points_)
 
     return scat;      
 }
-struct ArrayInfo f2_calc_hp(double Th_, ArrayInfo * points_)
+struct ArrayInfo f2_calc_hp(int Th_, ArrayInfo * points_)
 {    
     // initialize mwArrays
     mwArray Th (Th_);

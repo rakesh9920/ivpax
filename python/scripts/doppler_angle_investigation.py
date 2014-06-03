@@ -61,30 +61,37 @@ if __name__ == '__main__':
     txdelays = txdelays - np.min(txdelays)
     #rxdelays = -distance(centers[0:16,:], pos1).T/1540
     
-    tx = f2.xdc_linear_array(128, 290e-6, 0.01, 10e-6, 1, 1, 
+    planetx = f2.xdc_linear_array(128, 290e-6, 0.01, 10e-6, 1, 1, 
         np.array([0, 0, 300])) 
-    f2.xdc_impulse(tx, prms['tx_impulse_response'])
-    f2.xdc_excitation(tx, prms['tx_excitation'])
-    f2.xdc_focus_times(tx, np.zeros((1,1)), np.zeros((1,128)))
+    f2.xdc_impulse(planetx, prms['tx_impulse_response'])
+    f2.xdc_excitation(planetx, prms['tx_excitation'])
+    f2.xdc_focus_times(planetx, np.zeros((1,1)), np.zeros((1,128)))
     #f2.xdc_focus_times(tx, np.zeros((1,1)), txdelays)
     
-    rx = f2.xdc_linear_array(16, 290e-6, 0.01, 10e-6, 1, 1, 
+    fullrx = f2.xdc_linear_array(128, 290e-6, 0.01, 10e-6, 1, 1, 
         np.array([0, 0, 300])) 
-    org = np.mean(centers[0:16,:], axis=0)
-    rx = f2.xdc_shift(rx, org, free=True)
-    f2.xdc_impulse(rx, prms['tx_impulse_response'])
-    f2.xdc_excitation(rx, prms['tx_excitation'])
-    f2.xdc_focus_times(rx, np.zeros((1,1)), txdelays[:,0:16])
+    #org = np.mean(centers[0:16,:], axis=0)
+    #rx = f2.xdc_shift(rx, org, free=True)
+    f2.xdc_impulse(fullrx, prms['tx_impulse_response'])
+    f2.xdc_excitation(fullrx, prms['tx_excitation'])
+    #f2.xdc_focus_times(fullrx, np.zeros((1,1)), txdelays[:,0:16])
+    f2.xdc_focus_times(fullrx, np.zeros((1,1)), txdelays)
     
-    #apod = np.zeros((1, 128))
-    #apod[:,0:128] = 1
-    #f2.xdc_apodization(rx, np.zeros((1,1)), apod)
+    subrx = f2.xdc_linear_array(128, 290e-6, 0.01, 10e-6, 1, 1, 
+        np.array([0, 0, 300])) 
+    f2.xdc_impulse(subrx, prms['tx_impulse_response'])
+    f2.xdc_excitation(subrx, prms['tx_excitation'])
+    f2.xdc_focus_times(subrx, np.zeros((1,1)), txdelays)
+    apod = np.zeros((1, 128))
+    apod[:,0:16] = 1
+    f2.xdc_apodization(subrx, np.zeros((1,1)), apod)
     
-    h1, t01 = f2.calc_h(rx, pos1, fs=fs)
-    h1 = np.pad(h1, ((np.round(t01*fs), 0), (0,0)), mode='constant')
-    h2, t02 = f2.calc_h(tx, pos1, fs=fs)
-    h2 = np.pad(h2, ((np.round(t02*fs), 0), (0,0)), mode='constant')
-    
+    htx, t0 = f2.calc_h(planetx, pos1, fs=fs)
+    htx = np.pad(htx, ((np.round(t0*fs), 0), (0,0)), mode='constant')
+    hrx, t0 = f2.calc_h(fullrx, pos1, fs=fs)
+    hrx = np.pad(hrx, ((np.round(t0*fs), 0), (0,0)), mode='constant')
+    hrx1, t0 = f2.calc_h(subrx, pos1, fs=fs)
+    hrx1 = np.pad(hrx1, ((np.round(t0*fs), 0), (0,0)), mode='constant') 
     
     #f2.field_end()
     
