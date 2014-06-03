@@ -421,12 +421,18 @@ class Field:
         rect[15,:] = info[3,:]
         rect[16:19,:] = info[7:10,:] + org.T
         
-        centers = rect[16:19,:].T
+        nphys = (np.max(rect[0,:]) + 1).astype(int)
         
-        focus_times = focus[:,0]
-        focus_delays = focus[:,1:]
+        centers = np.zeros((nphys, 3))  
+        for phys in xrange(nphys):
+            
+            idx = np.argwhere(rect[0,:] == phys)[0]
+            centers[phys,:] = rect[16:19,idx].T
         
-        new_th = self.xdc_rectangles(rect, centers, np.array([[0, 0, 300]]))
+        focus_times = focus[0,:].T
+        focus_delays = focus[1:,:].T
+        
+        new_th = self.xdc_rectangles(rect.T, centers, np.array([[0, 0, 300]]))
         self.xdc_focus_times(new_th, focus_times, focus_delays)
         
         if free:

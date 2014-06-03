@@ -20,7 +20,7 @@ function res = xdc_focus_times (Th,times,delays)
   [m1,n]=size(times);
   if (n ~= 1) 
     error ('Times vectors must have one columns');
-    end
+  end
 
   [m2,n]=size(delays);
 
@@ -28,10 +28,12 @@ function res = xdc_focus_times (Th,times,delays)
 
   if (m1 ~= m2)
     error ('There must be the same number of rows for times and delays');
-    end
+  end
 
 %  Call the C-part of the program to insert focus
 
    Mat_field (1061,Th,times,delays);
+
+end
 
 
