@@ -16,19 +16,19 @@
 function res = xdc_focus_times (Th,times,delays)
 
 %  Check the times vector
-
-  [m1,n]=size(times);
-  if (n ~= 1) 
-    error ('Times vectors must have one columns');
-  end
-
-  [m2,n]=size(delays);
-
-%  Check both arrays
-
-  if (m1 ~= m2)
-    error ('There must be the same number of rows for times and delays');
-  end
+% 
+%   [m1,n]=size(times);
+%   if (n ~= 1) 
+%     error ('Times vectors must have one columns');
+%   end
+% 
+%   [m2,n]=size(delays);
+% 
+% %  Check both arrays
+% 
+%   if (m1 ~= m2)
+%     error ('There must be the same number of rows for times and delays');
+%   end
 
 %  Call the C-part of the program to insert focus
 
