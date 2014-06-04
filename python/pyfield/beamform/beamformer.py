@@ -171,6 +171,8 @@ def work(in_queue, out_queue, attrs):
             if planetx:
                 txdelay = np.abs(fieldpos[:,2,None])/c
             else:
+                if txpos.ndim == 1:
+                    txpos = txpos[None,:]
                 txdelay = distance(fieldpos, txpos)/c
             
             rxdelay = distance(fieldpos, rxpos)/c
