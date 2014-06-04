@@ -150,14 +150,16 @@ def align_cat(array0, t0, array1, t1, fs, taxis=0, axis=-1):
     
     return new_array, min(t0, t1)
 
-def h5py_tree(root):
+def h5_tree(root, dsets=True):
     
     def print_attrs(name, obj):
         
-        if not isinstance(obj, h5py._hl.dataset.Dataset):
+        if dsets:
             print name
-
-    
+        else:
+            if not isinstance(obj, h5py._hl.dataset.Dataset):
+                print name
+                
     root.visititems(print_attrs)
 
 class cyl_mgrid_class:

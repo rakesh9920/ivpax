@@ -9,7 +9,7 @@ if __name__ == '__main__':
     
     sim = Simulation()
     
-    file_path = './data/fieldii_bsc_experiments.hdf5'
+    file_path = './data/fieldii_bsc_experiments.h5'
     input_key = 'custombsc/field/targdata/00000'
     output_key = 'custombsc/field/rfdata/raw/'
     script_path = 'pyfield.field.focused_piston_f4'
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     sim.input_path = (file_path, input_key)
     sim.script_path = script_path
     
-    opt = { 'maxtargetsperchunk': 20000,
+    opt = { 'maxtargetsperchunk': 10000,
             'overwrite': True }
     sim.set_options(**opt)
     

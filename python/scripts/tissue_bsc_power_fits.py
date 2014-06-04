@@ -4,9 +4,9 @@ import h5py
 import numpy as np
 import scipy as sp
 
-file_path = './data/tissue experimental bsc/tissue_bsc_data.h5'
-exp_key = 'bsc/experimental/fat_wrist_raju'
-powerfit_key = 'bsc/powerfit/fat_wrist_raju'
+file_path = './data/bsc/tissue experimental bsc/tissue_bsc_data.h5'
+exp_key = 'bsc/experimental/heart_dog_odonnell'
+powerfit_key = 'bsc/powerfit/heart_dog_odonnell'
 fmax = 20e6
 
 if __name__ == '__main__':

@@ -38,20 +38,28 @@ if __name__ == '__main__':
     #xdc_draw('./pyfield/field/focused_piston_f4.npz', color='r', wireframe=True,
         #ax=ax)
     
-    scatter3d(target_pos*1000, mask=2, size=1, ax=ax)
+    scatter3d(target_pos*1000, mask=3, size=1, ax=ax)
+    
+
+    ax.tick_params(labelsize=8)
+    ax.set_xticks(np.arange(-20, 30, 10))
+    ax.set_yticks(np.arange(-20, 30, 10))
+    ax.set_zticks(np.arange(0, 30, 10))
+
+    ax.set_xlabel('x (mm)', fontsize=9)
+    ax.set_ylabel('y (mm)', fontsize=9)
+    ax.set_zlabel('z (mm)', fontsize=9)
     
     ax.set_xlim((-25, 25))
     ax.set_ylim((-25, 25))
-    ax.set_zlim((-12.5, 37.5))
-    ax.tick_params(labelsize=8)
-    ax.set_xticks(np.arange(-25, 30, 10))
-    ax.set_yticks(np.arange(-25, 30, 10))
-    ax.set_zticks(np.arange(0, 30, 10))
-    ax.set_aspect('equal','box')
+    ax.set_zlim((0, 30))
+    
+    ax.set_aspect('equal', 'box')
+    ax.set_aspect('equal', 'datalim')
+    
+    ax.elev = 15
 
-    ax.set_xlabel('x (mm)', fontsize=10)
-    ax.set_ylabel('y (mm)', fontsize=10)
-    ax.set_zlabel('z (mm)', fontsize=10)
+
 
     
     #ax.scatter(target_pos[:,0], target_pos[:,1], target_pos[:,2], s=0.01,

@@ -13,15 +13,17 @@ from scipy.stats import rayleigh
 if __name__ == '__main__':
     
     # define paths
-    file_path = './data/bsc/fieldii_bsc_experiments.hdf5'
+    file_path = './data/bsc/fieldii_bsc_data.h5'
     raw_key = 'custombsc/field/rfdata/raw2/'
     ref_key = 'custombsc/field/rfdata/raw2/ref'
-    #out_key = 'custombsc/field/rfdata/blood/'
-    #bsc_key = 'custombsc/field/bsc/blood_shung_hmtc8'
+    out_key = 'custombsc/field/rfdata/blood/'
+    bsc_key = 'bsc/experimental/blood_hmtc8_shung'
     #out_key = 'custombsc/field/rfdata/kidney/'
     #bsc_key = 'custombsc/field/bsc/kidney_wear'
-    out_key = 'custombsc/field/rfdata/liver/'
-    bsc_key = 'custombsc/field/bsc/liver_wear'
+    #out_key = 'custombsc/field/rfdata/liver/'
+    #bsc_key = 'custombsc/field/bsc/liver_wear'
+    #out_key = 'custombsc/field/rfdata/heart'
+    #bsc_key = 'bsc/experimental/heart_dog_odonnell'
     
     ninstance = 1000
     filter_method = 'fir'
@@ -89,7 +91,7 @@ if __name__ == '__main__':
         gate_duration/2]))*fs) + 32
     
     nfft = 2**13
-    f_lower = 4e6
+    f_lower = 1e6
     f_upper = 12e6
     wintype = 'hann'
     
@@ -142,15 +144,15 @@ if __name__ == '__main__':
     #pdf = root_bsc/(np.sqrt(2/np.pi)*np.mean(root_bsc, axis=1)[:,None])
     #pdf = pdf.ravel()
     
-    cam3 = cam
-    error_upper3 = error_upper
-    error_lower3 = error_lower
-    bsc3 = bsc
+    cam2 = cam
+    error_upper2 = error_upper
+    error_lower2 = error_lower
+    bsc2 = bsc
     
 def make_plot():
     
-    rc('mathtext', fontset='stix', default='regular')
-    rc('axes', linewidth = 0.6)
+    pp.rc('mathtext', fontset='stix', default='regular')
+    pp.rc('axes', linewidth = 0.6)
 
     # spectrum plots for cam and bsc
     fig2 = pp.figure(figsize=(3.5,2.7), dpi=100, tight_layout=True)
@@ -158,7 +160,7 @@ def make_plot():
     ax2.tick_params(labelsize=8)
     #ax2.set_xscale('log')
     ax2.set_yscale('log')
-    ax2.set_xlim(4, 12)
+    ax2.set_xlim(2, 12)
     
     c1, = pp.plot(freq[freq1:freq2]/1e6, np.mean(cam1, axis=1), 'b-')
     #e1, = pp.plot(freq[freq1:freq2]/1e6, error_upper1,'b:')
@@ -181,7 +183,9 @@ def make_plot():
     #ax2.legend((c1, e1, b1, b2, b3), ('CAM','95% CI',' Blood, Shung et. al.',
         #'Kidney, Wear et. al.','Liver, Wear et. al.'), loc='center left', 
         #frameon=False, fontsize=10)
-    ax2.legend((c1, b1, b2, b3), ('CAM', 'blood', 'kidney', 'liver'),
+    #ax2.legend((c1, b1, b2, b3), ('CAM', 'blood', 'kidney', 'liver'),
+    #    frameon=False, fontsize=9, loc='center left')
+    ax2.legend((c1, b1, b2), ('CAM', 'heart','blood'),
         frameon=False, fontsize=9, loc='center left')
     ax2.set_xlabel('Frequency ($MHz$)', fontsize=10)
     #ax2.set_ylabel(r'Backscattering Coefficient ($m^{-1}Sr^{-1}$)', fontsize=10)
@@ -205,6 +209,6 @@ def make_plot():
     ax3.set_xlabel(r'$[2 \eta(f) / \bar{\eta}(f)]^{1/2}$',
         fontsize=10) 
     ax3.set_ylabel('Probability density', fontsize=10)
-    ax3.legend((r'Rayleigh pdf' '\n' r'$(\sigma = 1)$','CAM'), 
+    ax3.legend((r'Rayleigh pdf' '\n' r'$(\alpha = 1)$','CAM'), 
         fontsize=10, frameon=False, loc='top right')
     fig3.show()
