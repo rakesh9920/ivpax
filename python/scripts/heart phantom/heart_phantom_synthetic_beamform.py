@@ -1,19 +1,20 @@
 # scripts / carotid_phantom_synthetic_beamform.py
 
-from pyfield.beamform import Beamformer, envelope, imdisp
+from pyfield.beamform import Beamformer, envelope, imdisp, msview
+from pyfield.util import align_and_sum
 
 import numpy as np
 import h5py
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/carotid_phantom_data.h5'
-input_key = 'field/rfdata/full'
+file_path = './data/heart_phantom_data.h5'
+input_key = 'field/rfdata/synthetic/full'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
-output_key = 'bfdata/tx'
-nchannel = 128
-nproc = 12
+output_key = 'bfdata/synthetic/tx'
+nchannel = 64
+nproc = 1
 frames = None
 chmask = False
 
@@ -28,21 +29,35 @@ opt = { 'nwin': 101,
        
 def write_view(view_path):
     
-    #x, y, z = np.mgrid[-0.01:0.01:40j,, 0:0.04:80j]
-    x, y, z = np.meshgrid(np.linspace(-0.02, 0.02, 800, endpoint=True),
-        0, np.linspace(0, 0.03, 600, endpoint=True))
-    ngrid = x.size
-
-    grid = np.concatenate((x.reshape((ngrid, -1)), y.reshape((ngrid, -1)),
-        z.reshape((ngrid, -1))), axis=1)
-        
+    view = msview[0.001:0.071:0.001, 0:1:1, -np.pi/4:np.pi/4:100j]
+    
     with h5py.File(view_path[0], 'a') as root:
         
         if view_path[1] in root:
             del root[view_path[1]]
         
-        root.create_dataset(view_path[1], data=grid, compression='gzip')
+        root.create_dataset(view_path[1], data=view, compression='gzip')
 
+def sum_output(output_path):
+    
+    file_path = output_path[0]
+    input_key = output_path[1]
+    
+    with h5py.File(file_path, 'a') as root:
+
+        bfdata_t = root[input_key + str(0)][:]
+        #t0_t = root[input_key + str(0)].attrs['start_time']
+        #fs = root[input_key + str(0)].attrs['sample_frequency']
+        
+        for ch in xrange(1, nchannel):
+            
+            bfdata = root[input_key + str(ch)][:]
+            #t0 = root[input_key + str(ch)].attrs['start_time']
+            
+            bfdata_t += bfdata
+    
+    return bfdata_t     
+    
 if __name__ == '__main__':
     
     write_view((file_path, view_key))

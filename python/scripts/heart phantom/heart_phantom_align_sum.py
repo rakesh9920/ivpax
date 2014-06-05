@@ -4,10 +4,10 @@ import h5py
 
 from pyfield.util import align_and_sum
 
-file_path = './data/carotid_phantom_data.h5'
-names = ['dermis', 'fat', 'artery', 'plaque', 'blood']
-input_key = 'field/rfdata/tissue/'
-output_key = 'field/rfdata/full'
+file_path = './data/heart_phantom_data.h5'
+names = ['myocardium', 'blood']
+input_key = 'field/rfdata/tissue/synthetic/'
+output_key = 'field/rfdata/synthetic/full'
 
 if __name__ == '__main__':
     

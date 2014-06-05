@@ -8,10 +8,10 @@ from sys import stdout
 # names = {'myocardium', 'blood'}
 file_path = './data/heart_phantom_data.h5'
 input_group = 'field/targdata/'
-output_group = 'field/rfdata/raw/'
+output_group = 'field/rfdata/raw/synthetic/'
 script_path = 'pyfield.field.ice_array_64_10mhz'
-tissue_names = ['myocardium', 'blood']
-#tissue_names = ['blood']
+#tissue_names = ['myocardium', 'blood']
+tissue_names = ['myocardium']
 nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,
@@ -26,8 +26,8 @@ if __name__ == '__main__':
         input_key = input_group + tissue
         output_key = output_group + tissue
         
-        sim = Simulation()
-        #sim = SynthSimulation()
+        #sim = Simulation()
+        sim = SynthSimulation()
         sim.input_path = (file_path, input_key)
         sim.output_path = (file_path, output_key)
         sim.script_path = script_path
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         print sim
         stdout.flush()
         
-        sim.join()
+        #sim.join()
         
         
     

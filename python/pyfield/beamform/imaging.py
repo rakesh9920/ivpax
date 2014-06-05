@@ -2,7 +2,7 @@
 
 import scipy as sp
 import numpy as np
-import matplotlib.pylab as pylab
+import matplotlib.pyplot as plt
 
 def envelope(bfdata, axis=-1):
     
@@ -10,14 +10,82 @@ def envelope(bfdata, axis=-1):
     
     return envdata
     
-def imdisp(img, dyn=60, cmap='gray', interp='none'):
+def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
+    
+    maxval = np.max(img)
+    dbimg = 20*np.log10(img/maxval)
+    
+    dbimg[dbimg < -dyn] = -dyn
+    
+    norm = plt.Normalize()
+    norm.autoscale(dbimg)
+    
+    if r is None:
+        
+        plt.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
+        
+    else:
+        
+        if isinstance(r, slice):
+            
+            rslice = slice(r.start - r.step/2, r.stop + r.step/2, r.step)
+            
+        else:
+            
+            rmin = np.min(r)
+            rmax = np.max(r)
+            rstep = (rmax - rmin)/r.size
+            
+            rslice = slice(rmin - rstep/2, rmax + rstep/2, rstep)
+        
+        if isinstance(phi, slice):
+            
+            phislice = slice(phi.start - phi.step/2, phi.stop + phi.step/2, 
+                phi.step)
+                
+        else:
+            
+            rmin = np.min(r)
+            rmax = np.max(r)
+            rstep = (rmax - rmin)/r.size
+            
+            rslice = slice(rmin - rstep/2, rmax + rstep/2, rstep)    
+             
+        x, _, z = msview[rslice, 0:1:1, phislice]
+        x = np.squeeze(x)
+        z = np.squeeze(z)
+        
+        
+        if interp is True:
+            plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
+                shading='gourad', cmap=cmap, norm=norm) 
+        else:
+            plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
+                shading='flat', edgecolor='k', cmap=cmap, norm=norm) 
+        
+        plt.gca().set_aspect('equal', 'datalim')
+        plt.gca().set_aspect('equal', 'box')
+        
+
+def imdisp3d(x, y, z, img, dyn=60, cmap=plt.cm.gray, ax=None, azim=90, elev=0):
     
     maxval = np.max(np.abs(img))
     dbimg = 20*np.log10(np.abs(img)/maxval)
     
     dbimg[dbimg < -dyn] = -dyn
     
-    pylab.imshow(dbimg, cmap=cmap, interpolation=interp)
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+    
+    norm = plt.Normalize()
+    norm.autoscale(dbimg)
+    
+    ax.plot_surface(x, y, z, cstride=1, rstride=1, facecolors=cmap(norm(dbimg)))
+    ax.azim = azim
+    ax.elev = elev
+    
+    return ax
 
 def meshview(vec1, vec2, vec3, geom='cart'):
     
@@ -33,7 +101,8 @@ def meshview(vec1, vec2, vec3, geom='cart'):
         y = r*np.sin(theta)*np.sin(phi)
         z = r*np.cos(phi)
     
-    return np.c_[x.ravel(), y.ravel(), z.ravel()]  
+    #return np.c_[x.ravel(), y.ravel(), z.ravel()]  
+    return x, y, z
 
 class CartesianView:
     
