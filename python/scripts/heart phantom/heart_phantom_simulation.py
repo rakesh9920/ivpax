@@ -10,9 +10,9 @@ file_path = './data/heart_phantom_data.h5'
 input_group = 'field/targdata/'
 output_group = 'field/rfdata/raw/'
 script_path = 'pyfield.field.ice_array_64_10mhz'
-#tissue_names = ['myocardium', 'blood']
-tissue_names = ['myocardium']
-nproc = 1
+tissue_names = ['myocardium', 'blood']
+#tissue_names = ['blood']
+nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,
         'maxframesperchunk': 1000,
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         print sim
         stdout.flush()
         
-        #sim.join()
+        sim.join()
         
         
     
