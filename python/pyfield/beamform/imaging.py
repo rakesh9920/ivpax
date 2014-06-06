@@ -36,7 +36,9 @@ def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
             rmax = np.max(r)
             rstep = (rmax - rmin)/r.size
             
-            rslice = slice(rmin - rstep/2, rmax + rstep/2, rstep)
+            rslice = np.linspace(rmin - rstep/2, rmax + rstep/2, r.size + 1, 
+                endpoint=True)
+            #rslice = slice(rmin - rstep/2, rmax + rstep/2, rstep)
         
         if isinstance(phi, slice):
             
@@ -45,13 +47,15 @@ def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
                 
         else:
             
-            rmin = np.min(r)
-            rmax = np.max(r)
-            rstep = (rmax - rmin)/r.size
+            phimin = np.min(phi)
+            phimax = np.max(phi)
+            phistep = (phimax - phimin)/phi.size
             
-            rslice = slice(rmin - rstep/2, rmax + rstep/2, rstep)    
+            phislice = np.linspace(phimin - phistep/2, phimax + phistep/2, 
+                phi.size + 1, endpoint=True)
              
-        x, _, z = msview[rslice, 0:1:1, phislice]
+        #x, _, z = msview[rslice, 0:1:1, phislice]
+        x, y, z = meshview(rslice, 0, phislice, geom='sphere')
         x = np.squeeze(x)
         z = np.squeeze(z)
         
@@ -61,7 +65,7 @@ def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
                 shading='gourad', cmap=cmap, norm=norm) 
         else:
             plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
-                shading='flat', edgecolor='k', cmap=cmap, norm=norm) 
+                shading='flat', edgecolor='None', cmap=cmap, norm=norm) 
         
         plt.gca().set_aspect('equal', 'datalim')
         plt.gca().set_aspect('equal', 'box')

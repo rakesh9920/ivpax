@@ -1,7 +1,6 @@
 # scripts / carotid_phantom_synthetic_beamform.py
 
 from pyfield.beamform import Beamformer, envelope, imdisp, msview
-from pyfield.util import align_and_sum
 
 import numpy as np
 import h5py
@@ -14,7 +13,7 @@ temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
 output_key = 'bfdata/synthetic/tx'
 nchannel = 64
-nproc = 1
+nproc = 12
 frames = None
 chmask = False
 
@@ -29,7 +28,8 @@ opt = { 'nwin': 101,
        
 def write_view(view_path):
     
-    view = msview[0.001:0.071:0.001, 0:1:1, -np.pi/4:np.pi/4:100j]
+    x, y, z = msview[0.001:0.071:0.00025, 0:1:1, -np.pi/4:np.pi/4:400j]
+    view = np.c_[x.ravel(), y.ravel(), z.ravel()]
     
     with h5py.File(view_path[0], 'a') as root:
         
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     
     write_view((file_path, view_key))
     
-    for tx in xrange(nchannel):
+    for tx in xrange(23, nchannel):
         
         startch = tx*nchannel
         endch = startch + nchannel
