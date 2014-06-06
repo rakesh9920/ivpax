@@ -10,7 +10,8 @@ def envelope(bfdata, axis=-1):
     
     return envdata
     
-def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
+def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none', 
+    ax=None):
     
     maxval = np.max(img)
     dbimg = 20*np.log10(img/maxval)
@@ -22,7 +23,10 @@ def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
     
     if r is None:
         
-        plt.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
+        if ax is None:
+            plt.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
+        else:
+            ax.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
         
     else:
         
@@ -57,18 +61,38 @@ def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none'):
         #x, _, z = msview[rslice, 0:1:1, phislice]
         x, y, z = meshview(rslice, 0, phislice, geom='sphere')
         x = np.squeeze(x)
-        z = np.squeeze(z)
-        
+        z = np.squeeze(z)        
         
         if interp is True:
-            plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
-                shading='gourad', cmap=cmap, norm=norm) 
+            if ax is None:
+                pc = plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
+                    shading='gouraud', cmap=cmap, norm=norm)
+            else:
+                pc = ax.pcolormesh(x[:-1,:-1], z[:-1,:-1], 
+                    dbimg.reshape(np.array(x.shape)-1), shading='gouraud', 
+                    cmap=cmap, norm=norm)
         else:
-            plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
-                shading='flat', edgecolor='None', cmap=cmap, norm=norm) 
+            if ax is None:
+                pc = plt.pcolormesh(x, z, dbimg.reshape(np.array(x.shape)-1),
+                    shading='flat', edgecolor='None', cmap=cmap, norm=norm) 
+            else:
+                pc = ax.pcolormesh(x[:-1,:-1], z[:-1,:-1], 
+                    dbimg.reshape(np.array(x.shape)-1), shading='flat', 
+                    edgecolor='None', cmap=cmap, norm=norm) 
         
-        plt.gca().set_aspect('equal', 'datalim')
-        plt.gca().set_aspect('equal', 'box')
+        if ax is None:
+            
+            #plt.gca().set_aspect('equal', 'datalim')
+            plt.gca().set_aspect('equal', 'box')
+            
+        else:
+            
+            #ax.set_aspect('equal', 'datalim')
+            ax.set_aspect('equal', 'box')
+        
+        return pc
+        
+        
         
 
 def imdisp3d(x, y, z, img, dyn=60, cmap=plt.cm.gray, ax=None, azim=90, elev=0):

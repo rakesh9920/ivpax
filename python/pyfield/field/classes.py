@@ -388,7 +388,7 @@ class Field:
             focus = varz['focus']
             
             rect = np.zeros((19, info.shape[1]))
-            rect[0,:] = info[0,:]
+            rect[0,:] = info[0,:] + 1
             rect[1:13,:] = info[10:22,:]
             rect[13,:] = info[4,:]
             rect[14,:] = info[2,:]
@@ -397,11 +397,11 @@ class Field:
             
             centers = info[23:26,:].T
             
-            focus_times = focus[:,0]
-            focus_delays = focus[:,1:]
+            #focus_times = focus[:,0]
+            #focus_delays = focus[:,1:]
             
             aperture = self.xdc_rectangles(rect, centers, np.array([[0,0,300]]))
-            self.xdc_focus_times(aperture, focus_times, focus_delays)
+            #self.xdc_focus_times(aperture, focus_times, focus_delays)
         
         return aperture
      
