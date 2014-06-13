@@ -25,7 +25,7 @@ coeff_quad = mpole_coeff(strengths, quadrupole, center, k, rho, c, order)
 #print coeff2
 #print coeff3
 
-r, theta, phi = np.mgrid[100:101:1, 0:2*np.pi:360j, np.pi/2:np.pi/2+1:1]
+r, theta, phi = np.mgrid[20:21:1, 0:2*np.pi:360j, np.pi/2:np.pi/2+1:1]
 
 points = sph2cart(np.c_[r.ravel(), theta.ravel(), phi.ravel()])
 
@@ -45,6 +45,18 @@ dist = distance(points, quadrupole)
 pres_quad_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
     dist*strengths[None,:], axis=1)
 
-plt.polar(theta.ravel(), np.abs(pres_quad_exact))
-plt.polar(theta.ravel(), np.abs(pres_quad))
-plt.gcf().show()
+#fig1 = plt.figure()
+#plt.polar(theta.ravel(), np.abs(pres_quad_exact))
+#plt.polar(theta.ravel(), np.abs(pres_quad))
+#fig1.show()
+#
+#fig2 = plt.figure()
+#plt.polar(theta.ravel(), np.abs(pres_mono_exact))
+#plt.polar(theta.ravel(), np.abs(pres_mono))
+#fig2.show()
+#
+#fig3 = plt.figure()
+#plt.polar(theta.ravel(), np.abs(pres_di_exact))
+#plt.polar(theta.ravel(), np.abs(pres_di))
+#fig3.show()
+

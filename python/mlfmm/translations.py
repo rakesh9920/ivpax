@@ -7,7 +7,10 @@ from mlfmm.wigner3j import wigner3j
 
 
 def sph2cart(points, cat=True):
-    
+
+    if points.ndim < 2:
+        points = points[None,:]
+        
     x = points[:,0]*np.cos(points[:,1])*np.sin(points[:,2])
     y = points[:,0]*np.sin(points[:,1])*np.sin(points[:,2])
     z = points[:,0]*np.cos(points[:,2])
@@ -22,6 +25,9 @@ def cart2sph(points, cat=True):
     # theta is azimuth angle (longitudinal)
     # phi is polar angle (colatitude)
     
+    if points.ndim < 2:
+        points = points[None,:]
+        
     hypotxy = np.hypot(points[:,0], points[:,1])
     r = np.hypot(hypotxy, points[:,2])
     theta = np.arctan2(points[:,1], points[:,0])
@@ -82,7 +88,7 @@ def mec(q, points, center, k, rho, c, l, m):
         #phi, theta)))
     
     #coeff = 1j*k*np.sum(q*sphjn(l, k*r)*np.conj(sph_harm(m, l, theta, phi)))
-    coeff = k**2*rho*c*np.sum(q*sphjn(l, k*r)*np.conj((-1)**m*sph_harm(m, l, 
+    coeff = -k**2*rho*c*np.sum(q*sphjn(l, k*r)*np.conj((-1)**m*sph_harm(m, l, 
         theta, phi))) 
 
      
@@ -112,18 +118,27 @@ def mpole_eval(coeff, points, center, k):
         
         for m in xrange(-l, l + 1):
             
-            pres += coeff[idx]*sphhankel1(l, k*r)*(-1)**m*sph_harm(m, l, theta, phi)
+            pres += coeff[idx]*sphhankel1(l, k*r)*(-1)**m*sph_harm(m, l, theta, 
+                phi)
             idx += 1
     
     return pres
 
-def local_eval(pos):
+def local_eval(coeff, points, center, k):
     pass
 
 def m2m(coeff, center1, center2, k):
     
+    def c(l1, l2, l3, m1, m2, m3):
+        
+        ret = wigner3j(l1, l2, l3, -m1, m2, m3)*wigner3j(l1, l2, l3, 0, 0, 0)* \
+            np.sqrt((2*l1+1)*(2*l2+1)*(2*l3+1)/(4*np.pi))#*1j**(l2 + l3 - 1)
+        
+        return ret
+    
     delta_r = center2 - center1
-    x = delta_r[0,0]
+    #delta_r = center1 - center2
+    #x = delta_r[0,0]
 
     r, theta, phi = cart2sph(delta_r, cat=False)
 
@@ -142,16 +157,20 @@ def m2m(coeff, center1, center2, k):
                 for m2 in xrange(-l2, l2 + 1):
                     
                     old_coeff = coeff[idx2]
-                    m3 = -m1 - m2
+                    m3 = m1 - m2
                     
                     for l3 in xrange(np.abs(l1 - l2), l1 + l2 + 1):
                         
                         if np.abs(m3) > l3:
                             continue
                             
-                        new_coeff += old_coeff*wigner3j(l1, l2, l3, m1, m2, 
-                            m3)*4*np.pi*sphjn(l3, k*x)*np.conj(sph_harm(m3, l3,
-                            theta, phi))*1j**(l2 + l3 - 1)
+                        #new_coeff += old_coeff*wigner3j(l1, l2, l3, m1, m2, 
+                        #    m3)*4*np.pi*sphjn(l3, k*x)*np.conj(sph_harm(m3, l3,
+                        #    theta, phi))*1j**(l2 + l3 - 1)
+                        
+                        new_coeff += old_coeff*c(l1, l2, l3, m1, m2, m3)*4* \
+                            np.pi*sphjn(l3, k*r)*np.conj(sph_harm(m3, l3,
+                            theta, phi))
 
                     idx2 += 1
                 
@@ -161,8 +180,9 @@ def m2m(coeff, center1, center2, k):
     
     return ret
  
-def l2l():
-    pass
+def l2l(coeff, center1, center2, k):
+    
+    return m2m(coeff, center1, center2, k)
        
 def m2l():
     pass
