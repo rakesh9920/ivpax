@@ -1,0 +1,50 @@
+# mlfmm / mpole_tester.py
+
+import numpy as np
+
+from mlfmm.translations import mpole_coeff, sph2cart, mpole_eval
+from pyfield.util import distance
+from matplotlib import pyplot as plt
+
+monopole = np.array([0, 0, 0])
+dipole = np.array([[1, 0, 0], [-1, 0, 0]])
+quadrupole = np.array([[1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0]])
+center = np.zeros((1,3))
+strengths = np.array([1, -1, -1, 1])
+f = 10
+rho = 1000
+c = 1500
+k = 2*np.pi*f/c
+order = 3
+
+coeff_mono = mpole_coeff(strengths[0], monopole, center, k, rho, c, order)
+coeff_di = mpole_coeff(strengths[:2], dipole, center, k, rho, c, order)
+coeff_quad = mpole_coeff(strengths, quadrupole, center, k, rho, c, order)
+
+#print coeff1
+#print coeff2
+#print coeff3
+
+r, theta, phi = np.mgrid[100:101:1, 0:2*np.pi:360j, np.pi/2:np.pi/2+1:1]
+
+points = sph2cart(np.c_[r.ravel(), theta.ravel(), phi.ravel()])
+
+pres_mono = mpole_eval(coeff_mono, points, center, k)
+pres_di = mpole_eval(coeff_di, points, center, k)
+pres_quad = mpole_eval(coeff_quad, points, center, k)
+
+dist = distance(points, monopole[None,:])
+pres_mono_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
+    dist*strengths[0], axis=1)
+
+dist = distance(points, dipole)
+pres_di_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
+    dist*strengths[None,:2], axis=1)
+    
+dist = distance(points, quadrupole)
+pres_quad_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
+    dist*strengths[None,:], axis=1)
+
+plt.polar(theta.ravel(), np.abs(pres_quad_exact))
+plt.polar(theta.ravel(), np.abs(pres_quad))
+plt.gcf().show()
