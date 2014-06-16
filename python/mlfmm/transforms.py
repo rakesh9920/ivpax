@@ -1,4 +1,4 @@
-# mlfmm / translations.py
+# mlfmm / transforms.py
 
 import numpy as np
 from scipy.special import sph_harm, jn, yv, lpmv
@@ -7,7 +7,9 @@ from mlfmm.wigner3j import wigner3j
 
 
 def sph2cart(points, cat=True):
-
+    '''
+    Coordinate transform from spherical to cartesian.
+    '''
     if points.ndim < 2:
         points = points[None,:]
         
@@ -21,7 +23,9 @@ def sph2cart(points, cat=True):
         return x, y, z
     
 def cart2sph(points, cat=True):
-    
+    '''
+    Coordinate transform from cartesian to spherical.
+    '''
     # theta is azimuth angle (longitudinal)
     # phi is polar angle (colatitude)
     
@@ -75,7 +79,26 @@ def sphharm(l, m, theta, phi):
         np.exp(1j*m*theta)
     
     return ret
+
+def calc_pressure_exact(q, points, center, k, rho, c):
+    '''
+    Return exact pressure using the baffled Rayleigh integral.
+    '''
+    delta_r = points - center
+    r, theta, phi = cart2sph(delta_r, cat=False)
     
+    return np.sum(q*1j*rho*c*k/(2*np.pi)*np.exp(1j*k*r)/r)
+
+def calc_self_pressure(q, s_n, k, rho, c):
+    '''
+    Return pressure at node approximated by radiation impedance of a piston.
+    '''
+    a_eff = np.sqrt(s_n/np.pi)
+    
+    pres = q/s_n*rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*(k*a_eff))
+    
+    return pres
+
 def mec(q, points, center, k, rho, c, l, m):
     '''
     Return the multipole expansion coefficient of degree l and order m for a
@@ -86,7 +109,6 @@ def mec(q, points, center, k, rho, c, l, m):
 
     #coeff = np.sqrt(4*np.pi/(2*l + 1))*np.sum(q*r**l*np.conj(sph_harm(m, l,
         #phi, theta)))
-    
     #coeff = 1j*k*np.sum(q*sphjn(l, k*r)*np.conj(sph_harm(m, l, theta, phi)))
     coeff = -k**2*rho*c*np.sum(q*sphjn(l, k*r)*np.conj((-1)**m*sph_harm(m, l, 
         theta, phi))) 
@@ -96,26 +118,35 @@ def mec(q, points, center, k, rho, c, l, m):
 
 def mpole_coeff(q, points, center, k, rho, c, order):
     '''
+    Return multipole expansion coefficients up to the desired order.
     '''
-    coeff = []
+    coeff = np.zeros((order + 1)**2, dtype='cfloat')
+    idx = 0
     
     for l in xrange(order + 1):
         for m in xrange(-l, l + 1): 
-            coeff.append(mec(q, points, center, k, rho, c, l, m))
+            
+            coeff[idx] = (mec(q, points, center, k, rho, c, l, m))
+            idx += 1
     
     return coeff
 
 def mpole_eval(coeff, points, center, k):
     '''
+    Return pressure calculated using a truncated multipole expansion.
     '''
     delta_r = points - center
     r, theta, phi = cart2sph(delta_r, cat=False)
     
-    idx = 0
-    pres = np.zeros(points.shape[0], dtype='cfloat')
-    
-    for l in xrange(np.sqrt(len(coeff)).astype(int)):
+    if points.ndim == 1:
+        npoints = 1
+    else:
+        npoints = points.shape[0]
         
+    idx = 0
+    pres = np.zeros(npoints, dtype='cfloat')
+    
+    for l in xrange(np.sqrt(coeff.size).astype(int)):
         for m in xrange(-l, l + 1):
             
             pres += coeff[idx]*sphhankel1(l, k*r)*(-1)**m*sph_harm(m, l, theta, 
@@ -128,12 +159,15 @@ def local_eval(coeff, points, center, k):
     pass
 
 def m2m(coeff, center1, center2, k):
-    
+    '''
+    Returns multipole expansion coefficients translated to a new origin.
+    '''
     def c(l1, l2, l3, m1, m2, m3):
         
         ret = wigner3j(l1, l2, l3, -m1, m2, m3)*wigner3j(l1, l2, l3, 0, 0, 0)* \
             np.sqrt((2*l1+1)*(2*l2+1)*(2*l3+1)/(4*np.pi))#*1j**(l2 + l3 - 1)
-        
+        #ret = wigner3j(l1, l2, l3, m1, m2, m3)*wigner3j(l1, l2, l3, 0, 0, 0)* \
+        #    np.sqrt((2*l1+1)*(2*l2+1)*(2*l3+1)/(4*np.pi))#*1j**(l2 + l3 - 1) 
         return ret
     
     delta_r = center2 - center1
@@ -143,8 +177,8 @@ def m2m(coeff, center1, center2, k):
     r, theta, phi = cart2sph(delta_r, cat=False)
 
     ncoeff = np.sqrt(len(coeff)).astype(int)
-    #ret = np.zeros(len(coeff), dtype='cfloat')
-    ret = []
+    ret = np.zeros(coeff.size, dtype='cfloat')
+    #ret = []
     idx1 = 0
     
     for l1 in xrange(ncoeff):
@@ -157,8 +191,9 @@ def m2m(coeff, center1, center2, k):
                 for m2 in xrange(-l2, l2 + 1):
                     
                     old_coeff = coeff[idx2]
-                    m3 = m1 - m2
-                    
+                    #m3 = m1 - m2
+                    m3 = m1 - m2    
+                                    
                     for l3 in xrange(np.abs(l1 - l2), l1 + l2 + 1):
                         
                         if np.abs(m3) > l3:
@@ -168,22 +203,29 @@ def m2m(coeff, center1, center2, k):
                         #    m3)*4*np.pi*sphjn(l3, k*x)*np.conj(sph_harm(m3, l3,
                         #    theta, phi))*1j**(l2 + l3 - 1)
                         
-                        new_coeff += old_coeff*c(l1, l2, l3, m1, m2, m3)*4* \
+                        new_coeff += np.conj(old_coeff*c(l1, l2, l3, m1, m2, 
+                            m3)*4* \
                             np.pi*sphjn(l3, k*r)*np.conj(sph_harm(m3, l3,
-                            theta, phi))
+                            theta, phi))) # not sure why conj is correct!
 
                     idx2 += 1
                 
-            #ret[idx1] = new_coeff[0]
-            ret.append(new_coeff[0])
+            ret[idx1] = new_coeff[0]
+            #ret.append(new_coeff[0])
             idx1 += 1
     
     return ret
  
 def l2l(coeff, center1, center2, k):
-    
+    '''
+    Returns local expansion coefficients translated to a new origin.
+    '''
     return m2m(coeff, center1, center2, k)
        
 def m2l():
+    '''
+    Returns local expansion coefficients transformed from multipole expansion
+    coefficients.
+    '''
     pass
 

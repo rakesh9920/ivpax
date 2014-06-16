@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from mlfmm.translations import mpole_coeff, sph2cart, mpole_eval
+from mlfmm.transforms import mpole_coeff, sph2cart, mpole_eval, m2m
 from pyfield.util import distance
 from matplotlib import pyplot as plt
 
@@ -45,18 +45,18 @@ dist = distance(points, quadrupole)
 pres_quad_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
     dist*strengths[None,:], axis=1)
 
-#fig1 = plt.figure()
-#plt.polar(theta.ravel(), np.abs(pres_quad_exact))
-#plt.polar(theta.ravel(), np.abs(pres_quad))
-#fig1.show()
-#
-#fig2 = plt.figure()
-#plt.polar(theta.ravel(), np.abs(pres_mono_exact))
-#plt.polar(theta.ravel(), np.abs(pres_mono))
-#fig2.show()
-#
-#fig3 = plt.figure()
-#plt.polar(theta.ravel(), np.abs(pres_di_exact))
-#plt.polar(theta.ravel(), np.abs(pres_di))
-#fig3.show()
+fig1 = plt.figure()
+plt.polar(theta.ravel(), np.abs(pres_quad_exact))
+plt.polar(theta.ravel(), np.abs(pres_quad))
+fig1.show()
+
+fig2 = plt.figure()
+plt.polar(theta.ravel(), np.abs(pres_mono_exact))
+plt.polar(theta.ravel(), np.abs(pres_mono))
+fig2.show()
+
+fig3 = plt.figure()
+plt.polar(theta.ravel(), np.abs(pres_di_exact))
+plt.polar(theta.ravel(), np.abs(pres_di))
+fig3.show()
 
