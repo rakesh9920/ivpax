@@ -282,7 +282,7 @@ class Operator:
             pres += calc_pressure_exact(strengths, pos, top_group.nodes[mask,:],
                 k, rho, c)
         
-        # add exact pressure from nodes in neighboring groups
+        ## add exact pressure from nodes in neighboring groups
         for group in top_group.neighbors:
             
             node_ids = group().node_ids
@@ -296,7 +296,7 @@ class Operator:
         # add approx pressure from nodes in ntnn via multipole expansion
         for group in top_group.ntnn:
             
-            pres += mpole_eval(group().coeff, pos, group().center, k)
+            pres += 2*mpole_eval(group().coeff, pos, group().center, k)
         
         # add approx pressure from nodes in ntnn for remaining levels
         for lvl in qt.levels[1:]:
@@ -305,7 +305,7 @@ class Operator:
             
             for group in top_group.ntnn:
                 
-                pres += mpole_eval(group().coeff, pos, group().center, k)
+                pres += 2*mpole_eval(group().coeff, pos, group().center, k)
        
         return pres 
     

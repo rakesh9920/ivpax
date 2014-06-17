@@ -87,7 +87,9 @@ def calc_pressure_exact(q, points, center, k, rho, c):
     delta_r = points - center
     r, theta, phi = cart2sph(delta_r, cat=False)
     
-    return np.sum(q*1j*rho*c*k/(2*np.pi)*np.exp(1j*k*r)/r)
+    #q = 1j*k*c*s_n*u
+    
+    return np.sum(q.ravel()*1j*rho*c*k/(2*np.pi)*np.exp(1j*k*r)/r)
 
 def calc_self_pressure(q, s_n, k, rho, c):
     '''
@@ -110,11 +112,13 @@ def mec(q, points, center, k, rho, c, l, m):
     #coeff = np.sqrt(4*np.pi/(2*l + 1))*np.sum(q*r**l*np.conj(sph_harm(m, l,
         #phi, theta)))
     #coeff = 1j*k*np.sum(q*sphjn(l, k*r)*np.conj(sph_harm(m, l, theta, phi)))
-    coeff = -k**2*rho*c*np.sum(q*sphjn(l, k*r)*np.conj((-1)**m*sph_harm(m, l, 
-        theta, phi))) 
+    if not np.all(q == 0):
+        coeff = -k**2*rho*c*np.sum(q.ravel()*sphjn(l, k*r)*np.conj((-1)**m*sph_harm(m, l, 
+            theta, phi))) 
 
-     
-    return coeff
+        return coeff
+    else:
+        return 0j
 
 def mpole_coeff(q, points, center, k, rho, c, order):
     '''
@@ -149,8 +153,9 @@ def mpole_eval(coeff, points, center, k):
     for l in xrange(np.sqrt(coeff.size).astype(int)):
         for m in xrange(-l, l + 1):
             
-            pres += coeff[idx]*sphhankel1(l, k*r)*(-1)**m*sph_harm(m, l, theta, 
-                phi)
+            if coeff[idx] != 0:
+                pres += coeff[idx]*sphhankel1(l, k*r)*(-1)**m*sph_harm(m, l, 
+                    theta, phi)
             idx += 1
     
     return pres
