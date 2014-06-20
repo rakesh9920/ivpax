@@ -3,12 +3,12 @@
 import h5py
 import numpy as np
 
-file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
-u1_key = 'flowdata/fluid2_sub0_31'
-u2_key = 'flowdata/fluid2_sub31_31'
-u3_key = 'flowdata/fluid2_full'
-view_key = 'view/view1'
-output_key = 'flowdata/fluid2_3d_1'
+file_path = './data/even_simpler_lumen_data.h5'
+u1_key = 'flowdata/corr_lag/fluid0_sub0'
+u2_key = 'flowdata/corr_lag/fluid0_sub15'
+u3_key = 'flowdata/corr_lag/full'
+view_key = 'view/view0'
+output_key = 'flowdata/fluid0_3d'
 
 def mag(x): return np.sqrt(x.dot(x))
 

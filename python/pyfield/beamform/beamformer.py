@@ -66,7 +66,7 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         if output_key not in output_root:
             
             bfdata = output_root.create_dataset(output_key, dtype='double',
-                shape=(npos, nwin, nframe), compression='gzip')   
+                shape=(npos, nwin, nframe))#, compression='gzip')   
                 
         else:
             
@@ -74,7 +74,7 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
                 
                 del output_root[output_key]
                 bfdata = output_root.create_dataset(output_key, dtype='double',
-                    shape=(npos, nwin, nframe), compression='gzip')
+                    shape=(npos, nwin, nframe))#, compression='gzip')
             
             bfdata = output_root[output_key]
         

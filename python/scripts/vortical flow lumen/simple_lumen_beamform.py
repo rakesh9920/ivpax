@@ -4,16 +4,15 @@ from pyfield.beamform import Beamformer
 
 import numpy as np
 import h5py
-from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/simple lumen flow/simple_lumen_data.hdf5'
-input_key = 'field/rfdata/blood/fluid2'
-view_key = 'view/view1'
-sub_rx_no = 0
-nsubch = 4
-#output_key = 'bfdata/fluid2_sub' + '{:01d}'.format(sub_rx_no)
-output_key = 'bfdata/fluid2_sub0_31'
+file_path = './data/even_simpler_lumen_data.h5'
+input_key = 'field/rfdata/blood/fluid0'
+view_key = 'view/view0'
+sub_rx_no = 15
+nsubch = 8
+output_key = 'bfdata/fluid0_sub' + '{:01d}'.format(sub_rx_no)
+#output_key = 'bfdata/full'
 nproc = 1
 frames = None
 centers = (np.arange(0,128) - 63.5)*300e-6
@@ -78,14 +77,14 @@ if __name__ == '__main__':
     bf.start(nproc=nproc, frames=frames)
     
     print bf
-    stdout.flush()
+    #stdout.flush()
     #bf.join()
     
-    with h5py.File(file_path, 'a') as root:
-        
-        bfdata = root[output_key]
-        bfdata.attrs['sub_rx_no'] = sub_rx_no
-        bfdata.attrs['sub_rx_position'] = sub_rx_position
+    #with h5py.File(file_path, 'a') as root:
+    #    
+    #    bfdata = root[output_key]
+    #    bfdata.attrs['sub_rx_no'] = sub_rx_no
+    #    bfdata.attrs['sub_rx_position'] = sub_rx_position
     
     
     
