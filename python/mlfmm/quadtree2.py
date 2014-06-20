@@ -14,7 +14,11 @@ class Group:
              
         self.center = np.array(origin).reshape(3) + np.array([xdim/(2**lvl)*(i + 
             0.5), ydim/(2**lvl)*(j + 0.5), 0])
-        self.group_id = np.array(group_id).reshape(3).astype(int)
+        
+        if isinstance(group_id, np.ndarray):
+            self.group_id = tuple(group_id.ravel())
+        else:
+            self.group_id = group_id
         self.children = []
         self.parent = None
         self.neighbors = []
@@ -33,11 +37,11 @@ class Group:
         
         lvl, i, j = self.group_id
         
-        parent_id = (lvl + 1, np.floor(i/2.0), np.floor(j/2.0))
-        parent_id = np.array(parent_id).reshape(3).astype(int)
+        parent_id = (lvl - 1, np.floor(i/2.0), np.floor(j/2.0))
         
         if not qt.is_member(parent_id):
-            qt.add_member(parent_id)
+            parent = Group(parent_id, qt.origin, qt.dim)
+            qt.add_member(parent)
         
         parent = qt.get_member(parent_id)
         parent.add_child(self)
@@ -57,9 +61,8 @@ class Group:
         
         for dx in xrange(istart, istop):
             for dy in xrange(jstart, jstop):
-                if qt.is_member((lvl + 1, dx, dy)):
-                    neighbors.append(weakref.ref(qt.get_member((lvl + 1, dx, 
-                        dy))))
+                if qt.is_member((lvl, dx, dy)):
+                    neighbors.append(weakref.ref(qt.get_member((lvl, dx, dy))))
         
         self.neighbors = neighbors
     
@@ -121,7 +124,6 @@ class QuadTree:
         origin = self.origin
         dim = self.dim
         nodes = self.nodes
-        group_ids = self.group_ids
         levels = self.levels
         
         # create empty levels
@@ -130,6 +132,7 @@ class QuadTree:
         
         # populate finest level
         self.assign_nodes(maxlevel)
+        group_ids = self.group_ids
         group_ids_tup = [tuple(row) for row in group_ids]
         unique_ids = np.unique(group_ids_tup)
         
@@ -156,16 +159,23 @@ class QuadTree:
         for lvl in levels.itervalues():
             for group in lvl.itervalues():
                 group.find_ntnn()
+        #for lvl in xrange(maxlevel, minlevel, -1):
+        #    for group in levels[lvl].itervalues():
+        #        group.find_ntnn()
           
     def assign_nodes(self, maxlevel):
         
         ids = np.floor((self.nodes[:,:2] - self.origin[None,:2])/ \
             (self.dim[None,:]*2**(-maxlevel))).astype(int) 
         
-        self.group_ids = np.insert(ids, 0, np.zeros((self.nodes.shape[0], 1)), 
-            axis=0)   
+        self.group_ids = np.insert(ids, 0, 
+            maxlevel*np.ones(self.nodes.shape[0]), axis=1)   
     
-            
+class Operator:
+    
+    def __init__(self):
+        pass
+
             
         
         
