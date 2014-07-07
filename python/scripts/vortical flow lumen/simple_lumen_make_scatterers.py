@@ -8,10 +8,10 @@ import scipy as sp
 from scipy.integrate import ode
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/simple lumen flow/even_simpler_lumen_data.hdf5'
+file_path = './data/diagonal_lumen_data.h5'
 out_key = 'field/targdata/fluid0'
 ns = 20*1000**3
-nframe = 20
+nframe = 10
 prf = 1000
 range_x = (-0.01, 0.01)
 range_y = (-0.01, 0.01)
@@ -68,7 +68,7 @@ def flow_field(t, r):
 def flow_field2(t, r):
     
     vel_x = 0.01 #-omega*r*sp.sin(theta)
-    vel_y = 0 #omega*r*sp.cos(theta)
+    vel_y = 0.01 #omega*r*sp.cos(theta)
     vel_z = 0.01
     
     return [vel_x, vel_y, vel_z]

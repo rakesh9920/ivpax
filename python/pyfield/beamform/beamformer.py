@@ -273,7 +273,7 @@ class Beamformer():
         return ''.join(string)
         
     def set_options(self, **kwargs):
-        
+
         self.options['nwin'] = kwargs.get('nwin')
         self.options['resample'] = kwargs.get('resample', 1)
         self.options['planetx'] = kwargs.get('planetx', False)

@@ -6,13 +6,13 @@ import numpy as np
 import h5py
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/even_simpler_lumen_data.h5'
+file_path = './data/diagonal_lumen_data.h5'
 input_key = 'field/rfdata/blood/fluid0'
 view_key = 'view/view0'
-sub_rx_no = 15
+sub_rx_no = 0
 nsubch = 8
-output_key = 'bfdata/fluid0_sub' + '{:01d}'.format(sub_rx_no)
-#output_key = 'bfdata/full'
+#output_key = 'bfdata/fluid0_sub' + '{:01d}'.format(sub_rx_no)
+output_key = 'bfdata/fluid0_full'
 nproc = 1
 frames = None
 centers = (np.arange(0,128) - 63.5)*300e-6
@@ -33,9 +33,9 @@ centers = np.c_[centers, np.zeros((128, 2))]
 #                            [0.0132, 0, 0],
 #                            [0.0156, 0, 0],
 #                            [0.018, 0, 0]])
-chmask = np.zeros(128)
-chmask[sub_rx_no*nsubch:sub_rx_no*nsubch+nsubch] = 1
-#chmask = False
+#chmask = np.zeros(128)
+#chmask[sub_rx_no*nsubch:sub_rx_no*nsubch+nsubch] = 1
+chmask = False
 
 sub_rx_position = np.mean(centers[(chmask==1),:], axis=0)
 

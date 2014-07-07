@@ -2,7 +2,7 @@ from mayavi import mlab
 import numpy as np
 
 
-with np.load('./data/even_simpler_lumen_flow.npz') as data:
+with np.load('./data/diagonal_lumen_flow.npz') as data:
     
     #fdata_inst = data['fdata_inst']
     fdata_corrlag = data['fdata_corrlag']
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     
     mlab.colorbar(orientation='vertical', title='m/s')
     lut = mlab.colorbar(orientation='vertical', title='m/s')
-    lut.data_range = np.array([0.00, 0.006])
+    lut.data_range = np.array([0.00, 0.017])
     lut.use_default_range = False
     
     

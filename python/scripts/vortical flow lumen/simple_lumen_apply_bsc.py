@@ -5,7 +5,7 @@ from pyfield.field import apply_bsc
 import h5py
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/even_simpler_lumen_data.h5'
+file_path = './data/diagonal_lumen_data.h5'
 bsc_key = 'bsc/experimental/blood_hmtc8_shung'
 raw_key = 'field/rfdata/raw/fluid0'
 out_key = 'field/rfdata/blood/fluid0'

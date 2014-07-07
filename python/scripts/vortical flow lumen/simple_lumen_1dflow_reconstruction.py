@@ -3,9 +3,9 @@
 from pyfield.flow import Reconstructor
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/even_simpler_lumen_data.h5'
-input_key = 'bfdata/fluid0_sub15'
-output_key = 'flowdata/corr_lag/fluid0_sub15'
+file_path = './data/diagonal_lumen_data.h5'
+input_key = 'bfdata/fluid0_full'
+output_key = 'flowdata/corr_lag/fluid0_full'
 coeff_key = ''
 opts = { 'method': 'corr_lag',
          'ensemble': 8,

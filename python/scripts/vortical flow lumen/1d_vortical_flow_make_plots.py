@@ -11,20 +11,20 @@ with np.load('./data/simple_lumen_1d_vortical_flow.npz') as data:
     y = data['y']
     z = data['z']
 
+    
 if __name__ == '__main__':
 
-    
     #v = fdata_actual.reshape((20, 20, 30, 3))
     actual = fdata_actual[2,...]
     
     flow = fdata_corrlag.reshape((20, 20, 30, 19))
-    v = (flow[...,0] - actual)
+    v = actual #(flow[...,0] - actual)
     
     #src = mlab.pipeline.vector_field(x, y, z, np.zeros_like(x), 
     #    np.zeros_like(y), v[...,0])
-    src = mlab.pipeline.vector_field(x, y, z, np.zeros_like(x), 
-        np.zeros_like(y), v)
-    #src = mlab.pipeline.vector_field(x, y, z, v[0,...], v[1,...], v[2,...])
+    #src = mlab.pipeline.vector_field(x, y, z, np.zeros_like(x), 
+        #np.zeros_like(y), v)
+    src = mlab.pipeline.vector_field(x, y, z, v[0,...], v[1,...], v[2,...])
     
     vec = mlab.pipeline.vectors(src, scale_factor = 1)
     vec.glyph.glyph.clamping = False

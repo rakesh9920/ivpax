@@ -3,10 +3,10 @@
 import h5py
 import numpy as np
 
-file_path = './data/even_simpler_lumen_data.h5'
+file_path = './data/diagonal_lumen_data.h5'
 u1_key = 'flowdata/corr_lag/fluid0_sub0'
 u2_key = 'flowdata/corr_lag/fluid0_sub15'
-u3_key = 'flowdata/corr_lag/full'
+u3_key = 'flowdata/corr_lag/fluid0_full'
 view_key = 'view/view0'
 output_key = 'flowdata/fluid0_3d'
 
