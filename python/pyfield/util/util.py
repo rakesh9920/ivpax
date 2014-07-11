@@ -57,7 +57,45 @@ def chunks(items, nitems):
     if nitems < 1:
         nitems = 1
     return [slice(i, i + nitems) for i in xrange(0, len(items), nitems)]
+
+def sph2cart(points, cat=True):
+    '''
+    Coordinate transform from spherical to cartesian.
+    '''
+    if points.ndim < 2:
+        points = points[None,:]
+        
+    x = points[:,0]*np.cos(points[:,1])*np.sin(points[:,2])
+    y = points[:,0]*np.sin(points[:,1])*np.sin(points[:,2])
+    z = points[:,0]*np.cos(points[:,2])
     
+    if cat:
+        return np.c_[x, y, z]
+    else:
+        return x, y, z
+    
+def cart2sph(points, cat=True):
+    '''
+    Coordinate transform from cartesian to spherical.
+    '''
+    # theta is azimuth angle (longitudinal)
+    # phi is polar angle (colatitude)
+    
+    if points.ndim < 2:
+        points = points[None,:]
+        
+    hypotxy = np.hypot(points[:,0], points[:,1])
+    r = np.hypot(hypotxy, points[:,2])
+    theta = np.arctan2(points[:,1], points[:,0])
+    phi = np.arctan2(hypotxy, points[:,2])
+    #r = np.sqrt(points[:,0]**2 + points[:,1]**2 + points[:,2]**2)
+    #phi = np.arccos(points[:,2]/r)
+    
+    if cat:
+        return np.c_[r, theta, phi]
+    else:
+        return r, theta, phi
+        
 def distance(a, b):
     
     a = a.T

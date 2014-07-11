@@ -114,7 +114,7 @@ if __name__ == '__main__':
     fluid_ntarget = fluid.shape[0]
     fluid_amp = np.ones((fluid_ntarget, 1))
     
-    solver = ode(flow_field2)
+    solver = ode(flow_field)
     solver.set_integrator('dopri5')
     
     with h5py.File(out_path[0], 'a') as root:
