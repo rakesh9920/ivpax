@@ -1,4 +1,4 @@
-# scripts / carotid_phantom_simulation.py
+# scripts / imaging phantom / imaging_phantom_simulation.py
 
 from pyfield.field import Simulation, SynthSimulation
 
@@ -6,12 +6,12 @@ from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 # names = {'myocardium', 'blood'}
-file_path = './data/heart_phantom_data.h5'
+file_path = './data/imaging_phantom_data.h5'
 input_group = 'field/targdata/'
 output_group = 'field/rfdata/raw/synthetic/'
 script_path = 'pyfield.field.ice_array_64_10mhz'
-#tissue_names = ['myocardium', 'blood']
-tissue_names = ['myocardium']
+tissue_names = ['mat1']
+#tissue_names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
 nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,
