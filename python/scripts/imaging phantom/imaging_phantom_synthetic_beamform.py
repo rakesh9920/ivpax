@@ -7,12 +7,12 @@ import h5py
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/heart_phantom_data.h5'
-input_key = 'field/rfdata/synthetic/full'
+file_path = './data/imaging_phantom_data.h5'
+input_key = 'field/rfdata/raw/synthetic'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
 output_key = 'bfdata/synthetic/tx'
-nchannel = 64
+nchannel = 128
 nproc = 12
 frames = None
 chmask = False
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     
     write_view((file_path, view_key))
     
-    for tx in xrange(23, nchannel):
+    for tx in xrange(0, nchannel):
         
         startch = tx*nchannel
         endch = startch + nchannel
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         bf.start(nproc=nproc, frames=frames)
         
         print bf
-        stdout.flush()
+        #stdout.flush()
         bf.join()
 #
     #with h5py.File(file_path, 'r') as root:

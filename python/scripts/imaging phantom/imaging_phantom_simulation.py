@@ -9,9 +9,9 @@ from sys import stdout
 file_path = './data/imaging_phantom_data.h5'
 input_group = 'field/targdata/'
 output_group = 'field/rfdata/raw/synthetic/'
-script_path = 'pyfield.field.ice_array_64_10mhz'
-tissue_names = ['mat1']
-#tissue_names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
+script_path = 'pyfield.field.linear_array_128_5mhz'
+#tissue_names = ['mat1']
+tissue_names = ['background', 'mat2', 'mat3', 'mat4']
 nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         print sim
         stdout.flush()
         
-        #sim.join()
+        sim.join()
         
         
     
