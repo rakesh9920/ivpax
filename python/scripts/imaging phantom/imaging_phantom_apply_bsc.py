@@ -5,12 +5,13 @@ from pyfield.field import apply_bsc
 import h5py
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/heart_phantom_data.h5'
-bsc_group = 'bsc/experimental/'
+file_path = './data/imaging_phantom_data.h5'
+bsc_group = 'bsc/powerfit/'
 raw_group = 'field/rfdata/raw/synthetic/'
 output_group = 'field/rfdata/tissue/synthetic/'
-bsc_names = ['heart_dog_odonnell', 'blood_hmtc8_shung']
-tissue_names = ['myocardium', 'blood']
+bsc_names = ['fat_wrist_raju', 'blood_hmtc8_shung', 'heart_dog_odonnell', 
+    'aorta_normal_landini', 'aorta_calcified_landini']
+tissue_names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
 ################################################################################
 
 if __name__ == '__main__':

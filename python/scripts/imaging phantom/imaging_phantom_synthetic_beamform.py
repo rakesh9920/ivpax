@@ -1,6 +1,6 @@
 # scripts / carotid_phantom_synthetic_beamform.py
 
-from pyfield.beamform import Beamformer, envelope, imdisp, msview
+from pyfield.beamform import Beamformer, envelope, imdisp, mcview
 
 import numpy as np
 import h5py
@@ -8,12 +8,12 @@ from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = './data/imaging_phantom_data.h5'
-input_key = 'field/rfdata/raw/synthetic'
+input_key = 'field/rfdata/tissue/synthetic/full'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
 output_key = 'bfdata/synthetic/tx'
 nchannel = 128
-nproc = 12
+nproc = 4
 frames = None
 chmask = False
 
@@ -28,7 +28,7 @@ opt = { 'nwin': 101,
        
 def write_view(view_path):
     
-    x, y, z = msview[0.001:0.071:0.00025, 0:1:1, -np.pi/4:np.pi/4:400j]
+    x, y, z = mcview[-0.02:0.02025:0.00025, 0:1:1, 0.001:0.051:0.00025]
     view = np.c_[x.ravel(), y.ravel(), z.ravel()]
     
     with h5py.File(view_path[0], 'a') as root:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
         print bf
         #stdout.flush()
         bf.join()
-#
+
     #with h5py.File(file_path, 'r') as root:
     #    bfdata = np.squeeze(root[output_key + str(tx)][:])
     #

@@ -673,14 +673,14 @@ def delegate(in_queue, out_queue, input_path, script_path, output_path,
              
 class Simulation():
     
-    workers = []
-    delegator = []
-    script_path = ''
-    input_path = ''
-    output_path = ''
-    options = dict()
-    
     def __init__(self):
+        
+        self.workers = []
+        self.delegator = []
+        self.script_path = ''
+        self.input_path = ''
+        self.output_path = ''
+        self.options = dict()
         self.set_options()
         self.progress = util.Progress()
     
@@ -948,14 +948,14 @@ def delegate_synth(in_queue, out_queue, input_path, script_path, output_path,
 
 class SynthSimulation():
     
-    workers = []
-    delegator = []
-    script_path = ''
-    input_path = ''
-    output_path = ''
-    options = dict()
-    
     def __init__(self):
+        
+        self.workers = []
+        self.delegator = []
+        self.script_path = ''
+        self.input_path = ''
+        self.output_path = ''
+        self.options = dict()
         self.set_options()
         self.progress = util.Progress()
     

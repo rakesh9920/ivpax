@@ -66,7 +66,7 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
         if output_key not in output_root:
             
             bfdata = output_root.create_dataset(output_key, dtype='double',
-                shape=(npos, nwin, nframe))#, compression='gzip')   
+                shape=(npos, nwin, nframe), compression='gzip')   
                 
         else:
             
@@ -74,7 +74,7 @@ def delegate(in_queue, out_queue, input_path, view_path, output_path,
                 
                 del output_root[output_key]
                 bfdata = output_root.create_dataset(output_key, dtype='double',
-                    shape=(npos, nwin, nframe))#, compression='gzip')
+                    shape=(npos, nwin, nframe), compression='gzip')
             
             bfdata = output_root[output_key]
         
@@ -228,16 +228,16 @@ def work(in_queue, out_queue, attrs):
     
 class Beamformer():
     
-    workers = []
-    delegator = []
-    input_path = ('', '')
-    output_path = ('', '')
-    view_path = ('', '')
-    options = dict()
-    
     def __init__(self):
-        self.set_options()
+    
         self.progress = Progress()
+        self.workers = []
+        self.delegator = []
+        self.input_path = ('', '')
+        self.output_path = ('', '')
+        self.view_path = ('', '')
+        self.options = dict()
+        self.set_options()
     
     def __str__(self):
         string = []
@@ -273,7 +273,7 @@ class Beamformer():
         return ''.join(string)
         
     def set_options(self, **kwargs):
-
+        
         self.options['nwin'] = kwargs.get('nwin')
         self.options['resample'] = kwargs.get('resample', 1)
         self.options['planetx'] = kwargs.get('planetx', False)
