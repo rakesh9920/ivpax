@@ -80,7 +80,7 @@ def iqdemod(in1, fc, bw, fs, axis=-1):
     return I, Q
     
 def wgn(shape, dbw=1):
-    return np.random.standard_normal(shape)*np.sqrt(10**(dbw/10))
+    return np.random.standard_normal(shape)*np.sqrt(10**(dbw/10.0))
 
 
 
