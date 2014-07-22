@@ -99,7 +99,7 @@ def mag(r):
     
     return np.sqrt(np.sum(r**2))
     
-def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order):
+def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order, rho, c):
     '''
     Evaluates the acoustic field at a specified point using far-field
     signature coefficients.
@@ -113,7 +113,7 @@ def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order):
     for i in xrange(ndir):
         total += weights[i]*mlop(delta_pos, k, kdir[i,:], order)*coeff[i]
             
-    return 1j*k/(4*np.pi)*total
+    return 1j*k*rho*c/(4*np.pi)*total
     
 def nfeval(coeff, weights):
     '''
@@ -151,7 +151,7 @@ def quadrule(order):
     
     weights = w1[:,None].dot((w2*np.sin(phi)*np.pi**2/2)[None,:]).ravel()
     absc = np.array([(a,b) for a in theta for b in phi])
-    kdir = sph2cart(np.c[np.ones(absc.shape[0]), absc])
+    kdir = sph2cart(np.c_[np.ones(absc.shape[0]), absc])
     
     return kdir, weights
  
