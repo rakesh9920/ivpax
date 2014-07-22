@@ -3,6 +3,7 @@
 import numpy as np
 from scipy.special import sph_harm, jn, yv, lpmv, eval_legendre
 from scipy.misc import factorial
+from numpy.polynomial.legendre import leggauss
 
 def sph2cart(points, cat=True):
     '''
@@ -78,73 +79,105 @@ def sphharm(l, m, theta, phi):
     
     return ret
 
-def calc_pressure_exact(q, points, center, k, rho, c):
+def ffcoeff(q, srcpos, centerpos, k, kdir):
     '''
-    Return exact pressure using the baffled Rayleigh integral.
+    Returns the far-field signature coefficients of a collection of sources in
+    the specified directions.
     '''
-    delta_r = points - center
-    r, theta, phi = cart2sph(delta_r, cat=False)
+    delta_r = centerpos - srcpos
+    ndir = kdir.shape[0]
+    #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
-    #q = 1j*k*c*s_n*u
+    coeff = np.zeros(ndir)
     
-    return np.sum(q.ravel()*1j*rho*c*k/(2*np.pi)*np.exp(1j*k*r)/r)
+    for i in xrange(ndir):
+        coeff[i] = np.sum(q*np.exp(1j*k*delta_r.dot(kdir[i,:])))
+        
+    return coeff
 
-def calc_self_pressure(q, s_n, k, rho, c):
-    '''
-    Return pressure at node approximated by radiation impedance of a piston.
-    '''
-    a_eff = np.sqrt(s_n/np.pi)
+def mag(r):
     
-    pres = q/s_n*rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*(k*a_eff))
+    return np.sqrt(np.sum(r**2))
     
-    return pres
-
-def m2m():
+def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order):
+    '''
+    Evaluates the acoustic field at a specified point using far-field
+    signature coefficients.
+    '''
+    #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
+    delta_pos = fieldpos - centerpos
+    ndir = kdir.shape[0]
+    
+    total = 0
+    
+    for i in xrange(ndir):
+        total += weights[i]*mlop(delta_pos, k, kdir[i,:], order)*coeff[i]
+            
+    return 1j*k/(4*np.pi)*total
+    
+def nfeval(coeff, weights):
+    '''
+    Evaluates the acoustic field at a specified point using near-field
+    signature coefficients.
+    '''
     pass
 
-def l2l():
-    pass
-
-def ffmu(origin, new_origin, k0, order):
+def mlop(pos, k, kdir, order):
+    '''
+    M_l operator used in evaluation and translation of multipole expansions.
+    '''
+    #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
-    delta_r = new_origin - origin
+    r, theta, phi = cart2sph(pos, cat=False)
     
-    cos_gamma = delta_r.dot(sph2cart(k0))
-    x12 = np.sqrt(np.sum((delta_r**2)))
+    total = 0
     
-    total = 0j
-    for l in xrange(order):
-        total += 1j**l*(2*l + 1)*sphhankel1(l, x12)*eval_legendre(l, cos_gamma)
+    for l in xrange(order + 1):
+        total += (2*l + 1)*1j**l*sphhankel1(l, k*r)*eval_legendre(l, 
+            pos.dot(kdir))
     
     return total
 
-def fflambda(origin, new_origin, k0):
+def quadrule(order):
+    '''
+    Returns abscissas (in cartesian coordinates) and weights for a 
+    Legendre-Gauss quadrature rule for integration over a unit sphere.
+    '''
+    absc1, w1 = leggauss(2*order)
+    absc2, w2 = leggauss(order)
     
-    delta_r = new_origin - origin
+    theta = (absc1 + 1)*np.pi
+    phi = (absc2 + 1)*np.pi/2
     
-    return np.exp(1j*delta_r.dot(sph2cart(k0)))
-     
-def l2m():
+    weights = w1[:,None].dot((w2*np.sin(phi)*np.pi**2/2)[None,:]).ravel()
+    absc = np.array([(a,b) for a in theta for b in phi])
+    kdir = sph2cart(np.c[np.ones(absc.shape[0]), absc])
+    
+    return kdir, weights
+ 
+def ff2nfop(startpos, endpos, ktheta, kphi, order):
     pass
 
-def fftransform(q, src_pos, origin, k0):
-    
-    delta_r = origin - src_pos
-    #r, theta, phi = cart2sph(delta_r, cat=False)
-    #k0 = sph2cart(np.array([1, ktheta, kphi]))
-
-    return np.sum(q.reshape((-1,1))*np.exp(1j*delta_r.dot(sph2cart(k0))))
-    
-def ffeval():
+def ff2ffop(startpos, endpos, k, ktheta, kphi):
     pass
 
-
+#def ff2ff():
+#    pass
+#
+#def ff2nf():
+#    pass
 
 def interpolate():
     pass
 
 def filter():
     pass
+
+
+
+
+
+
     
 
 

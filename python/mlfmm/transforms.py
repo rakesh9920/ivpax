@@ -113,8 +113,8 @@ def mec(q, points, center, k, rho, c, l, m):
         #phi, theta)))
     #coeff = 1j*k*np.sum(q*sphjn(l, k*r)*np.conj(sph_harm(m, l, theta, phi)))
     if not np.all(q == 0):
-        coeff = -k**2*rho*c*np.sum(q.ravel()*sphjn(l, k*r)*np.conj((-1)**m*sph_harm(m, l, 
-            theta, phi))) 
+        coeff = -k**2*rho*c*np.sum(q.ravel()*sphjn(l, k*r)*np.conj((-1)**m*
+            sph_harm(m, l, theta, phi))) 
 
         return coeff
     else:
