@@ -88,7 +88,7 @@ def ffcoeff(q, srcpos, centerpos, k, kdir):
     ndir = kdir.shape[0]
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
-    coeff = np.zeros(ndir)
+    coeff = np.zeros(ndir, dtype='complex64')
     
     for i in xrange(ndir):
         coeff[i] = np.sum(q*np.exp(1j*k*delta_r.dot(kdir[i,:])))
@@ -113,7 +113,7 @@ def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order, rho, c):
     for i in xrange(ndir):
         total += weights[i]*mlop(delta_pos, k, kdir[i,:], order)*coeff[i]
             
-    return 1j*k*rho*c/(4*np.pi)*total
+    return -k**2*rho*c/(16*np.pi**2)*total
     
 def nfeval(coeff, weights):
     '''
@@ -124,7 +124,7 @@ def nfeval(coeff, weights):
 
 def mlop(pos, k, kdir, order):
     '''
-    M_l operator used in evaluation and translation of multipole expansions.
+    M_L operator used in evaluation and translation of multipole expansions.
     '''
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
@@ -134,7 +134,7 @@ def mlop(pos, k, kdir, order):
     
     for l in xrange(order + 1):
         total += (2*l + 1)*1j**l*sphhankel1(l, k*r)*eval_legendre(l, 
-            pos.dot(kdir))
+            (pos/mag(pos)).dot(kdir))
     
     return total
 
