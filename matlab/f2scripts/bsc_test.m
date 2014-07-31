@@ -46,7 +46,7 @@ sigma = 0.316798267931919;
 Ns = round(ns*(Dim(1)*Dim(2)*Dim(3))*1000^3);
 R = 0.5;
 rxDepth = 1;
-nIter = 50;
+nIter = 1;
 %BscAmp = 2*sqrt(2*BSC/sigma/(ns*1000^3));
 BscAmp = sqrt(2*pi*BSC/sigma/(ns*1000^3));
 

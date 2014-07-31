@@ -82,5 +82,20 @@ def iqdemod(in1, fc, bw, fs, axis=-1):
 def wgn(shape, dbw=1):
     return np.random.standard_normal(shape)*np.sqrt(10**(dbw/10.0))
 
-
+def deconvwnr(image, psf, nsr=0, axis=-1):
+    
+    H = fft(psf, image.shape[axis], axis=axis)
+    I = fft(image, axis=axis)
+    Sx = 1
+    
+    numer = np.conj(H) * Sx
+    denom = np.abs(H)**2 * Sx + nsr
+    denom = np.maximum(denom, np.finfo(image.dtype).eps)
+    
+    G = numer / denom
+    
+    J = np.real(ifft(G * I, axis=axis))
+    
+    return J
+    
 
