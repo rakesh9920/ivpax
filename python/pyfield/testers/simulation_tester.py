@@ -9,15 +9,17 @@ if __name__ == '__main__':
     file_path = './data/testdata.h5'
     input_key = 'field/targdata/tester'
     output_key = 'field/rfdata/tester'
-    script_path = 'pyfield.field.linear_focused_array_256_12mhz'
+    script_path = 'pyfield.field.linear_array_128_5mhz'
     
     with h5py.File(file_path, 'a') as root:
     
         if input_key in root:
             del root[input_key]
             
-        targdata = sct_cube((file_path, input_key),
-            (0.01, 0.01, 0.01), (0,0,0.10), (0,0,0), 1, 500**3, 1)
+        #targdata = sct_cube((file_path, input_key),
+            #(0.01, 0.01, 0.01), (0,0,0.10), (0,0,0), 1, 500**3, 1)
+        
+        targdata = np.array([[0,0,0.01],[0,0,0.02],[0,0,0.03],[0,0,0.04]])
             
         amp = np.ones((targdata.shape[0], 1))
             
@@ -42,8 +44,8 @@ if __name__ == '__main__':
         
     #root.close()
     
-    #sim = SynthSimulation()
-    sim = Simulation()
+    sim = SynthSimulation()
+    #sim = Simulation()
     
     sim.script_path = script_path
     sim.input_path = (file_path, input_key)
@@ -53,7 +55,7 @@ if __name__ == '__main__':
             'overwrite': True }
     sim.set_options(**opt)
     
-    sim.start(nproc=1)
+    sim.start(nproc=1, frames=None)
     print sim
     
 

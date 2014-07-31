@@ -31,8 +31,6 @@ def get_prms():
     prms['tx_impulse_response'] = impulse_response
     prms['rx_impulse_response'] = impulse_response
     prms['tx_excitation'] = excitation
-    prms['tx_positions'] = np.zeros((1,3))
-    prms['rx_positions'] = np.zeros((1,3))
     prms['area'] = 0.003*290e-6*128
     
     centers = (np.arange(0,128) - 63.5)*300e-6

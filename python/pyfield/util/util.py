@@ -151,7 +151,7 @@ def align_and_sum(array1, t1, array2, t2, fs):
     sum_array = np.pad(array1, pad_width1, mode='constant') + \
         np.pad(array2, pad_width2, mode='constant') 
     
-    return (sum_array, min(t1, t2))
+    return sum_array, min(t1, t2)
 
 def align_cat(array0, t0, array1, t1, fs, taxis=0, axis=-1):
     
