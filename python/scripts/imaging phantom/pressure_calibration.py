@@ -5,7 +5,7 @@ from pyfield.field import Field
 import numpy as np
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-script_path = 'pyfield.field.linear_array_128_5mhz_calibrated'
+script_path = 'pyfield.field.linear_array_128_6mhz_calibrated'
 ################################################################################
 
 if __name__ == '__main__':
@@ -15,11 +15,12 @@ if __name__ == '__main__':
     f2.field_init(-1)
     script = __import__(script_path, fromlist=['asdf'])
     
-            
     prms = script.get_prms()
     tx, rx = script.get_apertures(f2)
     
-    scale_factor = 1.0
+    scale_factor = 5.3743614561131309e+17
+
+
     f2.xdc_impulse(tx, prms['tx_impulse_response']*scale_factor)
     pres, t0 = f2.calc_hp(tx, np.array([0,0,0.04]))
     

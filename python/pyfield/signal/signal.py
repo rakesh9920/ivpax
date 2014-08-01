@@ -94,6 +94,10 @@ def deconvwnr(image, psf, nsr=0, axis=-1):
     
     G = numer / denom
     
+    if I.ndim > G.ndim:
+        for i in xrange(I.ndim - G.ndim):
+            G = G[:,None]
+        
     J = np.real(ifft(G * I, axis=axis))
     
     return J

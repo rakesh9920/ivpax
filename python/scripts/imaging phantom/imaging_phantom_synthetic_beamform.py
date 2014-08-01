@@ -13,7 +13,7 @@ temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
 output_key = 'bfdata/synthetic/tx'
 nchannel = 128
-nproc = 4
+nproc = 24
 frames = None
 chmask = False
 
@@ -22,13 +22,13 @@ opt = { 'nwin': 101,
         'chmask': chmask,
         'planetx': False,
         'overwrite': True,
-        'maxpointsperchunk': 10000,
+        'maxpointsperchunk': 50000,
         'maxframesperchunk': 1000 }  
 ################################################################################
        
 def write_view(view_path):
     
-    x, y, z = mcview[-0.02:0.02025:0.00025, 0:1:1, 0.001:0.051:0.00025]
+    x, y, z = mcview[-0.02:0.020125:0.000125, 0:1:1, 0.001:0.041125:0.000125]
     view = np.c_[x.ravel(), y.ravel(), z.ravel()]
     
     with h5py.File(view_path[0], 'a') as root:
@@ -38,31 +38,27 @@ def write_view(view_path):
         
         root.create_dataset(view_path[1], data=view, compression='gzip')
 
-def sum_output(output_path):
-    
-    file_path = output_path[0]
-    input_key = output_path[1]
+def sum_output(file_path, input_key, output_key):
     
     with h5py.File(file_path, 'a') as root:
 
         bfdata_t = root[input_key + str(0)][:]
-        #t0_t = root[input_key + str(0)].attrs['start_time']
-        #fs = root[input_key + str(0)].attrs['sample_frequency']
         
         for ch in xrange(1, nchannel):
             
             bfdata = root[input_key + str(ch)][:]
-            #t0 = root[input_key + str(ch)].attrs['start_time']
-            
             bfdata_t += bfdata
-    
-    return bfdata_t     
+        
+        if output_key in root:
+            del root[output_key]
+            
+        root.create_dataset(output_key, data=bfdata_t, compression='gzip')  
     
 if __name__ == '__main__':
     
     write_view((file_path, view_key))
     
-    for tx in xrange(0, nchannel):
+    for tx in xrange(64, 128):
         
         startch = tx*nchannel
         endch = startch + nchannel

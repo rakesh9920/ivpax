@@ -29,7 +29,7 @@ def get_prms():
     prms['sample_frequency'] = fs
     prms['center_frequency'] = fc
     prms['bandwidth'] = fc*fbw
-    prms['use_attenuation'] = 1
+    prms['use_attenuation'] = 0
     prms['attenuation'] = 0
     prms['frequency_attenuation'] = 0
     prms['attenuation_center_frequency'] = fc

@@ -5,13 +5,13 @@ from pyfield.field import Simulation, SynthSimulation
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-# names = {'myocardium', 'blood'}
 file_path = './data/imaging_phantom_data.h5'
 input_group = 'field/targdata/'
 output_group = 'field/rfdata/raw/synthetic/'
-script_path = 'pyfield.field.linear_array_128_5mhz_calibrated'
+script_path = 'pyfield.field.linear_focused_array_128_6mhz_calibrated'
 #tissue_names = ['mat1']
-tissue_names = ['background', 'mat2', 'mat3', 'mat4']
+#tissue_names = ['background']
+tissue_names = ['mat2', 'mat3', 'mat4']
 nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,

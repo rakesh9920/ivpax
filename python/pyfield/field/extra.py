@@ -58,7 +58,8 @@ def bsc_to_fir(bsc, c=None, rho=None, area=None, ns=None, fs=None, deriv=True,
     else:
         return imp_resp
         
-def apply_bsc(inpath, outpath, bsc=None, method='fir', write=False, loop=False):
+def apply_bsc(inpath, outpath, bsc=None, method='fir', write=True, loop=False,
+    emtype='av'):
     
     inroot = h5py.File(inpath[0], 'a')
     indata = inroot[inpath[1]]
@@ -87,6 +88,15 @@ def apply_bsc(inpath, outpath, bsc=None, method='fir', write=False, loop=False):
         'sample_frequency']
     params = {k : indata.attrs.get(a) for k,a in zip(keys, attrs)}
     
+    if emtype.lower() == 'av':
+        params['deriv'] = True
+    elif emtype.lower() == 'pv':
+        params['deriv'] = False
+        params['rho'] = 1
+        params['c'] = 1
+    else:
+        raise Exception()
+    
     # insert start (dc) and end (nyquist) points if necessary
     if bsc[0,0] != 0:
         bsc = np.insert(bsc, 0, 0, axis=0)
@@ -98,9 +108,7 @@ def apply_bsc(inpath, outpath, bsc=None, method='fir', write=False, loop=False):
         filt = bsc_to_filt(bsc, **params)
     else:
         filt = bsc_to_fir(bsc, **params)
-    
-    #fs = params['fs']
-    
+
     if loop:
         for f in xrange(indata.shape[2]):
             for c in xrange(indata.shape[1]):
