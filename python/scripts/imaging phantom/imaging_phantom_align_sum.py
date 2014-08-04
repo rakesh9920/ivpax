@@ -4,14 +4,16 @@ import h5py
 from scipy.integrate import cumtrapz
 
 from pyfield.util import align_and_sum
-from pyfield.signal import deconvwnr
+from pyfield.signal import deconvwnr, addwgn
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = './data/imaging_phantom_data.h5'
 names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
 input_key = 'field/rfdata/tissue/synthetic/'
 output_key = 'field/rfdata/tissue/synthetic/full'
-deconvolve = True
+deconvolve = False
+addnoise = True
+noisesnr = 5
 emtype = 'av'
 ################################################################################
 
@@ -33,10 +35,13 @@ if __name__ == '__main__':
             t0 = root[input_key + i].attrs['start_time']
             
             rfdata_t, t0_t = align_and_sum(rfdata_t, t0_t, rfdata, t0, fs)
-        
+
+        if addnoise:
+            rfdata_t = addwgn(rfdata_t, snr=noisesnr, mode='mean')
+            
         if deconvolve:
             
-            rfdata_t = deconvwnr(rfdata_t, impulse_response, axis=0)
+            rfdata_t = deconvwnr(rfdata_t, impulse_response, axis=0)*fs
             
             if emtype.lower() == 'av':
                 rfdata_t = rho*c*cumtrapz(rfdata_t, dx=1/fs, axis=0, initial=0)

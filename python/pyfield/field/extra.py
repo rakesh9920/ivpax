@@ -122,7 +122,7 @@ def apply_bsc(inpath, outpath, bsc=None, method='fir', write=True, loop=False,
     for key, val in indata.attrs.iteritems():
         outdata.attrs.create(key, val)
       
-def apply_wgn(inpath, outpath, dbw=1, write=False, loop=False):
+def apply_wgn(inpath, outpath, dbw=None, snr=None, mode='mean', write=True):
     
     inroot = h5py.File(inpath[0], 'a')
     indata = inroot[inpath[1]]
@@ -131,25 +131,56 @@ def apply_wgn(inpath, outpath, dbw=1, write=False, loop=False):
         outroot = h5py.File(outpath[0], 'a')
     else:
         outroot = inroot
-    
+
+    if dbw is None and snr is not None:
+        outdata = addwgn(indata, snr, mode=mode)
+    elif dbw is not None and snr is None:
+        outdata = indata + signal.wgn(indata.shape, dbw)
+
     if write:
+        
         if outpath[1] in outroot:
             del outroot[outpath[1]]
         
-        outdata = outroot.create_dataset(outpath[1], shape=indata.shape, 
-            dtype='double', compression='gzip')
+        #outdata = outroot.create_dataset(outpath[1], shape=indata.shape, 
+        #    dtype='double', compression='gzip')
+        outdata = outroot.create_dataset(outpath[1], data=outdata, 
+            compression='gzip')
+ 
+    else:
+        
+        outroot[outpath] = outdata
+    #for f in xrange(indata.shape[2]):
+    #    outdata[:,:,f] = indata[:,:,f] + signal.wgn(indata.shape[0:2], dbw)
+
+        
+def addwgn(in1, snr, mode='mean'):
+    
+    out = in1.copy()
+    
+    if mode.lower() == 'mean':
+        power = 10*np.log10(np.mean(np.mean(in1**2, axis=0, keepdims=True), 
+            axis=1, keepdims=True))
+    elif mode.lower() == 'max':
+        power = 10*np.log10(np.max(np.mean(in1**2, axis=0, keepdims=True), 
+            axis=1, keepdims=True))
+    elif mode.lower() == 'min':
+        power = 10*np.log10(np.min(np.mean(in1**2, axis=0, keepdims=True), 
+            axis=1, keepdims=True))
+    
+    if in1.ndim < 3:
+
+        dbw = power - snr
+        out += signal.wgn(in1.shape, dbw) 
     
     else:
-        outdata = outroot[outpath]
-    
-    if loop:
-        
-        for f in xrange(indata.shape[2]):
-            outdata[:,:,f] = indata[:,:,f] + signal.wgn(indata.shape[0:2], dbw)
+        for frame in xrange(in1.shape[2]):
             
-    else:
-        outdata[:] = indata[:] + signal.wgn(indata.shape, dbw)
-        
+            dbw = power[...,frame] - snr
+            out[...,frame] += signal.wgn(in1.shape[:2], dbw)
+    
+    return out
+    
 # Reference for xdc_get:
 # number of elements = size(Info, 2);
 # physical element no. = Info(1,:);

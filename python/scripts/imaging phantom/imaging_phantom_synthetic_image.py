@@ -15,9 +15,9 @@ if __name__ == '__main__':
     with h5py.File(file_path, 'r') as root:
         bfdata = root[bf_key][:]
     
-    envdata = envelope(bfdata[:,:,0])
+    envdata = envelope(bfdata[:,:,0]/128/128)
     
-    img = envdata[:,50].reshape((321, 401))
+    img = envdata[:,50].reshape((321, 321))[:,:]
     
     plt.rc('mathtext', fontset='stix', default='regular')
     plt.rc('axes', linewidth = 0.6)
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(3.5,2.39), tight_layout=True)
     ax = fig.add_subplot(111)
     
-    imdisp(img.T, dyn=40, ax=ax, interp='bicubic')
+    imdisp(img.T, dyn=100, ax=ax, interp='none')
     
     fig.show()
     #ax.invert_yaxis()
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     #ax.set_axis_bgcolor('black')
     #ax.set_ylim((5.4, 0.7))
     #ax.set_xlim((-3.2, 3.2))
-    #ax.set_xlabel('lateral (cm)', fontsize=9)
-    #ax.set_ylabel('axial (cm)', fontsize=9)
+    #ax.set_xlabel('Lateral (cm)', fontsize=9)
+    #ax.set_ylabel('Axial (cm)', fontsize=9)
     #ax.tick_params(labelsize=9)
     
     #ax.text(0, 3, 'RA', color='white')

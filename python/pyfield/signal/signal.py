@@ -101,5 +101,4 @@ def deconvwnr(image, psf, nsr=0, axis=-1):
     J = np.real(ifft(G * I, axis=axis))
     
     return J
-    
 

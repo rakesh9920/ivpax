@@ -35,7 +35,7 @@ if __name__ == '__main__':
     
     ptx, t0 = f2.calc_hp(Tx, points) 
     ptx = np.squeeze(ptx)
-    prx = deconvwnr(rf, impulse_response, axis=0, nsr=1000000000)*fs
+    prx = deconvwnr(scat, impulse_response, axis=0, nsr=0)*fs
     
     #prx2 = ptx*2*np.pi*np.sqrt(sigma_bs)/sr/0.03
     prx2 = np.convolve(ptx*2*np.pi*np.sqrt(sigma_bs)/sr, h)/fs
