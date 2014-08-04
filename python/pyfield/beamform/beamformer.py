@@ -155,7 +155,12 @@ def work(in_queue, out_queue, attrs):
     planetx = attrs.get('planetx')
     chmask = attrs.get('chmask')
     t0 = attrs.get('t0')
+    apod = attrs.get('apodization')
+    useapod = attrs.get('useapodization')
     
+    if useapod:
+        maxapod = np.floor(apod.shape[0]/2) + 1
+        
     # read rf data and field positions from input queue
     for rfdata, frame_idx, fieldpos, pos_idx in iter(in_queue.get, 'STOP'):
 
@@ -206,6 +211,8 @@ def work(in_queue, out_queue, attrs):
                 
                 bfsig = np.zeros((nwin, nframe))
                 
+                center_ch = np.argmin(fieldpos[pos,0] - rxpos[:,0])
+                
                 for ch in xrange(nchannel):
                     
                     if not valid_delay[ch]:
@@ -216,7 +223,11 @@ def work(in_queue, out_queue, attrs):
                     
                     delay = pdelay[ch] + nwin - nwinhalf
                     
-                    bfsig += rfdata[delay:(delay + nwin),ch,:]
+                    if useapod:
+                        bfsig += apod[ch - center_ch + maxapod]*rfdata[
+                            delay:(delay + nwin),ch,:]
+                    else:
+                        bfsig += rfdata[delay:(delay + nwin),ch,:]
                 
                 bfdata[pos,:,:] = bfsig
             
@@ -282,7 +293,9 @@ class Beamformer():
             1000)
         self.options['maxpointsperchunk'] = kwargs.get('maxpointsperchunk',
             10000)
-        self.options['overwrite'] = kwargs.get('overwrite', False) 
+        self.options['overwrite'] = kwargs.get('overwrite', False)
+        self.options['useapodization'] = kwargs.get('useapodization', False)
+        self.options['apodization'] = kwargs.get('apodization', None)
         
     def start(self, nproc=1, frames=None):
         
