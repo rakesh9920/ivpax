@@ -158,8 +158,8 @@ def work(in_queue, out_queue, attrs):
     apod = attrs.get('apodization')
     useapod = attrs.get('useapodization')
     
-    if useapod:
-        maxapod = np.floor(apod.shape[0]/2) + 1
+    #if useapod:
+        #maxapod = np.floor(apod.shape[0]/2) + 1
         
     # read rf data and field positions from input queue
     for rfdata, frame_idx, fieldpos, pos_idx in iter(in_queue.get, 'STOP'):
@@ -211,7 +211,7 @@ def work(in_queue, out_queue, attrs):
                 
                 bfsig = np.zeros((nwin, nframe))
                 
-                center_ch = np.argmin(fieldpos[pos,0] - rxpos[:,0])
+                #center_ch = np.argmin(fieldpos[pos,0] - rxpos[:,0])
                 
                 for ch in xrange(nchannel):
                     
@@ -224,8 +224,7 @@ def work(in_queue, out_queue, attrs):
                     delay = pdelay[ch] + nwin - nwinhalf
                     
                     if useapod:
-                        bfsig += apod[ch - center_ch + maxapod]*rfdata[
-                            delay:(delay + nwin),ch,:]
+                        bfsig += apod[ch]*rfdata[delay:(delay + nwin),ch,:]
                     else:
                         bfsig += rfdata[delay:(delay + nwin),ch,:]
                 

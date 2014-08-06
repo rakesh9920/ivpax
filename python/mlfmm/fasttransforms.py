@@ -88,16 +88,16 @@ def ffcoeff(q, srcpos, centerpos, k, kdir):
     ndir = kdir.shape[0]
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
-    coeff = np.zeros(ndir, dtype='complex64')
+    coeff = np.zeros(ndir, dtype='complex')
     
     for i in xrange(ndir):
         coeff[i] = np.sum(q*np.exp(1j*k*delta_r.dot(kdir[i,:])))
         
     return coeff
 
-def mag(r):
+def mag(r, axis=-1):
     
-    return np.sqrt(np.sum(r**2))
+    return np.sqrt(np.sum(r**2, axis=axis, keepdims=True))
     
 def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order, rho, c):
     '''
@@ -106,13 +106,16 @@ def ffeval(coeff, fieldpos, centerpos, weights, k, kdir, order, rho, c):
     '''
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     delta_pos = fieldpos - centerpos
-    ndir = kdir.shape[0]
+    #ndir = kdir.shape[0]
     
-    total = 0
+    #total = 0
     
-    for i in xrange(ndir):
-        total += weights[i]*mlop(delta_pos, k, kdir[i,:], order)*coeff[i]
+    #for i in xrange(ndir):
+        #total += weights[i]*mlop(delta_pos, k, kdir[i,:], order)*coeff[i]
             
+    total = np.sum(weights[None,...]*mlop(delta_pos, k, kdir, order)* \
+        coeff[None,...], axis=1)
+    
     return -k**2*rho*c/(16*np.pi**2)*total
     
 def nfeval(coeff, weights):
@@ -128,13 +131,19 @@ def mlop(pos, k, kdir, order):
     '''
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
-    r, theta, phi = cart2sph(pos, cat=False)
+    #r, theta, phi = cart2sph(pos, cat=False)
+    r = mag(pos)
+    #rhat = pos/r[[Ellipsis,] + [None for x in range(pos.ndim - 1)]]
+    rhat = pos/mag(pos)
     
-    total = 0
+    npos = pos.shape[0]
+    ndir = kdir.shape[0]
+    
+    total = np.zeros((npos, ndir), dtype='complex')
     
     for l in xrange(order + 1):
-        total += (2*l + 1)*1j**l*sphhankel1(l, k*r)*eval_legendre(l, 
-            (pos/mag(pos)).dot(kdir))
+        total += (2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
+            rhat.dot(kdir.T))
     
     return total
 

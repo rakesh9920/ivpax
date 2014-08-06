@@ -15,10 +15,10 @@ f = 10
 rho = 1000
 c = 1500
 k = 2*np.pi*f/c
-order = 10
+order = 5
 
 ####
-kdir, weights = quadrule(5)
+kdir, weights = quadrule(9)
 coeff_mono = ffcoeff(strengths[0], monopole, center, k, kdir)
 coeff_di = ffcoeff(strengths[:2], dipole, center, k, kdir)
 coeff_quad = ffcoeff(strengths, quadrupole, center, k, kdir)
@@ -48,18 +48,18 @@ dist = distance(points, quadrupole)
 pres_quad_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
     dist*strengths[None,:], axis=1)
 
-####
-fig2 = plt.figure()
+#####
+#fig2 = plt.figure()
 #plt.polar(theta.ravel(), np.abs(pres_mono_exact))
-plt.polar(theta.ravel(), np.abs(pres_mono),'.')
-fig2.show()
-
-fig3 = plt.figure()
+#plt.polar(theta.ravel(), np.abs(pres_mono),'.')
+#fig2.show()
+#
+#fig3 = plt.figure()
 #plt.polar(theta.ravel(), np.abs(pres_di_exact))
-plt.polar(theta.ravel(), np.abs(pres_di),'.')
-fig3.show()
+#plt.polar(theta.ravel(), np.abs(pres_di),'.')
+#fig3.show()
 
 fig1 = plt.figure()
-plt.polar(theta.ravel(), np.abs(pres_quad_exact))
+plt.polar(theta.ravel(), np.abs(pres_quad_exact),'-')
 plt.polar(theta.ravel(), np.abs(pres_quad),'.')
 fig1.show()

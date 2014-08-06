@@ -11,11 +11,11 @@ dipole = np.array([[1, 0, 0], [-1, 0, 0]])
 quadrupole = np.array([[1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0]])
 center = np.zeros((1,3))
 strengths = np.array([1, -1, -1, 1])
-f = 10
+f = 1000
 rho = 1000
 c = 1500
 k = 2*np.pi*f/c
-order = 3
+order = 10
 
 coeff_mono = mpole_coeff(strengths[0], monopole, center, k, rho, c, order)
 coeff_di = mpole_coeff(strengths[:2], dipole, center, k, rho, c, order)
@@ -50,6 +50,11 @@ plt.polar(theta.ravel(), np.abs(pres_quad_exact),'.')
 plt.polar(theta.ravel(), np.abs(pres_quad),'-')
 fig1.show()
 
+#fig4 = plt.figure()
+#plt.plot(theta.ravel(), np.angle(pres_quad_exact),'.')
+#plt.plot(theta.ravel(), np.angle(pres_quad),'-')
+#fig4.show()
+#
 #fig2 = plt.figure()
 #plt.polar(theta.ravel(), np.abs(pres_mono_exact))
 #plt.polar(theta.ravel(), np.abs(pres_mono))
