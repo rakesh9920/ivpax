@@ -10,11 +10,12 @@ bsc_path = './data/tissue_bsc_data.h5'
 bsc_group = 'bsc/powerfit/'
 raw_group = 'field/rfdata/raw/synthetic/'
 output_group = 'field/rfdata/tissue/synthetic/'
-#bsc_names = ['fat_wrist_raju', 'blood_hmtc8_shung', 'heart_dog_odonnell', 
-#    'aorta_normal_landini', 'aorta_calcified_landini']
-bsc_names = ['fat_wrist_raju', 'blood_hmtc8_shung', 'aorta_normal_landini', 
+#bsc_names = ['fat_wrist_raju', 'blood_hmtc8_shung', 'aorta_normal_landini', 
+#    'heart_dog_odonnell', 'aorta_calcified_landini']
+#tissue_names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
+bsc_names = ['blood_hmtc8_shung', 'aorta_normal_landini', 
     'heart_dog_odonnell', 'aorta_calcified_landini']
-tissue_names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
+tissue_names = ['mat1', 'mat2', 'mat3', 'mat4']
 emtype = 'av'
 ################################################################################
 

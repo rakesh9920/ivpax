@@ -24,9 +24,11 @@ def imdisp(img, r=None, phi=None, dyn=60, cmap=plt.cm.gray, interp='none',
     if r is None:
         
         if ax is None:
-            plt.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
+            imax = plt.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
         else:
-            ax.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
+            imax = ax.imshow(dbimg, cmap=cmap, interpolation=interp, norm=norm)
+        
+        return imax
         
     else:
         

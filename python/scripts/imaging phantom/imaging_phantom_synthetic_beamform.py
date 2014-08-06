@@ -5,17 +5,20 @@ from pyfield.beamform import Beamformer, envelope, imdisp, mcview
 import numpy as np
 import h5py
 from sys import stdout
+import scipy.signal as sig
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = './data/imaging_phantom_data.h5'
-input_key = 'field/rfdata/tissue/synthetic/full'
+input_key = 'field/rfdata/tissue/synthetic/full_5db'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
-output_key = 'bfdata/synthetic/tx'
+output_key = 'bfdata/synthetic_5db/tx'
 nchannel = 128
 nproc = 24
 frames = None
 chmask = False
+useapod = True
+apod = sig.hann(400)[200-128:200+129]
 
 opt = { 'nwin': 101,
         'resample': 1,
@@ -23,7 +26,9 @@ opt = { 'nwin': 101,
         'planetx': False,
         'overwrite': True,
         'maxpointsperchunk': 50000,
-        'maxframesperchunk': 1000 }  
+        'maxframesperchunk': 1000,
+        'useapodization': useapod,
+        'apodization': apod }  
 ################################################################################
        
 def write_view(view_path):
@@ -58,7 +63,7 @@ if __name__ == '__main__':
     
     write_view((file_path, view_key))
     
-    for tx in xrange(64, 128):
+    for tx in xrange(0, 128):
         
         startch = tx*nchannel
         endch = startch + nchannel

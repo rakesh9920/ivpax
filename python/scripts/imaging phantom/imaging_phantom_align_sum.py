@@ -4,13 +4,15 @@ import h5py
 from scipy.integrate import cumtrapz
 
 from pyfield.util import align_and_sum
-from pyfield.signal import deconvwnr, addwgn
+from pyfield.signal import deconvwnr
+from pyfield.field import addwgn
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = './data/imaging_phantom_data.h5'
-names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
+#names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
+names = ['mat1', 'mat2', 'mat3', 'mat4']
 input_key = 'field/rfdata/tissue/synthetic/'
-output_key = 'field/rfdata/tissue/synthetic/full'
+output_key = 'field/rfdata/tissue/synthetic/full_5db'
 deconvolve = False
 addnoise = True
 noisesnr = 5
