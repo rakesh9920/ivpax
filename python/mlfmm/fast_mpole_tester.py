@@ -8,31 +8,31 @@ from matplotlib import pyplot as plt
 
 monopole = np.array([0, 0, 0])
 dipole = np.array([[1, 0, 0], [-1, 0, 0]])
-quadrupole = np.array([[1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0]])
+quadrupole = np.array([[1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0]])*0.1
 center = np.zeros((1,3))
 strengths = np.array([1, -1, -1, 1])
-f = 10
+f = 10000
 rho = 1000
 c = 1500
 k = 2*np.pi*f/c
-order = 5
-
+ml_order = 10
+quad_order = 25
 ####
-kdir, weights = quadrule(9)
+kdir, weights = quadrule(quad_order)
 coeff_mono = ffcoeff(strengths[0], monopole, center, k, kdir)
 coeff_di = ffcoeff(strengths[:2], dipole, center, k, kdir)
 coeff_quad = ffcoeff(strengths, quadrupole, center, k, kdir)
 
 ####
-r, theta, phi = np.mgrid[20:21:1, 0:2*np.pi:360j, np.pi/2:np.pi/2+1:1]
+r, theta, phi = np.mgrid[200:201:1, 0:2*np.pi:360j, np.pi/2:np.pi/2+1:1]
 
 points = sph2cart(np.c_[r.ravel(), theta.ravel(), phi.ravel()])
 
-pres_mono = ffeval(coeff_mono, points, center, weights, k, kdir, order, rho, 
+pres_mono = ffeval(coeff_mono, points, center, weights, k, kdir, ml_order, rho, 
     c)
-pres_di = ffeval(coeff_di, points, center, weights, k, kdir, order, rho, 
+pres_di = ffeval(coeff_di, points, center, weights, k, kdir, ml_order, rho, 
     c)
-pres_quad = ffeval(coeff_quad, points, center, weights, k, kdir, order, rho, 
+pres_quad = ffeval(coeff_quad, points, center, weights, k, kdir, ml_order, rho, 
     c)
     
 ####
