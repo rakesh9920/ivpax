@@ -7,8 +7,10 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from pyfield.beamform import envelope, imdisp
 
-file_path = './data/imaging_phantom_data.h5'
-bf_key = 'bfdata/synthetic_5db/full'
+#file_path = './data/imaging_phantom_data.h5'
+#bf_key = 'bfdata/synthetic_5db/full'
+file_path = './data/psf_data.h5'
+bf_key = 'bfdata/psf_192_apod/full'
 
 if __name__ == '__main__':
 
@@ -22,16 +24,18 @@ if __name__ == '__main__':
     plt.rc('mathtext', fontset='stix', default='regular')
     plt.rc('axes', linewidth = 0.6)
     
-    fig = plt.figure(figsize=(3.5,2.39), dpi=100, tight_layout=True)
+    fig = plt.figure(figsize=(3.5,3.5), dpi=100, tight_layout=True)
     ax = fig.add_subplot(111)
     
     imax = imdisp(img.T, dyn=60, ax=ax, interp='bicubic')
     
     #ax.invert_yaxis()
-    #ax.set_xticks([-3, -1, 1, 3])
-    #ax.set_yticks([1, 3, 5])
-    ax.set_xticks([])
-    ax.set_yticks([])
+    ax.set_xticks([0, 160, 321])
+    ax.set_xticklabels(['-2','0','2'], fontsize=9)
+    ax.set_yticks([0, 160, 320])
+    ax.set_yticklabels(['0','2','4'], fontsize=9)
+    #ax.set_xticks([])
+    #ax.set_yticks([])
     #ax.set_axis_bgcolor('black')
     #ax.set_ylim((5.4, 0.7))
     #ax.set_xlim((-3.2, 3.2))
@@ -47,5 +51,7 @@ if __name__ == '__main__':
     cbar.set_ticks([0, -20, -40, -60])
     cbar.set_label('dB (re max)', fontsize=9)
     cbar.ax.tick_params(labelsize=9)
-        
+    
+    ax.set_title('192 elem, 150 $\mu m$ pitch, \n 5 MHz, hann apod', fontsize=10)
+
     fig.show()

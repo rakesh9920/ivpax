@@ -7,7 +7,7 @@ import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 
-file_path = './data/imaging_phantom_data.h5'
+file_path = '/data/bshieh/imaging_phantom_data2.h5'
 key = 'field/targdata/'
 tissue = ('background', 'mat1', 'mat2', 'mat3', 'mat4')
 range_x = (-0.025, 0.025)

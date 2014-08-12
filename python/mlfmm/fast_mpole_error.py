@@ -25,15 +25,15 @@ pres_quad_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
 ####
 
 #ml_order = 15
-quad_order = 20
-kdir, weights = quadrule(quad_order)
+#quad_order = 20
+#kdir, weights = quadrule(quad_order)
 error = []
 
 #for quad_order in xrange(1,40):
-for ml_order in xrange(40):
+for ml_order in xrange(100):
     
-    #kdir, weights = quadrule(quad_order)
-    
+    kdir, weights = quadrule(ml_order + 1)
+
     coeff_quad = ffcoeff(strengths, quadrupole, center, k, kdir)
     pres_quad = ffeval(coeff_quad, points, center, weights, k, kdir, ml_order, 
         rho, c)

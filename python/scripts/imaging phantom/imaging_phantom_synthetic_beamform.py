@@ -8,17 +8,19 @@ from sys import stdout
 import scipy.signal as sig
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/imaging_phantom_data.h5'
-input_key = 'field/rfdata/tissue/synthetic/full_5db'
+#file_path = './data/imaging_phantom_data.h5'
+#input_key = 'field/rfdata/tissue/synthetic/full_5db'
+file_path = './data/psf_data.h5'
+input_key = 'field/rfdata/psf_192'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
-output_key = 'bfdata/synthetic_5db/tx'
-nchannel = 128
-nproc = 24
+output_key = 'bfdata/psf_192_apod/tx'
+nchannel = 192
+nproc = 12
 frames = None
 chmask = False
 useapod = True
-apod = sig.hann(400)[200-128:200+129]
+apod = sig.hann(200)[100-nchannel/2:100+nchannel/2]
 
 opt = { 'nwin': 101,
         'resample': 1,
@@ -61,9 +63,9 @@ def sum_output(file_path, input_key, output_key):
     
 if __name__ == '__main__':
     
-    write_view((file_path, view_key))
+    #write_view((file_path, view_key))
     
-    for tx in xrange(0, 128):
+    for tx in xrange(0, 192):
         
         startch = tx*nchannel
         endch = startch + nchannel
@@ -71,6 +73,7 @@ if __name__ == '__main__':
         with h5py.File(file_path, 'a') as root:
             
             rfdata = root[input_key][:,startch:endch,:]
+            #rfdata = root[input_key][:,startch:endch]
             
             if temp_key in root:
                 del root[temp_key]

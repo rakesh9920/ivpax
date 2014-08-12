@@ -1,7 +1,7 @@
 # mlfmm / transforms.py
 
 import numpy as np
-from scipy.special import sph_harm, jn, yv, lpmv
+from scipy.special import sph_harm, jn, yv, lpmv, hankel1
 from scipy.misc import factorial
 from mlfmm.wigner3j import wigner3j
 
@@ -66,12 +66,15 @@ def sph_yv(l, z):
 
 sphyv = np.vectorize(sph_yv)
 
-def sphhankel1(l, z):
+def sphhankel12(l, z):
     '''
     Spherical Hankel function of the first kind.
     '''
     return sphjn(l, z) + 1j*sphyv(l, z)
 
+def sphhankel1(l, z):
+    return np.sqrt(np.pi/(2*z))*hankel1(l + 0.5, z)
+    
 def sphharm(l, m, theta, phi):
     
     ret = np.sqrt((2*l + 1)/(4*np.pi)*factorial(l - m)/ \

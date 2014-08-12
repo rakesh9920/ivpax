@@ -3,11 +3,10 @@ import numpy as np
 import h5py
 
 from pyfield.field import Field
-from pyfield.beamform import Beamformer
 
-script = 'pyfield.field.linear_array_128_5mhz'
+script = 'pyfield.field.linear_focused_array_192_6mhz'
 file_path = './data/psf_data.h5'
-rf_key = 'field/rfdata/psf'
+rf_key = 'field/rfdata/psf_192'
 
 if __name__ == '__main__':
     
@@ -28,6 +27,8 @@ if __name__ == '__main__':
     amp = np.ones((3,1))
     
     scat, t0 = f2.calc_scat_all(Tx, Rx, points, amp, 1)
+    
+    scat = scat[...,None]
     
     with h5py.File(file_path, 'a') as root:
         
