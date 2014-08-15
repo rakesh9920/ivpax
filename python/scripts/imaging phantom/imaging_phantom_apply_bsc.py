@@ -5,7 +5,7 @@ from pyfield.field import apply_bsc
 import h5py
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/imaging_phantom_data.h5'
+file_path = '/data/bshieh/imaging_phantom_data3.h5'
 bsc_path = './data/tissue_bsc_data.h5'
 bsc_group = 'bsc/powerfit/'
 raw_group = 'field/rfdata/raw/synthetic/'

@@ -7,12 +7,12 @@ import numpy as np
 import h5py
 import matplotlib.pyplot as plt
 
-file_path = '/data/bshieh/imaging_phantom_data2.h5'
+file_path = '/data/bshieh/imaging_phantom_data3.h5'
 key = 'field/targdata/'
 tissue = ('background', 'mat1', 'mat2', 'mat3', 'mat4')
 range_x = (-0.025, 0.025)
 range_y = (-0.005, 0.005)
-range_z = (0.001, 0.041)
+range_z = (0.011, 0.051)
 target_density = 20*1000**3
 
 def draw3d():
@@ -53,27 +53,27 @@ if __name__ == '__main__':
     
     target_pos = sct_rectangle(range_x, range_y, range_z, ns=target_density)
     
-    targ2, rem = sct_cyl(target_pos, 0.0015, np.array([-0.015, 0, 0.01]))
-    targ3, rem = sct_cyl(rem, 0.0025, np.array([-0.015, 0, 0.02]))
-    targ4, rem = sct_cyl(rem, 0.0035, np.array([-0.015, 0, 0.03]))
+    targ2, rem = sct_cyl(target_pos, 0.0015, np.array([-0.015, 0, 0.02]))
+    targ3, rem = sct_cyl(rem, 0.0025, np.array([-0.015, 0, 0.03]))
+    targ4, rem = sct_cyl(rem, 0.0035, np.array([-0.015, 0, 0.04]))
     
     mat1 = np.concatenate((targ2, targ3, targ4), axis=0)
     
-    targ2, rem = sct_cyl(rem, 0.0015, np.array([-0.005, 0, 0.01]))
-    targ3, rem = sct_cyl(rem, 0.0025, np.array([-0.005, 0, 0.02]))
-    targ4, rem = sct_cyl(rem, 0.0035, np.array([-0.005, 0, 0.03]))
+    targ2, rem = sct_cyl(rem, 0.0015, np.array([-0.005, 0, 0.02]))
+    targ3, rem = sct_cyl(rem, 0.0025, np.array([-0.005, 0, 0.03]))
+    targ4, rem = sct_cyl(rem, 0.0035, np.array([-0.005, 0, 0.04]))
 
     mat2 = np.concatenate((targ2, targ3, targ4), axis=0)
 
-    targ2, rem = sct_cyl(rem, 0.0015, np.array([0.005, 0, 0.01]))
-    targ3, rem = sct_cyl(rem, 0.0025, np.array([0.005, 0, 0.02]))
-    targ4, rem = sct_cyl(rem, 0.0035, np.array([0.005, 0, 0.03]))
+    targ2, rem = sct_cyl(rem, 0.0015, np.array([0.005, 0, 0.02]))
+    targ3, rem = sct_cyl(rem, 0.0025, np.array([0.005, 0, 0.03]))
+    targ4, rem = sct_cyl(rem, 0.0035, np.array([0.005, 0, 0.04]))
 
     mat3 = np.concatenate((targ2, targ3, targ4), axis=0)
 
-    targ2, rem = sct_cyl(rem, 0.0015, np.array([0.015, 0, 0.01]))
-    targ3, rem = sct_cyl(rem, 0.0025, np.array([0.015, 0, 0.02]))
-    targ4, rem = sct_cyl(rem, 0.0035, np.array([0.015, 0, 0.03]))
+    targ2, rem = sct_cyl(rem, 0.0015, np.array([0.015, 0, 0.02]))
+    targ3, rem = sct_cyl(rem, 0.0025, np.array([0.015, 0, 0.03]))
+    targ4, rem = sct_cyl(rem, 0.0035, np.array([0.015, 0, 0.04]))
 
     mat4 = np.concatenate((targ2, targ3, targ4), axis=0)
     

@@ -5,13 +5,13 @@ from pyfield.field import Simulation, SynthSimulation
 from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = '/data/bshieh/imaging_phantom_data2.h5'
+file_path = '/data/bshieh/imaging_phantom_data3.h5'
 input_group = 'field/targdata/'
 output_group = 'field/rfdata/raw/synthetic/'
 script_path = 'pyfield.field.linear_focused_array_192_6mhz'
-tissue_names = ['mat3']
+#tissue_names = ['mat3']
 #tissue_names = ['background']
-#tissue_names = ['mat3','mat4']
+tissue_names = ['mat1','mat2','mat4']
 nproc = 24
 frames = None
 opt = { 'maxtargetsperchunk': 5000,
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         print sim
         stdout.flush()
         
-        #sim.join()
+        sim.join()
         
         
     

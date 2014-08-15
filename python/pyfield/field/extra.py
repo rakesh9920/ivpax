@@ -122,7 +122,7 @@ def apply_bsc(inpath, outpath, bsc=None, method='fir', write=True, loop=False,
     for key, val in indata.attrs.iteritems():
         outdata.attrs.create(key, val)
       
-def apply_wgn(inpath, outpath, dbw=None, snr=None, mode='mean', write=True):
+def apply_wgn(inpath, outpath, dbw=None, psnr=None, mode='mean', write=True):
     
     inroot = h5py.File(inpath[0], 'a')
     indata = inroot[inpath[1]]
@@ -132,10 +132,14 @@ def apply_wgn(inpath, outpath, dbw=None, snr=None, mode='mean', write=True):
     else:
         outroot = inroot
 
-    if dbw is None and snr is not None:
-        outdata = addwgn(indata, snr, mode=mode)
-    elif dbw is not None and snr is None:
+    if dbw is None and psnr is not None:
+        
+        outdata, dbs = addwgn(indata, psnr, mode=mode)
+        
+    elif dbw is not None and psnr is None:
+        
         outdata = indata + signal.wgn(indata.shape, dbw)
+        dbs = dbw
 
     if write:
         
@@ -144,42 +148,54 @@ def apply_wgn(inpath, outpath, dbw=None, snr=None, mode='mean', write=True):
         
         #outdata = outroot.create_dataset(outpath[1], shape=indata.shape, 
         #    dtype='double', compression='gzip')
-        outdata = outroot.create_dataset(outpath[1], data=outdata, 
+        outroot.create_dataset(outpath[1], data=outdata, 
             compression='gzip')
  
     else:
         
-        outroot[outpath] = outdata
+        outroot[outpath[1]] = outdata
+    
+    outroot[outpath[1]].attrs.create('noise_dbw', dbs)
+    
     #for f in xrange(indata.shape[2]):
     #    outdata[:,:,f] = indata[:,:,f] + signal.wgn(indata.shape[0:2], dbw)
 
         
-def addwgn(in1, snr, mode='mean'):
+def addwgn(in1, psnr, mode='mean'):
     
     out = in1.copy()
     
     if mode.lower() == 'mean':
-        power = 10*np.log10(np.mean(np.mean(in1**2, axis=0, keepdims=True), 
+        power = 10*np.log10(np.mean(np.max(in1**2, axis=0, keepdims=True), 
             axis=1, keepdims=True))
     elif mode.lower() == 'max':
-        power = 10*np.log10(np.max(np.mean(in1**2, axis=0, keepdims=True), 
+        power = 10*np.log10(np.max(np.max(in1**2, axis=0, keepdims=True), 
             axis=1, keepdims=True))
     elif mode.lower() == 'min':
-        power = 10*np.log10(np.min(np.mean(in1**2, axis=0, keepdims=True), 
+        power = 10*np.log10(np.min(np.max(in1**2, axis=0, keepdims=True), 
             axis=1, keepdims=True))
     
+    #power = np.squeeze(power)
+    
+    # if data contains only 1 frame
     if in1.ndim < 3:
 
-        dbw = power - snr
+        dbw = power - psnr
         out += signal.wgn(in1.shape, dbw) 
-    
+        dbwout = dbw
+        
     else:
-        for frame in xrange(in1.shape[2]):
+        
+        nframe = in1.shape[2]
+        dbwout = np.zeros(nframe)
+        
+        for frame in xrange(nframe):
             
-            dbw = power[...,frame] - snr
+            dbw = power[...,frame] - psnr
             out[...,frame] += signal.wgn(in1.shape[:2], dbw)
+            dbwout[frame] = dbw
     
-    return out
+    return out, dbwout
     
 # Reference for xdc_get:
 # number of elements = size(Info, 2);

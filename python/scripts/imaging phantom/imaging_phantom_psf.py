@@ -6,7 +6,7 @@ from pyfield.field import Field
 
 script = 'pyfield.field.linear_focused_array_192_6mhz'
 file_path = './data/psf_data.h5'
-rf_key = 'field/rfdata/psf_192'
+rf_key = 'field/rfdata/psf_192_wide'
 
 if __name__ == '__main__':
     
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     
     Tx, Rx = def_script.get_apertures(f2)
     
-    points = np.array([[0,0,0.01],[0,0,0.02],[0,0,0.03]])
+    points = np.array([[0.015,0,0.01],[0.015,0,0.02],[0.015,0,0.03]])
     amp = np.ones((3,1))
     
     scat, t0 = f2.calc_scat_all(Tx, Rx, points, amp, 1)

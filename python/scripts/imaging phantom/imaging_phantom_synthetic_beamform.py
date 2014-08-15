@@ -8,19 +8,20 @@ from sys import stdout
 import scipy.signal as sig
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-#file_path = './data/imaging_phantom_data.h5'
-#input_key = 'field/rfdata/tissue/synthetic/full_5db'
-file_path = './data/psf_data.h5'
-input_key = 'field/rfdata/psf_192'
+file_path = '/data/bshieh/imaging_phantom_data3.h5'
+input_key = 'field/rfdata/tissue/synthetic_0db/full'
+#file_path = './data/psf_data.h5'
+#input_key = 'field/rfdata/psf_192_wide'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
-output_key = 'bfdata/psf_192_apod/tx'
+output_key = 'bfdata/synthetic_0db/tx'
+#output_key = 'bfdata/psf_192_wide_apod/tx'
 nchannel = 192
 nproc = 12
 frames = None
 chmask = False
 useapod = True
-apod = sig.hann(200)[100-nchannel/2:100+nchannel/2]
+apod = sig.hann(192)#[100-nchannel/2:100+nchannel/2]
 
 opt = { 'nwin': 101,
         'resample': 1,
@@ -35,7 +36,8 @@ opt = { 'nwin': 101,
        
 def write_view(view_path):
     
-    x, y, z = mcview[-0.02:0.020125:0.000125, 0:1:1, 0.001:0.041125:0.000125]
+    #x, y, z = mcview[-0.02:0.020125:0.000125, 0:1:1, 0.001:0.041125:0.000125]
+    x, y, z = mcview[-0.02:0.020250:0.000250, 0:1:1, 0.011:0.051250:0.000250]
     view = np.c_[x.ravel(), y.ravel(), z.ravel()]
     
     with h5py.File(view_path[0], 'a') as root:
@@ -63,7 +65,7 @@ def sum_output(file_path, input_key, output_key):
     
 if __name__ == '__main__':
     
-    #write_view((file_path, view_key))
+    write_view((file_path, view_key))
     
     for tx in xrange(0, 192):
         

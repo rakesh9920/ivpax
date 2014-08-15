@@ -5,12 +5,12 @@ import numpy as np
 def ffts(x, *args, **kwargs):
     
     fs = kwargs.pop('fs', 1)
-    return fftshift(fft(x, *args, **kwargs)*fs)
+    return fftshift(fft(x, *args, **kwargs)/fs)
 
 def iffts(x, *args, **kwargs):
     
     fs = kwargs.pop('fs', 1)
-    return ifft(ifftshift(x), *args, **kwargs)/fs
+    return ifft(ifftshift(x), *args, **kwargs)*fs
 
 def xcorr(in1, in2, mode='full', norm=True):
     

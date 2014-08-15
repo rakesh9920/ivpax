@@ -7,10 +7,10 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from pyfield.beamform import envelope, imdisp
 
-#file_path = './data/imaging_phantom_data.h5'
-#bf_key = 'bfdata/synthetic_5db/full'
-file_path = './data/psf_data.h5'
-bf_key = 'bfdata/psf_192_apod/full'
+file_path = '/data/bshieh/imaging_phantom_data3.h5'
+bf_key = 'bfdata/synthetic_0db/full'
+#file_path = './data/psf_data.h5'
+#bf_key = 'bfdata/psf_192_wide_apod/full'
 
 if __name__ == '__main__':
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     
     envdata = envelope(bfdata[:,:,0])
     
-    img = envdata[:,50].reshape((321, 321))
+    img = envdata[:,50].reshape((161, 161))
     
     plt.rc('mathtext', fontset='stix', default='regular')
     plt.rc('axes', linewidth = 0.6)
@@ -30,9 +30,9 @@ if __name__ == '__main__':
     imax = imdisp(img.T, dyn=60, ax=ax, interp='bicubic')
     
     #ax.invert_yaxis()
-    ax.set_xticks([0, 160, 321])
+    ax.set_xticks([0, 80, 161])
     ax.set_xticklabels(['-2','0','2'], fontsize=9)
-    ax.set_yticks([0, 160, 320])
+    ax.set_yticks([0, 80, 160])
     ax.set_yticklabels(['0','2','4'], fontsize=9)
     #ax.set_xticks([])
     #ax.set_yticks([])
