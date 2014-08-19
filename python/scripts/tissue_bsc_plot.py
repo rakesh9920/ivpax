@@ -4,7 +4,7 @@ import h5py
 import numpy as np
 from matplotlib import pyplot as plt
 
-file_path = './data/tissue experimental bsc/tissue_bsc_data.h5'
+file_path = './data/tissue_bsc_data.h5'
 tissue_names = ['aorta_normal_landini','aorta_calcified_landini',
     'blood_hmtc8_shung','dermis_wrist_raju','fat_wrist_raju',
     'heart_dog_odonnell']
@@ -12,7 +12,7 @@ exp_group = 'bsc/experimental/'
 powerfit_group = 'bsc/powerfit/'
 #colors = ['b','g','r','y','c','k']
 colors = ["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854","#ffd92f"]
-syms = ['o','^','s','v','D','d']
+syms = ['o','^','s','v','*','d']
 lstyle = ['-','--','-.',':','-','--']
 
 if __name__ == '__main__':
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     
     fig = plt.figure(figsize=(3.5,2.6), dpi=100, tight_layout=True)
     ax = fig.add_subplot(111)
-    ax.tick_params(labelsize=8)
+    ax.tick_params(labelsize=9)
     lines = []
     
     with h5py.File(file_path, 'a') as root:
@@ -57,7 +57,8 @@ if __name__ == '__main__':
     ax.set_yticks([10e-5, 10e-3, 10e-1, 10e1])
     ax.set_xticks([5, 10, 15, 20])
     #ax.legend(lines, tissue_names, loc=4)
-    ax.set_xlabel('Frequency (MHz)', fontsize=10)
-    ax.set_ylabel('$\eta(f)$ ($m^{-1} Sr^{-1}$)', fontsize=10)
+    ax.set_xlabel('Frequency (MHz)', fontsize=9)
+    #ax.set_ylabel('Backscattering \n Coefficient ($m^{-1} Sr^{-1}$)', fontsize=9)
+    ax.set_ylabel('$\eta(f)$ ($m^{-1} Sr^{-1}$)', fontsize=9)
     fig.show()
     

@@ -9,12 +9,12 @@ import scipy.signal as sig
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
 file_path = '/data/bshieh/imaging_phantom_data3.h5'
-input_key = 'field/rfdata/tissue/synthetic_0db/full'
+input_key = 'field/rfdata/tissue/synthetic_10db/full'
 #file_path = './data/psf_data.h5'
 #input_key = 'field/rfdata/psf_192_wide'
 temp_key = 'field/rfdata/temp'
 view_key = 'view/view0'
-output_key = 'bfdata/synthetic_0db/tx'
+output_key = 'bfdata/synthetic_10db/tx'
 #output_key = 'bfdata/psf_192_wide_apod/tx'
 nchannel = 192
 nproc = 12
@@ -101,13 +101,8 @@ if __name__ == '__main__':
         #stdout.flush()
         bf.join()
 
-    #with h5py.File(file_path, 'r') as root:
-    #    bfdata = np.squeeze(root[output_key + str(tx)][:])
-    #
-    #envdata = envelope(bfdata, axis=1)
-    #img = envdata[:,100].reshape((800, 600))
-    #
-    #imdisp(img.T, dyn=30)
+    sum_output(file_path, output_key, output_key[:-2] + 'full') 
+    
     
     
     

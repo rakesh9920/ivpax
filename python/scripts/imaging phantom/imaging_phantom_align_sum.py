@@ -13,10 +13,10 @@ file_path = '/data/bshieh/imaging_phantom_data3.h5'
 #names = ['background', 'mat1', 'mat2', 'mat3', 'mat4']
 names = ['mat1', 'mat2', 'mat3', 'mat4']
 input_key = 'field/rfdata/tissue/synthetic/'
-output_key = 'field/rfdata/tissue/synthetic_0db/full'
+output_key = 'field/rfdata/tissue/synthetic_10db/full'
 deconvolve = False
 addnoise = True
-noisesnr = 0
+noisesnr = 10
 emtype = 'av'
 ################################################################################
 
