@@ -58,7 +58,7 @@ if __name__ == '__main__':
     ax.set_xticks([5, 10, 15, 20])
     #ax.legend(lines, tissue_names, loc=4)
     ax.set_xlabel('Frequency (MHz)', fontsize=9)
-    #ax.set_ylabel('Backscattering \n Coefficient ($m^{-1} Sr^{-1}$)', fontsize=9)
-    ax.set_ylabel('$\eta(f)$ ($m^{-1} Sr^{-1}$)', fontsize=9)
+    ax.set_ylabel('BSC ($m^{-1} Sr^{-1}$)', fontsize=9)
+    #ax.set_ylabel('$\eta(f)$ ($m^{-1} Sr^{-1}$)', fontsize=9)
     fig.show()
     

@@ -41,13 +41,13 @@ if __name__ == '__main__':
     scatter3d(target_pos*1000, mask=3, size=1, ax=ax)
     
 
-    ax.tick_params(labelsize=8)
+    ax.tick_params(labelsize=9)
     ax.set_xticks(np.arange(-20, 30, 10))
     ax.set_yticks(np.arange(-20, 30, 10))
     ax.set_zticks(np.arange(0, 30, 10))
 
-    ax.set_xlabel('x (mm)', fontsize=9)
-    ax.set_ylabel('y (mm)', fontsize=9)
+    ax.set_xlabel('\nx (mm)', fontsize=9)
+    ax.set_ylabel('\ny (mm)', fontsize=9)
     ax.set_zlabel('z (mm)', fontsize=9)
     
     ax.set_xlim((-25, 25))
@@ -59,9 +59,6 @@ if __name__ == '__main__':
     
     ax.elev = 15
 
-
-
-    
     #ax.scatter(target_pos[:,0], target_pos[:,1], target_pos[:,2], s=0.01,
     #    c='blue', alpha=0.8, edgecolor='blue', linewidth=1)
     
