@@ -4,7 +4,7 @@ import matplotlib.pyplot as pp
 import numpy as np
 from scipy.stats import rayleigh
 
-file_path = './data/custombsc_data.npz'    
+file_path = './data/bsc/custombsc_data.npz'    
     
 if __name__ == '__main__':
     
@@ -48,8 +48,8 @@ if __name__ == '__main__':
         #frameon=False, fontsize=10)
     #ax2.legend((c1, b1, b2, b3), ('CAM', 'blood', 'kidney', 'liver'),
     #    frameon=False, fontsize=9, loc='center left')
-    ax2.legend((c1, b1, b2), ('CAM', 'heart','blood'),
-        frameon=False, fontsize=9, loc='best')
+    ax2.legend((c1, b1, b2), ('CAM', 'blood','heart'),
+        frameon=False, fontsize=9, loc='best', numpoints=1)
     ax2.set_xlabel('Frequency ($MHz$)', fontsize=9)
     #ax2.set_ylabel('Backscattering \n Coefficient ($m^{-1}Sr^{-1}$)', fontsize=9)
     ax2.set_ylabel('BSC ($m^{-1}Sr^{-1}$)', fontsize=9)
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     ax3.plot(np.linspace(0, 4, 100), rayleigh.pdf(np.linspace(0, 4, 100)), 
         'k--', linewidth=0.8)
     
-    ax3.set_xlabel(r'Normalized BSC $\mathit{[2\eta(f) / \bar{\eta}(f)]^{1/2}}$',
+    ax3.set_xlabel(r'Normalized Root BSC $\mathit{[2\eta(f) / \bar{\eta}(f)]^{1/2}}$',
         fontsize=9) 
     ax3.set_ylabel('Probability density', fontsize=9)
     ax3.legend((r'Rayleigh pdf' '\n' r'$(\alpha = 1)$','CAM'), 
