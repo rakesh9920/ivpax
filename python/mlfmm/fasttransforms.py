@@ -97,6 +97,10 @@ def sphharm(l, m, theta, phi):
     
     return ret
 
+def mag(r, axis=-1):
+    
+    return np.sqrt(np.sum(r**2, axis=axis, keepdims=True))
+    
 def ffcoeff(q, srcpos, centerpos, k, kcoord):
     '''
     Returns the far-field signature coefficients of a collection of sources in
@@ -114,10 +118,6 @@ def ffcoeff(q, srcpos, centerpos, k, kcoord):
             coeff[i, j] = np.sum(q*np.exp(1j*k*delta_r.dot(kcoord[i,j,:])))
         
     return coeff
-
-def mag(r, axis=-1):
-    
-    return np.sqrt(np.sum(r**2, axis=axis, keepdims=True))
     
 def ffeval(coeff, fieldpos, centerpos, weights, k, kcoord, order, rho, c):
     '''
@@ -171,7 +171,7 @@ def mlop(pos, k, kcoord, order):
 
 def quadrule(order):
     '''
-    Returns abscissas (in cartesian coordinates) and weights for a 
+    Returns abscissas (in theta/phi form) and weights for a 
     Legendre-Gauss quadrature rule for integration over a unit sphere.
     '''
     absc1, w1 = leggauss(2*order)
@@ -191,8 +191,8 @@ def quadrule(order):
     ntheta = theta.shape[0]
     nphi = phi.shape[0]
     
-    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), np.tile(phi[None,:, None], 
-        (ntheta, 1, 1)))
+    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), 
+        np.tile(phi[None,:, None], (ntheta, 1, 1)))
     
     kdir = np.concatenate(kdir, axis=2)
     
@@ -223,7 +223,8 @@ def interpolate(coeff, weights, kdir, newkdir):
     
     b_m = fft(coeff, axis=0)
     
-    b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*b_m[:L,None,:], axis=2)
+    b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*
+        b_m[:L,None,:], axis=2)
 
     newcoeff = ifft(np.sum(b_lm*lpml(L - 1, L - 1, np.cos(newkphi)), axis=1), 
         axis=0, n=newL)
