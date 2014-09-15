@@ -250,11 +250,30 @@ def interpolate(coeff, weights, kdir, newkdir):
     
     b_m = fft(coeff, axis=0)
     
-    b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*
-        b_m[:L,None,:], axis=2)
+    lp = lpml(L - 1, L - 1, np.cos(kphi))
+    lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(lp[1:,:,:])), axis=0)
 
-    newcoeff = ifft(np.sum(b_lm[:,:,None]*lpml(L - 1, L - 1, np.cos(newkphi)), 
-        axis=1), axis=0, n=newL*2)
+    b_lm = np.sum(weights[None,None,:]*lp*b_m[:,None,:], axis=2)
+
+    newlp = lpml(L - 1, L - 1, np.cos(newkphi))
+    newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(newlp[1:,:,:])), axis=0)
+    
+    b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
+    
+    padded = np.zeros((newL*2, newL), dtype='complex')
+    padded[0:L,:] = b_m2[0:L,:]
+    padded[-L:,:] = b_m2[L:2*L,:]
+    
+    newcoeff = ifft(padded, axis=0)
+    #newcoeff = ifft(np.sum(b_lm[:,:,None]*newlp, axis=1), axis=0, n=newL*2)
+        
+    #b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*
+        #b_m[:L,None,:], axis=2)
+
+    #newcoeff = ifft(np.sum(b_lm[:,:,None]*lpml(L - 1, L - 1, np.cos(newkphi)), 
+    #    axis=1), axis=0, n=newL*2)
 
     return newcoeff, b_lm
 

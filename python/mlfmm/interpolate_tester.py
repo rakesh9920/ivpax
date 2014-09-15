@@ -49,7 +49,6 @@ if __name__ == '__main__':
     pres_fmm1 = ffeval(coeff, points, center, weights, k, kcoord, 
         ml_order, rho, c)
 
-
     fig1 = pp.figure()
     fig1.add_subplot(111)
     pp.plot(np.abs(pres_exact))
@@ -61,6 +60,7 @@ if __name__ == '__main__':
     fig2.add_subplot(111)
     pp.plot(np.angle(pres_exact))
     pp.plot(np.angle(pres_fmm1),'.')
+    pp.plot(np.angle(pres_fmm2),'.')
     pp.title('phase')
     
     pp.show()
