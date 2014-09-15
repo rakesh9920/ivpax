@@ -197,7 +197,34 @@ def quadrule(order):
     kdir = np.concatenate(kdir, axis=2)
     
     return kdir, weights, weights1, weights2
- 
+
+def quadrule2(order):
+    
+    absc1 = np.linspace(0, 2*np.pi, 2*order)
+    w1 = np.ones(2*order)*2*np.pi/(2*order - 1)
+    w1[0] = w1[0]/2
+    w1[-1] = w1[-1]/2
+    weights1 = w1
+    theta = absc1
+    
+    absc2, w2 = leggauss(order)
+    
+    #theta = (absc1 + 1)*np.pi
+    phi = (absc2 + 1)*np.pi/2
+    
+    weights2 = w2*np.pi/2*np.sin(phi)
+    weights = weights1[:,None].dot(weights2[None,:])
+    
+    ntheta = theta.shape[0]
+    nphi = phi.shape[0]
+    
+    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), 
+        np.tile(phi[None,:, None], (ntheta, 1, 1)))
+    
+    kdir = np.concatenate(kdir, axis=2)
+    
+    return kdir, weights, weights1, weights2
+
 def ff2nfop(startpos, endpos, kdir, order):
     pass
 
@@ -226,8 +253,8 @@ def interpolate(coeff, weights, kdir, newkdir):
     b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*
         b_m[:L,None,:], axis=2)
 
-    newcoeff = ifft(np.sum(b_lm*lpml(L - 1, L - 1, np.cos(newkphi)), axis=1), 
-        axis=0, n=newL)
+    newcoeff = ifft(np.sum(b_lm[:,:,None]*lpml(L - 1, L - 1, np.cos(newkphi)), 
+        axis=1), axis=0, n=newL*2)
 
     return newcoeff, b_lm
 
