@@ -8,7 +8,7 @@ from matplotlib import pyplot as pp
 
 nsource = 10
 box = np.array([[-0.05, 0.05],[-0.05, 0.05],[0, 0]])
-f = 1000
+f = 10000
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     #pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, ml_order, 
     #    rho, c)
     
-    newkdir, newweights, _, _ = quadrule2(ml_order*2*3 + 1)
+    newkdir, newweights, _, _ = quadrule2(ml_order*2*2 + 1)
     newkcoord = dir2coord(newkdir)
     
     newcoeff, b_lm = interpolate(coeff, w2, kdir, newkdir)

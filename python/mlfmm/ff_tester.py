@@ -12,7 +12,7 @@ f = 10000
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
-obs_d = 1
+obs_d = 10
 center = np.array([0, 0, 0])
 ml_order = 10
 ####
