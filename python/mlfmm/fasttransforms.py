@@ -236,8 +236,14 @@ def lpml(m, l, z):
     z = z.ravel()
     out = np.zeros((m + 1, l + 1, z.size))
     
+
+    ms = np.tile(np.arange(0, m + 1)[:,None], (1, l + 1))   
+    ls = np.tile(np.arange(0, l + 1)[None,:], (m + 1, 1))
+    
+    norm = np.sqrt((ls + 0.5)*factorial(ls - ms)/factorial(ls + ms))
+    
     for ind in xrange(z.size):
-        out[..., ind] = lpmn(m, l, z[ind])[0]
+        out[..., ind] = norm*lpmn(m, l, z[ind])[0]
     
     return out
 
@@ -245,7 +251,7 @@ def interpolate(coeff, weights, kdir, newkdir):
     
     M, L = kdir.shape[:2]
     kphi = kdir[0,:,1]
-    newL = newkdir.shape[1]
+    newM, newL = newkdir.shape[:2]
     newkphi = newkdir[0,:,1]
     
     b_m = fft(coeff, axis=0)
@@ -266,7 +272,7 @@ def interpolate(coeff, weights, kdir, newkdir):
     padded[0:L,:] = b_m2[0:L,:]
     padded[-L:,:] = b_m2[L:2*L,:]
     
-    newcoeff = ifft(padded, axis=0)
+    newcoeff = newM/np.double(M)*ifft(padded, axis=0)
     #newcoeff = ifft(np.sum(b_lm[:,:,None]*newlp, axis=1), axis=0, n=newL*2)
         
     #b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*

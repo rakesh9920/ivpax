@@ -34,7 +34,7 @@ if __name__ == '__main__':
     pres_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
         dist*strengths[None,:], axis=1)
     
-    kdir, weights, w1, w2 = quadrule2(ml_order*2)
+    kdir, weights, w1, w2 = quadrule2(ml_order*2 + 1)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)

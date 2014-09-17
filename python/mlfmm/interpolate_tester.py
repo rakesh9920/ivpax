@@ -8,11 +8,11 @@ from matplotlib import pyplot as pp
 
 nsource = 10
 box = np.array([[-0.05, 0.05],[-0.05, 0.05],[0, 0]])
-f = 10000
+f = 1000
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
-obs_d = 1
+obs_d = 10
 center = np.array([0, 0, 0])
 ml_order = 10
 ####
@@ -33,34 +33,34 @@ if __name__ == '__main__':
     pres_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
         dist*strengths[None,:], axis=1)
     
-    kdir, weights, w1, w2 = quadrule2(ml_order*2)
+    kdir, weights, w1, w2 = quadrule2(ml_order*2 + 1)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)
     #pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, ml_order, 
     #    rho, c)
     
-    newkdir, newweights, _, _ = quadrule2(ml_order*2*2)
+    newkdir, newweights, _, _ = quadrule2(ml_order*2*3 + 1)
     newkcoord = dir2coord(newkdir)
     
     newcoeff, b_lm = interpolate(coeff, w2, kdir, newkdir)
     pres_fmm2 = ffeval(newcoeff, points, center, newweights, k, newkcoord, 
-        ml_order*2, rho, c)
+        ml_order, rho, c)
     pres_fmm1 = ffeval(coeff, points, center, weights, k, kcoord, 
         ml_order, rho, c)
 
     fig1 = pp.figure()
     fig1.add_subplot(111)
-    pp.plot(np.abs(pres_exact))
-    pp.plot(np.abs(pres_fmm1),'.')
-    pp.plot(np.abs(pres_fmm2),'.')
+    pp.plot(np.abs(pres_exact),'b')
+    pp.plot(np.abs(pres_fmm1),'g.')
+    pp.plot(np.abs(pres_fmm2),'r.')
     pp.title('amplitude')
     
     fig2 = pp.figure()
     fig2.add_subplot(111)
-    pp.plot(np.angle(pres_exact))
-    pp.plot(np.angle(pres_fmm1),'.')
-    pp.plot(np.angle(pres_fmm2),'.')
+    pp.plot(np.angle(pres_exact),'b')
+    pp.plot(np.angle(pres_fmm1),'g.')
+    pp.plot(np.angle(pres_fmm2),'r.')
     pp.title('phase')
     
     pp.show()
