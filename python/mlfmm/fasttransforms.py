@@ -104,7 +104,7 @@ def mag(r, axis=-1):
 def ffcoeff(q, srcpos, centerpos, k, kcoord):
     '''
     Returns the far-field signature coefficients of a collection of sources in
-    the specified directions.
+    the specified far-field directions.
     '''
     delta_r = centerpos - srcpos
     ntheta, nphi = kcoord.shape[:2]
@@ -112,10 +112,13 @@ def ffcoeff(q, srcpos, centerpos, k, kcoord):
     
     coeff = np.zeros((ntheta, nphi), dtype='complex')
     
-    for i in xrange(ntheta):
-        for j in xrange(nphi):
-            
-            coeff[i, j] = np.sum(q*np.exp(1j*k*delta_r.dot(kcoord[i,j,:])))
+    #for i in xrange(ntheta):
+    #    for j in xrange(nphi):
+    #        
+    #        coeff[i, j] = np.sum(q*np.exp(1j*k*delta_r.dot(kcoord[i,j,:])))
+    
+    shift = np.exp(1j*k*delta_r.dot(np.transpose(kcoord, (0,2,1))))
+    coeff = np.sum((q*shift.T).T, axis=0)
         
     return coeff
     
@@ -147,16 +150,21 @@ def nfeval(coeff, weights):
 
 def mlop(pos, k, kcoord, order):
     '''
-    M_L operator used in evaluation and translation of multipole expansions.
+    Translation operator used in evaluation and translation of far-field 
+    expansions.
     '''
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
     #r, theta, phi = cart2sph(pos, cat=False)
-    r = mag(pos)
+    #r = mag(pos)
     #rhat = pos/r[[Ellipsis,] + [None for x in range(pos.ndim - 1)]]
-    rhat = pos/mag(pos)
-     
+    #rhat = pos/mag(pos)
+    
+    pos = pos.reshape((-1,3))
     kcoord = kcoord.reshape((-1,3))
+    
+    r = mag(pos)
+    rhat = pos/mag(pos)
     
     npos = pos.shape[0]
     ndir = kcoord.shape[0]
@@ -167,7 +175,23 @@ def mlop(pos, k, kcoord, order):
         total += (2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
             rhat.dot(kcoord.T))
     
+    #l = np.arange(0, order + 1)
+    #total = np.sum((2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
+    #    rhat.dot(kcoord.T)))
+    
     return total
+
+def m2lop(r, angle, k, order):
+    
+    l = np.arange(0, order + 1)
+    operator =  np.sum((2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
+        np.cos(angle)))
+    
+    return operator
+
+def m2mop(r, angle, k):
+    
+    return np.exp(1j*k*r*np.cos(angle))
 
 def quadrule(order):
     '''
@@ -224,12 +248,6 @@ def quadrule2(order):
     kdir = np.concatenate(kdir, axis=2)
     
     return kdir, weights, weights1, weights2
-
-def ff2nfop(startpos, endpos, kdir, order):
-    pass
-
-def ff2ffop(startpos, endpos, k, kdir):
-    pass
 
 #factorial2 =np.vectorize(factorial, excluded=('exact'))
 
@@ -288,8 +306,34 @@ def interpolate(coeff, weights, kdir, newkdir):
 
     return newcoeff, b_lm
 
-def filter(coeff, order):
-    pass
+def filter(coeff, weights, kdir, newkdir):
+    
+    M, L = kdir.shape[:2]
+    kphi = kdir[0,:,1]
+    newM, newL = newkdir.shape[:2]
+    newkphi = newkdir[0,:,1]
+    
+    b_m1 = fft(coeff, axis=0)
+    
+    lp = lpml(L - 1, L - 1, np.cos(kphi))
+    lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(lp[1:,:,:])), axis=0)
+
+    b_lm = np.sum(weights[None,None,:]*lp*b_m1[:,None,:], axis=2)
+
+    newlp = lpml(L - 1, L - 1, np.cos(newkphi))
+    newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(newlp[1:,:,:])), axis=0)
+    
+    b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
+    
+    padded = np.zeros((newM, newL), dtype='complex')
+    padded[0:newM/2,:] = b_m2[0:newM/2,:newL]
+    padded[-newM/2:,:] = b_m2[newM/2:newM,:newL]
+    
+    newcoeff = newM/np.double(M)*ifft(padded, axis=0)
+
+    return newcoeff, b_lm
 
 
 

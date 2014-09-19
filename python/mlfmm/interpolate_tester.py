@@ -7,12 +7,12 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 nsource = 10
-box = np.array([[-0.05, 0.05],[-0.05, 0.05],[0, 0]])
-f = 10000
+box = np.array([[-0.0005, 0.0005],[-0.0005, 0.0005],[0, 0]])
+f = 1000000
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
-obs_d = 10
+obs_d = 100
 center = np.array([0, 0, 0])
 ml_order = 10
 ####
@@ -40,10 +40,10 @@ if __name__ == '__main__':
     #pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, ml_order, 
     #    rho, c)
     
-    newkdir, newweights, _, _ = quadrule2(42)
+    newkdir, newweights, _, _ = quadrule2(41)
     newkcoord = dir2coord(newkdir)
     
-    newcoeff, b_lm = interpolate(coeff, w2, kdir, newkdir)
+    newcoeff, b_lm = filter(coeff, w2, kdir, newkdir)
     pres_fmm2 = ffeval(newcoeff, points, center, newweights, k, newkcoord, 
         ml_order, rho, c)
     pres_fmm1 = ffeval(coeff, points, center, weights, k, kcoord, 
