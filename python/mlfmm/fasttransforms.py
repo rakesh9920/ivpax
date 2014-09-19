@@ -231,12 +231,13 @@ def ff2nfop(startpos, endpos, kdir, order):
 def ff2ffop(startpos, endpos, k, kdir):
     pass
 
+#factorial2 =np.vectorize(factorial, excluded=('exact'))
+
 def lpml(m, l, z):
     
     z = z.ravel()
     out = np.zeros((m + 1, l + 1, z.size))
     
-
     ms = np.tile(np.arange(0, m + 1)[:,None], (1, l + 1))   
     ls = np.tile(np.arange(0, l + 1)[None,:], (m + 1, 1))
     
@@ -254,13 +255,13 @@ def interpolate(coeff, weights, kdir, newkdir):
     newM, newL = newkdir.shape[:2]
     newkphi = newkdir[0,:,1]
     
-    b_m = fft(coeff, axis=0)
+    b_m1 = fft(coeff, axis=0)
     
     lp = lpml(L - 1, L - 1, np.cos(kphi))
     lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
         np.flipud(lp[1:,:,:])), axis=0)
 
-    b_lm = np.sum(weights[None,None,:]*lp*b_m[:,None,:], axis=2)
+    b_lm = np.sum(weights[None,None,:]*lp*b_m1[:,None,:], axis=2)
 
     newlp = lpml(L - 1, L - 1, np.cos(newkphi))
     newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
@@ -268,9 +269,13 @@ def interpolate(coeff, weights, kdir, newkdir):
     
     b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
     
-    padded = np.zeros((newL*2, newL), dtype='complex')
-    padded[0:L,:] = b_m2[0:L,:]
-    padded[-L:,:] = b_m2[L:2*L,:]
+    padded = np.zeros((newM, newL), dtype='complex')
+    padded[0:M/2,:] = b_m2[0:M/2,:]
+    padded[-M/2:,:] = b_m2[M/2:M,:]
+    
+    #padded = np.zeros((newL*2, newL), dtype='complex')
+    #padded[0:L,:] = b_m2[0:L,:]
+    #padded[-L:,:] = b_m2[L:2*L,:]
     
     newcoeff = newM/np.double(M)*ifft(padded, axis=0)
     #newcoeff = ifft(np.sum(b_lm[:,:,None]*newlp, axis=1), axis=0, n=newL*2)

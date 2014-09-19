@@ -33,14 +33,14 @@ if __name__ == '__main__':
     pres_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
         dist*strengths[None,:], axis=1)
     
-    kdir, weights, w1, w2 = quadrule2(ml_order*2 + 1)
+    kdir, weights, w1, w2 = quadrule2(21)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)
     #pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, ml_order, 
     #    rho, c)
     
-    newkdir, newweights, _, _ = quadrule2(ml_order*2*2 + 1)
+    newkdir, newweights, _, _ = quadrule2(42)
     newkcoord = dir2coord(newkdir)
     
     newcoeff, b_lm = interpolate(coeff, w2, kdir, newkdir)
@@ -48,19 +48,27 @@ if __name__ == '__main__':
         ml_order, rho, c)
     pres_fmm1 = ffeval(coeff, points, center, weights, k, kcoord, 
         ml_order, rho, c)
+    
+    newcoeff_ref = ffcoeff(strengths, sources, center, k, newkcoord)
 
     fig1 = pp.figure()
     fig1.add_subplot(111)
     pp.plot(np.abs(pres_exact),'b')
     pp.plot(np.abs(pres_fmm1),'g.')
     pp.plot(np.abs(pres_fmm2),'r.')
-    pp.title('amplitude')
+    pp.xlabel('angle (degrees)')
+    pp.ylabel('pressure')
+    pp.title('pressure amplitude after interpolation')
+    pp.legend(('exact','882 angles', '3362 angles'), loc='best')
     
     fig2 = pp.figure()
     fig2.add_subplot(111)
     pp.plot(np.angle(pres_exact),'b')
     pp.plot(np.angle(pres_fmm1),'g.')
     pp.plot(np.angle(pres_fmm2),'r.')
-    pp.title('phase')
+    pp.xlabel('angle (degrees)')
+    pp.ylabel('phase')
+    pp.title('pressure phase after interpolation')
+    pp.legend(('exact','882 angles', '3362 angles'), loc='best')
     
     pp.show()
