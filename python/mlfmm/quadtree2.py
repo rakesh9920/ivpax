@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import weakref
+from mlfmm.fasttransforms import *
 
 class Group:
     '''
@@ -174,7 +175,38 @@ class QuadTree:
 class Operator:
     
     def __init__(self):
+        
+        self.translators = dict()
         pass
+    
+    def setup(self):
+        
+        # create quadtree
+        # precompute translation operators for each level
+        # precompute shift operators for each level
+        pass
+        
+    def apply(self):
+        
+        # calculate far-field coefficients for each group in max level
+        # far to local translation for each group in max level
+        # uptree pass
+        # downwtree pass
+        # calculate the total field at each node
+        pass
+        
+    def uptree(self):
+        
+        # shift-interpolate-sum far-field coefficients for each group in a level
+        # far to local translation for each group in a level
+        pass
+    
+    def downtree(self):
+        
+        # shift-filter-sum far-field coefficients for each group in a level
+        pass
+    
+    
 
             
         
