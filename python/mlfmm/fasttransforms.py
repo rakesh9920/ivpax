@@ -181,13 +181,19 @@ def mlop(pos, k, kcoord, order):
     
     return total
 
-def m2lop(r, angle, k, order):
-    
+def m2lop(r, cos_angle, k, order):
+    '''
+    Far to local transform.
+    '''
     l = np.arange(0, order + 1)
+    
+    
     operator =  np.sum((2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
-        np.cos(angle)))
+        cos_angle))
     
     return operator
+
+m2l = np.vectorize(m2lop, excluded=['r', 'k', 'order'])
 
 def m2mop(r, angle, k):
     

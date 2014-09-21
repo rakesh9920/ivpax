@@ -12,7 +12,9 @@ class Group:
         
         lvl, i, j = group_id
         xdim, ydim = dim
-             
+        
+        self.group_dims = np.array([xdim/(2**lvl), ydim/(2**lvl)])
+            
         self.center = np.array(origin).reshape(3) + np.array([xdim/(2**lvl)*(i + 
             0.5), ydim/(2**lvl)*(j + 0.5), 0])
         
@@ -176,15 +178,63 @@ class Operator:
     
     def __init__(self):
         
-        self.translators = dict()
-        pass
+        #self.translators = dict()
+        self.params = dict.fromkeys(['wave_number', 'density', 'sound_speed', 
+            'node_area', 'nodes', 'origin', 'box_dims', 'min_level', 
+            'max_level'])
+        self.qt = None
+        self.levelinfo = None
     
     def setup(self):
         
-        # create quadtree
+        prms = self.params
+        k = prms['wave_number']
+        
+        # create and initialize quadtree
+        qt = QuadTree(prms['nodes'], prms['origin'], prms['box_dims'])
+        qt.setup(prms['min_level'], prms['max_level'])
+        self.qt = qt
+        self.levelinfo = dict.fromkeys(range(prms['max_level'] + 1), dict())
+        
+        # compute far-field angles for each level
+        for l, lvl in qt.levels.iteritems():
+            
+            xdim, ydim = prms['box_dims']
+            D = max(xdim/(2**l), ydim/(2**l))
+
+            order = k*D + 5/1.6*np.log(k*D + np.pi)
+            
+            kdir, weights, thetaweights, phiweights = quadrule2(order + 1)
+            kcoord = dir2coord(kdir)
+            
+            self.levelinfo[l]['kdir'] = kdir
+            self.levelinfo[l]['kcoord'] = kcoord
+            self.levelinfo[l]['weights'] = weights
+            self.levelinfo[l]['thetaweights'] = thetaweights
+            self.levelinfo[l]['phiweights'] = phiweights
+            self.levelinfo[l]['order'] = order
+        
         # precompute translation operators for each level
+        for l, lvl in qt.levels.iteritems(): 
+            
+            kcoord = self.levelinfo[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            order = self.levelinfo[l]['order']
+            
+            for group in lvl.itervalues():
+                
+                group.translators = []
+                
+                for neighbor in group.nntn.itervalues():
+                    
+                    r = group.center - neighbor.center
+                    rhat = r/mag(r)
+                    cos_angle = rhat.dot(kcoordT)
+                    
+                    group.translators.append(m2l(r, cos_angle, k, order + 1))
+        
         # precompute shift operators for each level
-        pass
+        
         
     def apply(self):
         
