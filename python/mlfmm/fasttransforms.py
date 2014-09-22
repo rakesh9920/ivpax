@@ -187,7 +187,6 @@ def m2lop(r, cos_angle, k, order):
     '''
     l = np.arange(0, order + 1)
     
-    
     operator =  np.sum((2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
         cos_angle))
     
@@ -195,9 +194,9 @@ def m2lop(r, cos_angle, k, order):
 
 m2l = np.vectorize(m2lop, excluded=['r', 'k', 'order'])
 
-def m2mop(r, angle, k):
+def m2m(r, cos_angle, k):
     
-    return np.exp(1j*k*r*np.cos(angle))
+    return np.exp(1j*k*r*cos_angle)
 
 def quadrule(order):
     '''

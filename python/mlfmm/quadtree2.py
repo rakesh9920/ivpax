@@ -30,7 +30,7 @@ class Group:
         
     def __repr__(self):
         
-        return 'Group %s, %s {level: %s}' % (self.group_id[1], 
+        return 'Group %d, %d {level: %d}' % (self.group_id[1], 
             self.group_id[2], self.group_id[0])
 
     def add_child(self, child):
@@ -137,15 +137,14 @@ class QuadTree:
         self.assign_nodes(maxlevel)
         group_ids = self.group_ids
         group_ids_tup = [tuple(row) for row in group_ids]
-        unique_ids = np.unique(group_ids_tup)
+        unique_ids = set(group_ids_tup)
         
         for group_id in unique_ids:
             self.add_member(Group(group_id, origin, dim))
             
-        # add nodes to groups in finest level
         for n in xrange(nodes.shape[0]):
             
-            group = self.get_member(tuple(group_ids[n,:].ravel()))
+            group = self.get_member(group_ids[n])
             group.add_node(nodes[n,:], n)
         
         # populate remaining levels
@@ -162,18 +161,16 @@ class QuadTree:
         for lvl in levels.itervalues():
             for group in lvl.itervalues():
                 group.find_ntnn()
-        #for lvl in xrange(maxlevel, minlevel, -1):
-        #    for group in levels[lvl].itervalues():
-        #        group.find_ntnn()
           
     def assign_nodes(self, maxlevel):
         
         ids = np.floor((self.nodes[:,:2] - self.origin[None,:2])/ \
             (self.dim[None,:]*2**(-maxlevel))).astype(int) 
+            
+        group_ids = np.insert(ids, 0, maxlevel*np.ones(ids.shape[0]), axis=1)   
+
+        self.group_ids = [tuple(row) for row in group_ids]
         
-        self.group_ids = np.insert(ids, 0, 
-            maxlevel*np.ones(self.nodes.shape[0]), axis=1)   
-    
 class Operator:
     
     def __init__(self):
@@ -202,7 +199,7 @@ class Operator:
             xdim, ydim = prms['box_dims']
             D = max(xdim/(2**l), ydim/(2**l))
 
-            order = k*D + 5/1.6*np.log(k*D + np.pi)
+            order = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
             
             kdir, weights, thetaweights, phiweights = quadrule2(order + 1)
             kcoord = dir2coord(kdir)
@@ -213,6 +210,8 @@ class Operator:
             self.levelinfo[l]['thetaweights'] = thetaweights
             self.levelinfo[l]['phiweights'] = phiweights
             self.levelinfo[l]['order'] = order
+            self.levelinfo[l]['group_dims'] = np.array([xdim/(2**l), 
+                ydim/(2**l)])
         
         # precompute translation operators for each level
         for l, lvl in qt.levels.iteritems(): 
@@ -225,16 +224,38 @@ class Operator:
                 
                 group.translators = []
                 
-                for neighbor in group.nntn.itervalues():
+                for neighbor in group.ntnn:
                     
-                    r = group.center - neighbor.center
+                    r = group.center - neighbor().center
                     rhat = r/mag(r)
                     cos_angle = rhat.dot(kcoordT)
                     
-                    group.translators.append(m2l(r, cos_angle, k, order + 1))
+                    group.translators.append(m2l(mag(r), cos_angle, k, 
+                        order + 1))
         
         # precompute shift operators for each level
-        
+        for l, lvl in qt.levels.iteritems():
+            
+            kcoord = self.levelinfo[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            
+            group_dims = self.levelinfo[l]['group_dims']
+            r = mag(group_dims)
+            
+            rhat_ul = np.array([1, -1, 0])/np.sqrt(2) # upper left group
+            rhat_ur = np.array([-1, -1, 0])/np.sqrt(2) # upper right group
+            rhat_ll = np.array([1, 1, 0])/np.sqrt(2) # lower left group
+            rhat_lr = np.array([-1, 1, 0])/np.sqrt(2) # lower right group
+            
+            shift_ul = m2m(r, rhat_ul.dot(kcoordT), k)
+            shift_ur = m2m(r, rhat_ur.dot(kcoordT), k)
+            shift_ll = m2m(r, rhat_ll.dot(kcoordT), k)
+            shift_lr = m2m(r, rhat_lr.dot(kcoordT), k)
+            
+            self.levelinfo[l]['shifters'] = [shift_ul, shift_ur, shift_ll, 
+                shift_lr]
+                
+        # precompute interpolate/filter operators?
         
     def apply(self):
         

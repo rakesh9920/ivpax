@@ -3,15 +3,13 @@
 import numpy as np
 import scipy as sp
 
-from mlfmm.quadtree import QuadTree, Operator
+from mlfmm.quadtree2 import QuadTree, Operator
 
 rho = 1000
 c = 1500
-#nnodes = 1000
-#s_n = 1.0/nnodes
 f = 100e6
-origin = [0.0, 0.0, 0.0]
-dim = [70.1e-6, 70.1e-6]
+origin = np.array([0.0, 0.0, 0.0])
+dim = np.array([70.1e-6, 70.1e-6])
 k = 2*np.pi*f/c
 order = 2
 
@@ -34,17 +32,19 @@ if __name__ == '__main__':
     u = u.reshape((-1, 1))
     
     #q = 1j*rho*c*2*np.pi*f/c*s_n*u
-
-    qt = QuadTree(nodes, origin, dim)
-    qt.assign_nodes(5)
-    qt.populate_tree(5, 5)
+    #qt = QuadTree(nodes, origin, dim)
+    #qt.setup(2, 4)
     
-    op = Operator(qt)
-    op.rho = rho
-    op.c = c
-    op.s_n = s_n
-    op.k = 2*np.pi*f/c
-    op.order = order
+    op = Operator()
+    op.params['density'] = rho
+    op.params['sound_speed'] = c
+    op.params['node_area'] = s_n
+    op.params['wave_number'] = 2*np.pi*f/c
+    op.params['order'] = order
+    op.params['box_dims'] = dim
+    op.params['origin'] = origin
+    op.params['nodes'] = nodes
+    op.params['min_level'] = 2
+    op.params['max_level'] = 4
     
-    #op.calculate_mpole_coeff(q, k, rho, c, 1)
-    #op.matvec(disp)
+    op.setup()
