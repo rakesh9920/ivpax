@@ -43,9 +43,24 @@ def cart2sph(points, cat=True):
         return np.c_[r, theta, phi]
     else:
         return r, theta, phi
-
-def dir2coord(kdir):
+        
+def mag(r, axis=-1):
+    '''
+    '''
+    return np.sqrt(np.sum(r**2, axis=axis, keepdims=True))
+           
+def distance(a, b):
+    '''
+    '''
+    a = a.reshape((-1,3)).T
+    b = b.reshape((-1,3)).T
     
+    return np.sqrt(np.sum(b*b, 0)[None,:] + np.sum(a*a, 0)[:,None] - \
+        2*np.dot(a.T, b))
+        
+def dir2coord(kdir):
+    '''
+    '''
     theta = kdir[:,:,0]
     phi = kdir[:,:,1]
     
@@ -87,19 +102,18 @@ def sphhankel12(l, z):
     return sphjn(l, z) + 1j*sphyv(l, z)
 
 def sphhankel1(l, z):
+    '''
+    '''
     return np.sqrt(np.pi/(2*z))*hankel1(l + 0.5, z)
     
 def sphharm(l, m, theta, phi):
-    
+    '''
+    '''
     ret = np.sqrt((2*l + 1)/(4*np.pi)*factorial(l - m)/ \
         factorial(l + m))*lpmv(m, l, np.cos(phi))* \
         np.exp(1j*m*theta)
     
     return ret
-
-def mag(r, axis=-1):
-    
-    return np.sqrt(np.sum(r**2, axis=axis, keepdims=True))
     
 def ffcoeff(q, srcpos, centerpos, k, kcoord):
     '''
@@ -152,6 +166,18 @@ def nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
         coeff*weights, axis=1), axis=1)
 
     return -k**2*rho*c/(16*np.pi**2)*total
+
+def directeval(q, srcpos, fieldpos, k, rho, c):
+    '''
+    '''
+    r = distance(fieldpos, srcpos)
+    
+    mat = (1j*k*rho*c/(4*np.pi)*np.exp(1j*k*r)/r)*q
+    
+    mat[np.isnan(mat)] = 0
+    
+    return np.sum(mat, axis=1)
+
     
 def mlop(pos, k, kcoord, order):
     '''

@@ -2,12 +2,12 @@
 
 import numpy as np
 import scipy as sp
-
-from mlfmm.quadtree2 import QuadTree, Operator
+from matplotlib import pyplot as pp
+from mlfmm.quadtree2 import *
 
 rho = 1000
 c = 1500
-f = 1e6
+f = 100e6
 origin = np.array([0.0, 0.0, 0.0])
 dim = np.array([70.1e-6, 70.1e-6])
 k = 2*np.pi*f/c
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     u[14,14] = 1
     u = u.ravel()
     
-    #q = 1j*rho*c*2*np.pi*f/c*s_n*u
+    q = 1j*rho*c*2*np.pi*f/c*s_n*u
     #qt = QuadTree(nodes, origin, dim)
     #qt.setup(2, 4)
     
@@ -39,7 +39,6 @@ if __name__ == '__main__':
     op.params['sound_speed'] = c
     op.params['node_area'] = s_n
     op.params['wave_number'] = 2*np.pi*f/c
-    #op.params['order'] = order
     op.params['box_dims'] = dim
     op.params['origin'] = origin
     op.params['nodes'] = nodes
@@ -49,8 +48,11 @@ if __name__ == '__main__':
     op.setup()
     pressure = op.apply(u).reshape((30,30))
     
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))
     
-    
+    pp.imshow(np.abs(pressure), interpolation='none')
+    pp.colorbar()
+    pp.show()
     
     
     

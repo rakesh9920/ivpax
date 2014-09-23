@@ -69,7 +69,7 @@ class Group:
         for dx in xrange(istart, istop):
             for dy in xrange(jstart, jstop):
                 
-                if qt.is_member((lvl, dx, dy)):
+                if qt.is_member((lvl, dx, dy)) and (lvl, dx, dy) != (lvl, i, j):
                     neighbors.append(weakref.ref(qt.get_member((lvl, dx, dy))))
                     #neighbors[idx] = weakref.ref(qt.get_member((lvl, dx, dy)))
                 
@@ -210,7 +210,9 @@ class Operator:
         for l, lvl in qt.levels.iteritems():
             
             xdim, ydim = prms['box_dims']
-            D = max(xdim/(2**l), ydim/(2**l))
+            min_level = prms['min_level']
+            D = max(xdim/(2**min_level), ydim/(2**min_level))
+            #D = max(xdim/(2**l), ydim/(2**l))
 
             order = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
             
@@ -329,6 +331,7 @@ class Operator:
         # calculate the total field at each node
         pressure = np.zeros_like(u, dtype='complex')
         
+        # first, add pressure at each node due to far sources using fmm
         for group in maxl.itervalues():
             
             sources = np.array(group.nodes.values())
@@ -339,6 +342,39 @@ class Operator:
             
             pressure[group.nodes.keys()] = pres
         
+        # second, add pressure from neighboring groups using direct evaluation
+        for group in maxl.itervalues():
+            
+            # create dictionary containing all node_ids and nodes from 
+            # neighboring groups
+            neighbor_nodes = dict()
+            
+            for neighbor in group.neighbors:
+                neighbor_nodes.update(neighbor().nodes)
+            
+            sources = np.array(neighbor_nodes.values())
+            
+            # find their source strengths and evaluate the summed pressure 
+            # contribution at each node in the group
+            strengths = q[neighbor_nodes.keys()]
+            fieldpos = np.array(group.nodes.values())
+            
+            pres = directeval(strengths, sources, fieldpos, k, rho, c)
+            pressure[group.nodes.keys()] += pres
+        
+        # third, add pressure from nodes in the group using direct evaluation
+        for group in maxl.itervalues():
+            for node_id, node in group.nodes.iteritems():
+                
+                other_nodes = dict((key, val) for (key, val) in 
+                    group.nodes.iteritems() if key != node_id)
+                
+                strengths = q[other_nodes.keys()]
+                sources = np.array(other_nodes.values())
+            
+                pres = directeval(strengths, sources, node, k, rho, c)
+                pressure[node_id] += pres[0]
+
         return pressure
         
     def uptree(self):
@@ -365,8 +401,9 @@ class Operator:
                 
                 for key, child in group.children.iteritems():
                     
-                    sum_coeffs += interpolate(shifters[key]*(child().coeffs), 
-                        phiweights, kdir, newkdir)
+                    #sum_coeffs += interpolate(shifters[key]*(child().coeffs), 
+                    #    phiweights, kdir, newkdir)
+                    sum_coeffs += shifters[key]*(child().coeffs)
                 
                 group.coeffs = sum_coeffs
         
@@ -409,8 +446,9 @@ class Operator:
             for group in lvl.itervalues():
                 
                 # calculate filtered coefficients
-                aggr_coeffs = filter(group.aggr_coeffs, phiweights, kdir, 
-                    newkdir)
+                #aggr_coeffs = filter(group.aggr_coeffs, phiweights, kdir, 
+                #    newkdir)
+                aggr_coeffs = group.aggr_coeffs
                 
                 # for each child group, shift filtered coefficients and add the 
                 # child group's ntnn coefficients    

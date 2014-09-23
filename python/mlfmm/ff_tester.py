@@ -23,15 +23,17 @@ if __name__ == '__main__':
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
     sources = np.c_[srcx, srcy, srcz]
-    strengths = np.ones(nsource)
+    strengths = np.ones(nsource, dtype='complex')*1j
     
     r_obs, theta_obs, phi_obs = np.mgrid[obs_d:(obs_d+1):1, 0:2*np.pi:360j, 
         np.pi/2:np.pi/2+1:1]
     points = sph2cart(np.c_[r_obs.ravel(), theta_obs.ravel(), phi_obs.ravel()])
     dist = distance(points, sources)
     
-    pres_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
-        dist*strengths[None,:], axis=1)
+    #pres_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
+    #    dist*strengths[None,:], axis=1)
+    
+    pres_exact = directeval(strengths, sources, points, k, rho, c)
     
     kdir, weights, w1, w2 = quadrule2(21)
     kcoord = dir2coord(kdir)
