@@ -43,7 +43,7 @@ if __name__ == '__main__':
     newkdir, newweights, _, _ = quadrule2(41)
     newkcoord = dir2coord(newkdir)
     
-    newcoeff, b_lm = filter(coeff, w2, kdir, newkdir)
+    newcoeff, b_lm = interpolate(coeff, w2, kdir, newkdir)
     pres_fmm2 = ffeval(newcoeff, points, center, newweights, k, newkcoord, 
         ml_order, rho, c)
     pres_fmm1 = ffeval(coeff, points, center, weights, k, kcoord, 

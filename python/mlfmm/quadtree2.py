@@ -22,9 +22,9 @@ class Group:
             self.group_id = tuple(group_id.ravel())
         else:
             self.group_id = group_id
-        self.children = []
+        self.children = dict()
         self.parent = None
-        self.neighbors = []
+        self.neighbors = [] 
         self.ntnn = []
         self.nodes = dict()
         
@@ -34,7 +34,10 @@ class Group:
             self.group_id[2], self.group_id[0])
 
     def add_child(self, child):
-        self.children.append(weakref.ref(child))
+        
+        lvl, i, j = child.group_id
+        
+        self.children[(i % 2, j % 2)] = weakref.ref(child)
     
     def spawn_parent(self, qt):
         
@@ -61,12 +64,17 @@ class Group:
         jstop = int(min(j + 2, 2**lvl))
         
         neighbors = []
+        #idx = 0
         
         for dx in xrange(istart, istop):
             for dy in xrange(jstart, jstop):
+                
                 if qt.is_member((lvl, dx, dy)):
                     neighbors.append(weakref.ref(qt.get_member((lvl, dx, dy))))
-        
+                    #neighbors[idx] = weakref.ref(qt.get_member((lvl, dx, dy)))
+                
+                #idx += 1
+                    
         self.neighbors = neighbors
     
     def find_ntnn(self):
@@ -79,7 +87,8 @@ class Group:
         ntnn = []
         
         for n in parent().neighbors:
-            ntnn.extend([x for x in n().children if x not in self.neighbors])
+            ntnn.extend([x for x in n().children.itervalues() if x not in 
+                self.neighbors])
 
         self.ntnn = ntnn
     
@@ -172,7 +181,8 @@ class QuadTree:
         self.group_ids = [tuple(row) for row in group_ids]
         
 class Operator:
-    
+    '''
+    '''
     def __init__(self):
         
         #self.translators = dict()
@@ -183,7 +193,9 @@ class Operator:
         self.levelinfo = None
     
     def setup(self):
-        
+        '''
+        Initialize operator and precompute translators and shifters.
+        '''
         prms = self.params
         k = prms['wave_number']
         
@@ -191,7 +203,8 @@ class Operator:
         qt = QuadTree(prms['nodes'], prms['origin'], prms['box_dims'])
         qt.setup(prms['min_level'], prms['max_level'])
         self.qt = qt
-        self.levelinfo = dict.fromkeys(range(prms['max_level'] + 1), dict())
+        #self.levelinfo = dict.fromkeys(range(prms['max_level'] + 1), None)
+        self.levelinfo = dict()
         
         # compute far-field angles for each level
         for l, lvl in qt.levels.iteritems():
@@ -201,9 +214,10 @@ class Operator:
 
             order = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
             
-            kdir, weights, thetaweights, phiweights = quadrule2(order + 1)
+            kdir, weights, thetaweights, phiweights = quadrule2(2*order + 1)
             kcoord = dir2coord(kdir)
             
+            self.levelinfo[l] = dict()
             self.levelinfo[l]['kdir'] = kdir
             self.levelinfo[l]['kcoord'] = kcoord
             self.levelinfo[l]['weights'] = weights
@@ -233,50 +247,179 @@ class Operator:
                     group.translators.append(m2l(mag(r), cos_angle, k, 
                         order + 1))
         
-        # precompute shift operators for each level
+        # precompute shifters for each level
         for l, lvl in qt.levels.iteritems():
             
             kcoord = self.levelinfo[l]['kcoord']
             kcoordT = np.transpose(kcoord, (0, 2, 1))
             
             group_dims = self.levelinfo[l]['group_dims']
-            r = mag(group_dims)
+            r = mag(group_dims)/2
             
+            # define direction unit vectors for the four quadrants
             rhat_ul = np.array([1, -1, 0])/np.sqrt(2) # upper left group
             rhat_ur = np.array([-1, -1, 0])/np.sqrt(2) # upper right group
             rhat_ll = np.array([1, 1, 0])/np.sqrt(2) # lower left group
             rhat_lr = np.array([-1, 1, 0])/np.sqrt(2) # lower right group
             
+            # calculate shifters from magnitude and angle
             shift_ul = m2m(r, rhat_ul.dot(kcoordT), k)
             shift_ur = m2m(r, rhat_ur.dot(kcoordT), k)
             shift_ll = m2m(r, rhat_ll.dot(kcoordT), k)
             shift_lr = m2m(r, rhat_lr.dot(kcoordT), k)
             
-            self.levelinfo[l]['shifters'] = [shift_ul, shift_ur, shift_ll, 
-                shift_lr]
-                
+            self.levelinfo[l]['shifters'] = dict()
+            self.levelinfo[l]['shifters'][(0,0)] = shift_ll
+            self.levelinfo[l]['shifters'][(1,0)] = shift_lr
+            self.levelinfo[l]['shifters'][(0,1)] = shift_ul
+            self.levelinfo[l]['shifters'][(1,1)] = shift_ur   
+            
         # precompute interpolate/filter operators?
         
-    def apply(self):
+    def apply(self, u):
+        '''
+        Apply operator to input velocity vector to approximate the matrix-vector
+        product.
+        '''
+        qt = self.qt
+        prms = self.params
+        
+        rho = prms['density']
+        c = prms['sound_speed']
+        k = prms['wave_number']
+        s_n = prms['node_area']
+        max_level = prms['max_level']
+        min_level = prms['min_level']
+        weights = self.levelinfo[max_level]['weights']
+
+        # calculate node source strength from velocity
+        q = 1j*rho*c*k*s_n*u
         
         # calculate far-field coefficients for each group in max level
-        # far to local translation for each group in max level
+        maxl = qt.levels[max_level]
+        kcoord = self.levelinfo[max_level]['kcoord']
+        
+        for group in maxl.itervalues():
+            
+            sources = np.array(group.nodes.values())
+            strengths = q[group.nodes.keys()]
+            center = group.center
+            
+            group.coeffs = ffcoeff(strengths, sources, center, k, kcoord)
+        
+        # calculate local coefficients for group's non-touching nearest 
+        # neighbors using far-to-local translators
+        for group in maxl.itervalues():
+            
+            sum_coeffs = np.zeros_like(group.coeffs)
+            
+            for n in xrange(len(group.ntnn)):
+                
+                neighbor = group.ntnn[n]
+                sum_coeffs += group.translators[n]*(neighbor().coeffs)
+            
+            group.ntnn_coeffs = sum_coeffs
+            
         # uptree pass
+        self.uptree()
+        
         # downwtree pass
+        self.downtree()
+        
         # calculate the total field at each node
-        pass
+        pressure = np.zeros_like(u, dtype='complex')
+        
+        for group in maxl.itervalues():
+            
+            sources = np.array(group.nodes.values())
+            center = group.center
+            coeffs = group.aggr_coeffs
+            
+            pres = nfeval(coeffs, sources, center, weights, k, kcoord, rho, c)
+            
+            pressure[group.nodes.keys()] = pres
+        
+        return pressure
         
     def uptree(self):
+        '''
+        '''
+        qt = self.qt
+        prms = self.params
+        #k = prms['wave_number']
+        max_level = prms['max_level']
+        min_level = prms['min_level']
         
         # shift-interpolate-sum far-field coefficients for each group in a level
-        # far to local translation for each group in a level
-        pass
+        for l in xrange(max_level - 1, min_level - 1, -1):
+            
+            lvl = qt.levels[l]
+            shifters = self.levelinfo[l + 1]['shifters']
+            kdir = self.levelinfo[l + 1]['kdir']
+            newkdir = self.levelinfo[l]['kdir']
+            phiweights = self.levelinfo[l + 1]['phiweights']
+            
+            for group in lvl.itervalues():
+                
+                sum_coeffs = np.zeros_like(newkdir[:,:,0], dtype='complex')
+                
+                for key, child in group.children.iteritems():
+                    
+                    sum_coeffs += interpolate(shifters[key]*(child().coeffs), 
+                        phiweights, kdir, newkdir)
+                
+                group.coeffs = sum_coeffs
+        
+            # far to local translation for each group in a level
+            for group in lvl.itervalues():
+                
+                sum_coeffs = np.zeros_like(group.coeffs, dtype='complex')
+                
+                for n in xrange(len(group.ntnn)):
+                    
+                    neighbor = group.ntnn[n]
+                    sum_coeffs += group.translators[n]*(neighbor().coeffs)
+                
+                group.ntnn_coeffs = sum_coeffs
     
     def downtree(self):
+        '''
+        '''
+        # grab necessary parameters and instance objects
+        qt = self.qt
+        prms = self.params
+        max_level = prms['max_level']
+        min_level = prms['min_level']
         
-        # shift-filter-sum far-field coefficients for each group in a level
-        pass
-    
+        # filter-shift ntnn coefficients for each group, passing coefficients 
+        # to their children groups for aggregation
+        for l in xrange(min_level, max_level):
+            
+            lvl = qt.levels[l]
+            shifters = self.levelinfo[l + 1]['shifters']
+            kdir = self.levelinfo[l]['kdir']
+            newkdir = self.levelinfo[l + 1]['kdir']
+            phiweights = self.levelinfo[l]['phiweights']
+
+            # seed top level aggregate coefficients with ntnn coefficients
+            if l == min_level:
+                for group in lvl.itervalues():
+                    group.aggr_coeffs = group.ntnn_coeffs
+                    
+            for group in lvl.itervalues():
+                
+                # calculate filtered coefficients
+                aggr_coeffs = filter(group.aggr_coeffs, phiweights, kdir, 
+                    newkdir)
+                
+                # for each child group, shift filtered coefficients and add the 
+                # child group's ntnn coefficients    
+                for key, child in group.children.iteritems():
+                    
+                    # use conjugate of shifter to reverse its direction
+                    child().aggr_coeffs = (np.conj(shifters[key])*aggr_coeffs +
+                        child().ntnn_coeffs) 
+            
     
 
             

@@ -7,11 +7,10 @@ from mlfmm.quadtree2 import QuadTree, Operator
 
 rho = 1000
 c = 1500
-f = 100e6
+f = 1e6
 origin = np.array([0.0, 0.0, 0.0])
 dim = np.array([70.1e-6, 70.1e-6])
 k = 2*np.pi*f/c
-order = 2
 
 if __name__ == '__main__':
     
@@ -29,7 +28,7 @@ if __name__ == '__main__':
     
     u = np.zeros((30, 30), dtype='cfloat')
     u[14,14] = 1
-    u = u.reshape((-1, 1))
+    u = u.ravel()
     
     #q = 1j*rho*c*2*np.pi*f/c*s_n*u
     #qt = QuadTree(nodes, origin, dim)
@@ -40,7 +39,7 @@ if __name__ == '__main__':
     op.params['sound_speed'] = c
     op.params['node_area'] = s_n
     op.params['wave_number'] = 2*np.pi*f/c
-    op.params['order'] = order
+    #op.params['order'] = order
     op.params['box_dims'] = dim
     op.params['origin'] = origin
     op.params['nodes'] = nodes
@@ -48,3 +47,10 @@ if __name__ == '__main__':
     op.params['max_level'] = 4
     
     op.setup()
+    pressure = op.apply(u).reshape((30,30))
+    
+    
+    
+    
+    
+    

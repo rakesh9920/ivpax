@@ -141,13 +141,18 @@ def ffeval(coeff, fieldpos, centerpos, weights, k, kcoord, order, rho, c):
     
     return -k**2*rho*c/(16*np.pi**2)*total
     
-def nfeval(coeff, weights):
+def nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
     '''
     Evaluates the acoustic field at a specified point using near-field
     signature coefficients.
     '''
-    pass
+    r = fieldpos - centerpos
 
+    total = np.sum(np.sum(np.exp(1j*k*r.dot(np.transpose(kcoord, (0,2,1))))*
+        coeff*weights, axis=1), axis=1)
+
+    return -k**2*rho*c/(16*np.pi**2)*total
+    
 def mlop(pos, k, kcoord, order):
     '''
     Translation operator used in evaluation and translation of far-field 
@@ -309,7 +314,7 @@ def interpolate(coeff, weights, kdir, newkdir):
     #newcoeff = ifft(np.sum(b_lm[:,:,None]*lpml(L - 1, L - 1, np.cos(newkphi)), 
     #    axis=1), axis=0, n=newL*2)
 
-    return newcoeff, b_lm
+    return newcoeff
 
 def filter(coeff, weights, kdir, newkdir):
     
@@ -338,7 +343,7 @@ def filter(coeff, weights, kdir, newkdir):
     
     newcoeff = newM/np.double(M)*ifft(padded, axis=0)
 
-    return newcoeff, b_lm
+    return newcoeff
 
 
 
