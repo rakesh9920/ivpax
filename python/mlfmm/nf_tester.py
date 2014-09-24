@@ -7,14 +7,18 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 nsource = 10
-box = np.array([[-0.05, 0.05],[-0.05, 0.05],[0, 0]])
-f = 10000
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*4
+f = 1e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
-obs_d = 1
-center = np.array([0, 0, 0])
-ml_order = 10
+D = box[0,1] - box[0,0]
+L = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
+ml_order = L
+obs_d = 2*D
+center1 = np.array([0, 0, 0])
+center2 = np.array([0, 1, 0])*obs_d
+#ml_order = 7
 ####
 
 if __name__ == '__main__':
@@ -22,34 +26,40 @@ if __name__ == '__main__':
     srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz]
+    sources = np.c_[srcx, srcy, srcz] + center1
     strengths = np.ones(nsource)
     
-    r_obs, theta_obs, phi_obs = np.mgrid[obs_d:(obs_d+1):1, 0:2*np.pi:360j, 
-        np.pi/2:np.pi/2+1:1]
-    points = sph2cart(np.c_[r_obs.ravel(), theta_obs.ravel(), phi_obs.ravel()])
-    dist = distance(points, sources)
+    srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
+    srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
+    srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
+    fieldpos = np.c_[srcx, srcy, srcz] + center2
+    dist = distance(fieldpos, sources)
     
-    pres_exact = np.sum(1j*k*rho*c/(4*np.pi)*np.exp(1j*k*dist)/ \
-        dist*strengths[None,:], axis=1)
+    pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = quadrule2(21)
+    kdir, weights, w1, w2 = quadrule2(ml_order*2 + 1)
     kcoord = dir2coord(kdir)
+    kcoordT = np.transpose(kcoord, (0,2,1))
     
-    coeff = ffcoeff(strengths, sources, center, k, kcoord)
-    pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, ml_order, 
+    r = center2 - center1
+    rhat = r/mag(r)
+    cos_angle = rhat.dot(kcoordT)
+    
+    coeff = ffcoeff(strengths, sources, center1, k, kcoord)
+    translator = m2l(mag(r), cos_angle, k, ml_order)
+    pres_fmm = nfeval(coeff*translator, fieldpos, center2, weights, k, kcoord, 
         rho, c)
     
     fig1 = pp.figure()
     fig1.add_subplot(111)
-    pp.plot(np.abs(pres_exact))
-    pp.plot(np.abs(pres_fmm),'.')
+    pp.plot(np.abs(pres_exact),'.')
+    pp.plot(np.abs(pres_fmm),'r+')
     pp.title('amplitude')
     
     fig2 = pp.figure()
     fig2.add_subplot(111)
-    pp.plot(np.angle(pres_exact))
-    pp.plot(np.angle(pres_fmm),'.')
+    pp.plot(np.angle(pres_exact),'.')
+    pp.plot(np.angle(pres_fmm),'r+')
     pp.title('phase')
     
     pp.show()

@@ -386,6 +386,9 @@ class Operator:
         max_level = prms['max_level']
         min_level = prms['min_level']
         
+        if max_level == min_level:
+            return
+            
         # shift-interpolate-sum far-field coefficients for each group in a level
         for l in xrange(max_level - 1, min_level - 1, -1):
             
@@ -430,6 +433,13 @@ class Operator:
         
         # filter-shift ntnn coefficients for each group, passing coefficients 
         # to their children groups for aggregation
+        
+        # handle case of single level tree
+        if max_level == min_level:
+            
+            for group in qt.levels[max_level].itervalues():
+                group.aggr_coeffs = group.ntnn_coeffs
+                
         for l in xrange(min_level, max_level):
             
             lvl = qt.levels[l]
