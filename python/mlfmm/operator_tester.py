@@ -7,15 +7,16 @@ from mlfmm.quadtree2 import *
 
 rho = 1000
 c = 1500
-f = 1e6
+f = 2e6
 origin = np.array([0.0, 0.0, 0.0])
-dim = np.array([70.1e-6, 70.1e-6])*4
+mfac = 100
+dim = np.array([70.1e-6, 70.1e-6])*mfac
 k = 2*np.pi*f/c
 
 if __name__ == '__main__':
     
     #x, y, z = np.mgrid[0:65.3e-6:28j, 0:65.3e-6:28j, 0:1:1]
-    x, y, z = np.mgrid[0:70e-6:30j, 0:70e-6:30j, 0:1:1]*4
+    x, y, z = np.mgrid[0:70e-6:30j, 0:70e-6:30j, 0:1:1]*mfac
     #nodes = np.c_[x[1:-1, 1:-1].ravel(), y[1:-1, 1:-1].ravel(), 
     #    z[1:-1, 1:-1].ravel()]
     nodes = np.c_[x.ravel(), y.ravel(), z.ravel()]
@@ -42,10 +43,11 @@ if __name__ == '__main__':
     op.params['box_dims'] = dim
     op.params['origin'] = origin
     op.params['nodes'] = nodes
-    op.params['min_level'] = 3
+    op.params['min_level'] = 2
     op.params['max_level'] = 4
     
     op.setup()
+    op.precompute()
     pressure = op.apply(u).reshape((30,30))
     
     pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))

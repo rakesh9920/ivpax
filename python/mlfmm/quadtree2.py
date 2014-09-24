@@ -192,7 +192,7 @@ class Operator:
         self.qt = None
         self.levelinfo = None
     
-    def setup(self):
+    def setup(self, verbose=True):
         '''
         Initialize operator and precompute translators and shifters.
         '''
@@ -210,11 +210,17 @@ class Operator:
         for l, lvl in qt.levels.iteritems():
             
             xdim, ydim = prms['box_dims']
-            min_level = prms['min_level']
-            D = max(xdim/(2**min_level), ydim/(2**min_level))
-            #D = max(xdim/(2**l), ydim/(2**l))
-
-            order = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
+            #min_level = prms['min_level']
+            #D = max(xdim/(2**min_level), ydim/(2**min_level))
+            D = max(xdim/(2**l), ydim/(2**l))
+            v = np.sqrt(3)*D*k
+            C = 1
+            
+            order = np.int(np.ceil(v + 5/1.6*np.log(v + np.pi)))
+            order2 = np.int(np.ceil(v + C*np.log(v + np.pi)))
+            stab_cond = 0.15*v/np.log(v + np.pi)
+            
+            print l, order, order2, stab_cond, stab_cond > C
             
             kdir, weights, thetaweights, phiweights = quadrule2(2*order + 1)
             kcoord = dir2coord(kdir)
@@ -228,8 +234,15 @@ class Operator:
             self.levelinfo[l]['order'] = order
             self.levelinfo[l]['group_dims'] = np.array([xdim/(2**l), 
                 ydim/(2**l)])
+    
+    def precompute(self):
+        '''
+        '''
+        qt = self.qt
+        prms = self.params
+        k = prms['wave_number']
         
-        # precompute translation operators for each level
+        # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
             kcoord = self.levelinfo[l]['kcoord']
@@ -404,9 +417,9 @@ class Operator:
                 
                 for key, child in group.children.iteritems():
                     
-                    #sum_coeffs += interpolate(shifters[key]*(child().coeffs), 
-                    #    phiweights, kdir, newkdir)
-                    sum_coeffs += shifters[key]*(child().coeffs)
+                    sum_coeffs += interpolate(shifters[key]*(child().coeffs), 
+                        phiweights, kdir, newkdir)
+                    #sum_coeffs += shifters[key]*(child().coeffs)
                 
                 group.coeffs = sum_coeffs
         
@@ -456,9 +469,9 @@ class Operator:
             for group in lvl.itervalues():
                 
                 # calculate filtered coefficients
-                #aggr_coeffs = filter(group.aggr_coeffs, phiweights, kdir, 
-                #    newkdir)
-                aggr_coeffs = group.aggr_coeffs
+                aggr_coeffs = filter(group.aggr_coeffs, phiweights, kdir, 
+                    newkdir)
+                #aggr_coeffs = group.aggr_coeffs
                 
                 # for each child group, shift filtered coefficients and add the 
                 # child group's ntnn coefficients    
