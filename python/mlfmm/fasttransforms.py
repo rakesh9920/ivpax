@@ -229,6 +229,13 @@ def m2m(r, cos_angle, k):
     
     return np.exp(1j*k*r*cos_angle)
 
+def m2m2(center, newcenter, k, kcoord):
+    
+    r = newcenter - center
+    kcoordT = np.transpose(kcoord, (0,2,1))
+    
+    return np.exp(1j*k*r.dot(kcoordT))
+
 def quadrule(order):
     '''
     Returns abscissas (in theta/phi form) and weights for a 

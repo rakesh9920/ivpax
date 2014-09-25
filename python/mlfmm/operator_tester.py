@@ -3,7 +3,8 @@
 import numpy as np
 import scipy as sp
 from matplotlib import pyplot as pp
-from mlfmm.quadtree2 import *
+from mlfmm.operators import CachedOperator
+from mlfmm.quadtree2 import Operator
 
 rho = 1000
 c = 1500
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     #qt = QuadTree(nodes, origin, dim)
     #qt.setup(2, 4)
     
-    op = Operator()
+    op = CachedOperator()
     op.params['density'] = rho
     op.params['sound_speed'] = c
     op.params['node_area'] = s_n
@@ -44,17 +45,17 @@ if __name__ == '__main__':
     op.params['origin'] = origin
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
-    op.params['max_level'] = 4
+    op.params['max_level'] = 3
     
     op.setup()
-    op.precompute()
-    pressure = op.apply(u).reshape((30,30))
-    
-    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))
-    
-    pp.imshow(np.abs(pressure), interpolation='none')
-    pp.colorbar()
-    pp.show()
+    #op.precompute()
+    #pressure = op.apply(u).reshape((30,30))
+    #
+    #pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))
+    #
+    #pp.imshow(np.abs(pressure), interpolation='none')
+    #pp.colorbar()
+    #pp.show()
     
     
     
