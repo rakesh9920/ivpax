@@ -48,7 +48,7 @@ class CachedOperator:
             order = np.int(np.ceil(v + C*np.log(v + np.pi)))
             stab_cond = 0.15*v/np.log(v + np.pi)
             
-            kdir, weights, thetaweights, phiweights = quadrule2(2*order + 1)
+            kdir, weights, thetaweights, phiweights = quadrule2(order + 1)
             kcoord = dir2coord(kdir)
             
             leveldata[l] = dict()
@@ -97,7 +97,7 @@ class CachedOperator:
                     rhat = r/rmag
                     cos_angle = rhat.dot(kcoordT)
                     
-                    trans = np.zeros_like(kcoord, dtype='complex')
+                    trans = np.zeros_like(kcoord[:,:,0], dtype='complex')
                     
                     for theta in xrange(kcoord.shape[0]):
                         for phi in xrange(kcoord.shape[1]):
@@ -152,8 +152,9 @@ class CachedOperator:
         Apply operator to input velocity vector to approximate the matrix-vector
         product.
         '''
-        qt = self.qt
+        qt = self.quadtree
         prms = self.params
+        leveldata = self.leveldata
         
         rho = prms['density']
         c = prms['sound_speed']
@@ -161,14 +162,15 @@ class CachedOperator:
         s_n = prms['node_area']
         max_level = prms['max_level']
         min_level = prms['min_level']
-        weights = self.levelinfo[max_level]['weights']
-
+        
         # calculate node source strength from velocity
         q = 1j*rho*c*k*s_n*u
         
         # calculate far-field coefficients for each group in max level
         maxl = qt.levels[max_level]
-        kcoord = self.levelinfo[max_level]['kcoord']
+        
+        kcoord = leveldata[max_level]['kcoord']
+        weights = leveldata[max_level]['weights']
         
         for group in maxl.itervalues():
             
@@ -182,7 +184,7 @@ class CachedOperator:
         # neighbors using far-to-local translators
         for group in maxl.itervalues():
             
-            sum_coeffs = np.zeros_like(group.coeffs)
+            sum_coeffs = np.zeros_like(group.coeffs, dtype='complex')
             
             for n in xrange(len(group.ntnn)):
                 
@@ -221,10 +223,9 @@ class CachedOperator:
             for neighbor in group.neighbors:
                 neighbor_nodes.update(neighbor().nodes)
             
-            sources = np.array(neighbor_nodes.values())
-            
             # find their source strengths and evaluate the summed pressure 
             # contribution at each node in the group
+            sources = np.array(neighbor_nodes.values())
             strengths = q[neighbor_nodes.keys()]
             fieldpos = np.array(group.nodes.values())
             
@@ -249,9 +250,11 @@ class CachedOperator:
     def uptree(self):
         '''
         '''
-        qt = self.qt
+        qt = self.quadtree
         prms = self.params
-        #k = prms['wave_number']
+        leveldata = self.leveldata
+        shifters = self.shifters
+        
         max_level = prms['max_level']
         min_level = prms['min_level']
         
@@ -262,10 +265,10 @@ class CachedOperator:
         for l in xrange(max_level - 1, min_level - 1, -1):
             
             lvl = qt.levels[l]
-            shifters = self.levelinfo[l + 1]['shifters']
-            kdir = self.levelinfo[l + 1]['kdir']
-            newkdir = self.levelinfo[l]['kdir']
-            phiweights = self.levelinfo[l + 1]['phiweights']
+            
+            kdir = leveldata[l + 1]['kdir']
+            phiweights = leveldata[l + 1]['phiweights']
+            newkdir = leveldata[l]['kdir']
             
             for group in lvl.itervalues():
                 
@@ -273,8 +276,8 @@ class CachedOperator:
                 
                 for key, child in group.children.iteritems():
                     
-                    sum_coeffs += interpolate(shifters[key]*(child().coeffs), 
-                        phiweights, kdir, newkdir)
+                    sum_coeffs += interpolate(shifters[l + 1][key]*
+                        (child().coeffs), phiweights, kdir, newkdir)
                 
                 group.coeffs = sum_coeffs
         
@@ -294,8 +297,11 @@ class CachedOperator:
         '''
         '''
         # grab necessary parameters and instance objects
-        qt = self.qt
+        qt = self.quadtree
         prms = self.params
+        leveldata = self.leveldata
+        shifters = self.shifters
+        
         max_level = prms['max_level']
         min_level = prms['min_level']
         
@@ -303,24 +309,23 @@ class CachedOperator:
         # to their children groups for aggregation
         
         # handle case of single level tree
-        if max_level == min_level:
-            
-            for group in qt.levels[max_level].itervalues():
-                group.aggr_coeffs = group.ntnn_coeffs
+        #if max_level == min_level:
+        #    
+        #    for group in qt.levels[max_level].itervalues():
+        #        group.aggr_coeffs = group.ntnn_coeffs
+                
+        # seed top level aggregate coefficients with ntnn coefficients
+        for group in qt.levels[min_level].itervalues():
+            group.aggr_coeffs = group.ntnn_coeffs  
                 
         for l in xrange(min_level, max_level):
             
             lvl = qt.levels[l]
-            shifters = self.levelinfo[l + 1]['shifters']
-            kdir = self.levelinfo[l]['kdir']
-            newkdir = self.levelinfo[l + 1]['kdir']
-            phiweights = self.levelinfo[l]['phiweights']
-
-            # seed top level aggregate coefficients with ntnn coefficients
-            if l == min_level:
-                for group in lvl.itervalues():
-                    group.aggr_coeffs = group.ntnn_coeffs
-                    
+            
+            newkdir = leveldata[l + 1]['kdir']
+            kdir = leveldata[l]['kdir']
+            phiweights = leveldata[l]['phiweights']
+  
             for group in lvl.itervalues():
                 
                 # calculate filtered coefficients
@@ -332,5 +337,5 @@ class CachedOperator:
                 for key, child in group.children.iteritems():
                     
                     # use conjugate of shifter to reverse its direction
-                    child().aggr_coeffs = (np.conj(shifters[key])*aggr_coeffs +
-                        child().ntnn_coeffs) 
+                    child().aggr_coeffs = (np.conj(shifters[l + 1][key])*
+                        aggr_coeffs + child().ntnn_coeffs) 

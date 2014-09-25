@@ -142,6 +142,10 @@ class QuadTree:
         for lvl in xrange(minlevel, maxlevel + 1):
             self.add_level(lvl)
         
+        # create extra dummy level needed for finding ntnn if necessary
+        if minlevel > 0:
+            self.add_level(minlevel - 1)
+        
         # populate finest level
         self.assign_nodes(maxlevel)
         group_ids = self.group_ids
@@ -161,6 +165,11 @@ class QuadTree:
             for group in levels[lvl].itervalues():
                 group.spawn_parent(self)
         
+        # populate dummy level if it was created
+        if minlevel > 0:
+            for group in levels[minlevel].itervalues():
+                group.spawn_parent(self)
+        
         # populate neighbor lists
         for lvl in levels.itervalues():
             for group in lvl.itervalues():
@@ -170,6 +179,10 @@ class QuadTree:
         for lvl in levels.itervalues():
             for group in lvl.itervalues():
                 group.find_ntnn()
+        
+        # delete dummy levels if they were added
+        if minlevel > 0:
+            del self.levels[minlevel - 1]
           
     def assign_nodes(self, maxlevel):
         

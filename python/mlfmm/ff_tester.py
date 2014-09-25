@@ -7,15 +7,19 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 nsource = 10
-box = np.array([[-0.05, 0.05],[-0.05, 0.05],[0, 0]])
-f = 10000
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*25
+f = 2e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
-obs_d = 1
+D = box[0,1] - box[0,0]
+obs_d = 2*D
 center = np.array([0, 0, 0])
-ml_order = 10
-####
+v = np.sqrt(3)*D*k
+C = 1
+order = np.int(np.ceil(v + C*np.log(v + np.pi)))
+stab_cond = 0.15*v/np.log(v + np.pi)
+print order, stab_cond, stab_cond > C
 
 if __name__ == '__main__':
     
@@ -35,11 +39,11 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, points, k, rho, c)
     
-    kdir, weights, w1, w2 = quadrule2(21)
+    kdir, weights, w1, w2 = quadrule2(order + 1)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)
-    pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, ml_order, 
+    pres_fmm = ffeval(coeff, points, center, weights, k, kcoord, order, 
         rho, c)
     
     fig1 = pp.figure()

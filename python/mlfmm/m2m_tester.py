@@ -7,14 +7,13 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 nsource = 10
-box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*64
-f = 1e6
+nfieldpos = 20
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*25
+f = 2e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
 D = box[0,1] - box[0,0]
-#L = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
-#ml_order = L
 obs_d = 2*D
 center1 = np.array([0, 0, 0])
 center2 = center1 + np.array([D, 0, 0])/1
@@ -36,15 +35,15 @@ if __name__ == '__main__':
     sources = np.c_[srcx, srcy, srcz] + center1
     strengths = np.ones(nsource)
     
-    srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
-    srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
-    srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
+    srcx = sp.rand(nfieldpos)*(box[0,1] - box[0,0])
+    srcy = sp.rand(nfieldpos)*(box[1,1] - box[1,0])
+    srcz = sp.rand(nfieldpos)*(box[2,1] - box[2,0])
     fieldpos = np.c_[srcx, srcy, srcz] + center3
     dist = distance(fieldpos, sources)
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = quadrule2(2*order + 1)
+    kdir, weights, w1, w2 = quadrule2(order + 1)
     kcoord = dir2coord(kdir)
     kcoordT = np.transpose(kcoord, (0,2,1))
     

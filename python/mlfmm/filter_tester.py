@@ -1,4 +1,4 @@
-# mlfmm / interpolate_tester.py
+# mlfmm / filter_tester.py
 
 import numpy as np
 import scipy as sp
@@ -7,7 +7,7 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 nsource = 10
-box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*25
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*50
 f = 2e6
 rho = 1000
 c = 1540
@@ -22,7 +22,7 @@ order1 = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 print order1, stab_cond, stab_cond > C
 
-v = np.sqrt(3)*D*k*2
+v = np.sqrt(3)*D*k/2
 C = 1
 order2 = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     newkdir, newweights, _, _ = quadrule2(order2 + 1)
     newkcoord = dir2coord(newkdir)
     
-    newcoeff = interpolate(coeff, w2, kdir, newkdir)
+    newcoeff = filter(coeff, w2, kdir, newkdir)
     pres_fmm2 = ffeval(newcoeff, points, center, newweights, k, newkcoord, 
         order2, rho, c)
     pres_fmm1 = ffeval(coeff, points, center, weights, k, kcoord, 

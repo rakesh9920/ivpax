@@ -5,10 +5,11 @@ import scipy as sp
 from matplotlib import pyplot as pp
 from mlfmm.operators import CachedOperator
 from mlfmm.quadtree2 import Operator
+from mlfmm.fasttransforms import *
 
 rho = 1000
-c = 1500
-f = 2e6
+c = 1000
+f = 3e6
 origin = np.array([0.0, 0.0, 0.0])
 mfac = 100
 dim = np.array([70.1e-6, 70.1e-6])*mfac
@@ -48,14 +49,14 @@ if __name__ == '__main__':
     op.params['max_level'] = 3
     
     op.setup()
-    #op.precompute()
-    #pressure = op.apply(u).reshape((30,30))
-    #
-    #pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))
-    #
-    #pp.imshow(np.abs(pressure), interpolation='none')
-    #pp.colorbar()
-    #pp.show()
+    op.precompute()
+    pressure = op.apply(u).reshape((30,30))
+    
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))
+    
+    pp.imshow(np.abs(pressure), interpolation='none')
+    pp.colorbar()
+    pp.show()
     
     
     
