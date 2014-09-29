@@ -8,37 +8,32 @@ from mlfmm.quadtree2 import Operator
 from mlfmm.fasttransforms import *
 
 rho = 1000
-c = 1000
+c = 1540
 f = 3e6
 origin = np.array([0.0, 0.0, 0.0])
 mfac = 100
 dim = np.array([70.1e-6, 70.1e-6])*mfac
 k = 2*np.pi*f/c
+nxnodes = 60
+nynodes = 60
 
 if __name__ == '__main__':
-    
-    #x, y, z = np.mgrid[0:65.3e-6:28j, 0:65.3e-6:28j, 0:1:1]
-    x, y, z = np.mgrid[0:70e-6:60j, 0:70e-6:60j, 0:1:1]*mfac
-    #nodes = np.c_[x[1:-1, 1:-1].ravel(), y[1:-1, 1:-1].ravel(), 
-    #    z[1:-1, 1:-1].ravel()]
+
+    x, y, z = np.mgrid[0:70e-6:(nxnodes*1j), 0:70e-6:(nynodes*1j), 0:1:1]*mfac
     nodes = np.c_[x.ravel(), y.ravel(), z.ravel()]
     nnodes = nodes.shape[0]
     
-    #nodes = sp.rand(nnodes, 3)
+    s_n = (70e-6*mfac/(nxnodes-1))**2
     
-    s_n = (70e-6/29)**2
-    #s_n = (70e-6)**2/nnodes
-    
-    u = np.zeros((60, 60), dtype='cfloat')
+    u = np.zeros((nxnodes, nynodes), dtype='cfloat')
     #u[14,14] = 1
+    u[0,0] = 1
     u = u.ravel()
-    u[0:50] = 1
-    np.random.shuffle(u)
+    #u[0:50] = 1
+    #np.random.shuffle(u)
     
     q = 1j*rho*c*2*np.pi*f/c*s_n*u
-    #qt = QuadTree(nodes, origin, dim)
-    #qt.setup(2, 4)
-    
+
     op = CachedOperator()
     op.params['density'] = rho
     op.params['sound_speed'] = c
@@ -52,38 +47,71 @@ if __name__ == '__main__':
     
     op.setup()
     op.precompute()
-    pressure = op.apply(u).reshape((60,60))
+    pressure = op.apply(u).reshape((nxnodes,nynodes))
     
-    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((60,60))
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((nxnodes,
+        nynodes))
     
-    maskedu = np.abs(u.reshape((60,60)))
+    maskedu = np.abs(u.reshape((nxnodes,nynodes)))
     maskedu = np.ma.masked_where(maskedu < 0.5, maskedu)
     
-    pp.figure()
+    error_amp = (np.abs(np.abs(pressure) - np.abs(pressure_exact))/ 
+        np.abs(pressure_exact))*100
+    
+    error_phase = np.abs(np.angle(pressure) - np.angle(pressure_exact))
+        
+    pp.figure(tight_layout=True)
     pp.imshow(np.abs(pressure), interpolation='none')
-    pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    pp.title('pressure amplitude (mlfmm)')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Pressure (Pa)')
+    pp.title('Pressure amplitude with source distr. overlay \n MLFMM, 3 MHz, '
+        '7x7mm area, 3600 nodes')
     pp.show()
     
-    pp.figure()
-    pp.imshow(np.abs(pressure_exact), interpolation='none')
-    pp.title('pressure amplitude (exact)')
-    pp.colorbar()
-    pp.show()
-    
-    pp.figure()
+    pp.figure(tight_layout=True)
     pp.imshow(np.angle(pressure), interpolation='none')
-    pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    pp.title('pressure phase (mlfmm)')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Phase (radians)')
+    pp.title('Pressure phase with source distr. overlay \n MLFMM, 3 MHz, '
+        '7x7mm area, 3600 nodes')
     pp.show()
     
-    pp.figure()
+    pp.figure(tight_layout=True)
+    pp.imshow(np.abs(pressure_exact), interpolation='none')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Pressure (Pa)')
+    pp.title('Pressure amplitude with source distr. overlay \n Exact, 3 MHz, '
+        '7x7mm area, 3600 nodes')
+    pp.show()
+    
+    pp.figure(tight_layout=True)
     pp.imshow(np.angle(pressure_exact), interpolation='none')
-    pp.title('presure phase (exact)')
-    pp.colorbar()
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Phase (radians)')
+    pp.title('Pressure phase with source distr. overlay \n Exact, 3 MHz, '
+        '7x7mm area, 3600 nodes')
     pp.show()
     
+    pp.figure(tight_layout=True)
+    pp.imshow(error_amp, interpolation='none')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Error (%)')
+    pp.title('Amplitude error with source distr. overlay \n 3 MHz, '
+        '7x7mm area, 3600 nodes')
+    pp.show()
+
+    pp.figure(tight_layout=True)
+    pp.imshow(error_phase, interpolation='none', clim=[0, np.pi/16])
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Error (radians)')
+    pp.title('Phase error with source distr. overlay \n 3 MHz, '
+        '7x7mm area, 3600 nodes')
+    pp.show()
     
     
