@@ -18,7 +18,7 @@ k = 2*np.pi*f/c
 if __name__ == '__main__':
     
     #x, y, z = np.mgrid[0:65.3e-6:28j, 0:65.3e-6:28j, 0:1:1]
-    x, y, z = np.mgrid[0:70e-6:30j, 0:70e-6:30j, 0:1:1]*mfac
+    x, y, z = np.mgrid[0:70e-6:60j, 0:70e-6:60j, 0:1:1]*mfac
     #nodes = np.c_[x[1:-1, 1:-1].ravel(), y[1:-1, 1:-1].ravel(), 
     #    z[1:-1, 1:-1].ravel()]
     nodes = np.c_[x.ravel(), y.ravel(), z.ravel()]
@@ -29,9 +29,11 @@ if __name__ == '__main__':
     s_n = (70e-6/29)**2
     #s_n = (70e-6)**2/nnodes
     
-    u = np.zeros((30, 30), dtype='cfloat')
-    u[14,14] = 1
+    u = np.zeros((60, 60), dtype='cfloat')
+    #u[14,14] = 1
     u = u.ravel()
+    u[0:50] = 1
+    np.random.shuffle(u)
     
     q = 1j*rho*c*2*np.pi*f/c*s_n*u
     #qt = QuadTree(nodes, origin, dim)
@@ -50,11 +52,36 @@ if __name__ == '__main__':
     
     op.setup()
     op.precompute()
-    pressure = op.apply(u).reshape((30,30))
+    pressure = op.apply(u).reshape((60,60))
     
-    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((30,30))
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((60,60))
     
+    maskedu = np.abs(u.reshape((60,60)))
+    maskedu = np.ma.masked_where(maskedu < 0.5, maskedu)
+    
+    pp.figure()
     pp.imshow(np.abs(pressure), interpolation='none')
+    pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    pp.title('pressure amplitude (mlfmm)')
+    pp.show()
+    
+    pp.figure()
+    pp.imshow(np.abs(pressure_exact), interpolation='none')
+    pp.title('pressure amplitude (exact)')
+    pp.colorbar()
+    pp.show()
+    
+    pp.figure()
+    pp.imshow(np.angle(pressure), interpolation='none')
+    pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    pp.title('pressure phase (mlfmm)')
+    pp.show()
+    
+    pp.figure()
+    pp.imshow(np.angle(pressure_exact), interpolation='none')
+    pp.title('presure phase (exact)')
     pp.colorbar()
     pp.show()
     

@@ -48,7 +48,8 @@ class CachedOperator:
             order = np.int(np.ceil(v + C*np.log(v + np.pi)))
             stab_cond = 0.15*v/np.log(v + np.pi)
             
-            kdir, weights, thetaweights, phiweights = quadrule2(order + 1)
+            #kdir, weights, thetaweights, phiweights = legquadrule(order)
+            kdir, weights, thetaweights, phiweights = fftquadrule(order)
             kcoord = dir2coord(kdir)
             
             leveldata[l] = dict()
@@ -276,9 +277,11 @@ class CachedOperator:
                 
                 for key, child in group.children.iteritems():
                     
-                    sum_coeffs += interpolate(shifters[l + 1][key]*
-                        (child().coeffs), phiweights, kdir, newkdir)
-                
+                    #sum_coeffs += leginterpolate(shifters[l + 1][key]*
+                        #(child().coeffs), phiweights, kdir, newkdir)
+                    sum_coeffs += fftinterpolate(shifters[l + 1][key]*
+                        (child().coeffs), kdir, newkdir)
+                        
                 group.coeffs = sum_coeffs
         
             # far to local translation for each group in a level
@@ -329,8 +332,9 @@ class CachedOperator:
             for group in lvl.itervalues():
                 
                 # calculate filtered coefficients
-                aggr_coeffs = filter(group.aggr_coeffs, phiweights, kdir, 
-                    newkdir)
+                #aggr_coeffs = legfilter(group.aggr_coeffs, phiweights, kdir, 
+                    #newkdir)
+                aggr_coeffs = fftfilter(group.aggr_coeffs, kdir, newkdir)
                 
                 # for each child group, shift filtered coefficients and add the 
                 # child group's ntnn coefficients    
