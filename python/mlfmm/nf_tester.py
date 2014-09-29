@@ -44,7 +44,7 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = quadrule2(order + 1)
+    kdir, weights, w1, w2 = quadrule2(order)
     kcoord = dir2coord(kdir)
     kcoordT = np.transpose(kcoord, (0,2,1))
     
@@ -59,14 +59,14 @@ if __name__ == '__main__':
     
     fig1 = pp.figure()
     fig1.add_subplot(111)
-    pp.plot(np.abs(pres_exact),'.')
-    pp.plot(np.abs(pres_fmm),'r+')
+    pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
+    pp.plot(np.abs(pres_fmm),'r.')
     pp.title('amplitude')
     
     fig2 = pp.figure()
     fig2.add_subplot(111)
-    pp.plot(np.angle(pres_exact),'.')
-    pp.plot(np.angle(pres_fmm),'r+')
+    pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
+    pp.plot(np.angle(pres_fmm),'r.')
     pp.title('phase')
     
     pp.show()

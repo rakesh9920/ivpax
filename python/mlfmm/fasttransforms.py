@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import sph_harm, jn, yv, lpmv, eval_legendre, hankel1, lpmn
 from scipy.misc import factorial
 from numpy.polynomial.legendre import leggauss
-from scipy.fftpack import fft, ifft
+from scipy.fftpack import fft, ifft, fft2, ifft2, fftshift, ifftshift
 
 def sph2cart(points, cat=True):
     '''
@@ -142,7 +142,8 @@ def ffeval(coeff, fieldpos, centerpos, weights, k, kcoord, order, rho, c):
     signature coefficients.
     '''
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
-    delta_pos = fieldpos - centerpos
+    delta_r = fieldpos - centerpos
+    #npos = delta_r.shape[0]
     #ndir = kdir.shape[0]
     
     #total = 0
@@ -150,8 +151,22 @@ def ffeval(coeff, fieldpos, centerpos, weights, k, kcoord, order, rho, c):
     #for i in xrange(ndir):
         #total += weights[i]*mlop(delta_pos, k, kdir[i,:], order)*coeff[i]
             
-    total = np.sum(weights.ravel()*mlop(delta_pos, k, kcoord, order)* \
+    total = np.sum(weights.ravel()*mlop(delta_r, k, kcoord, order)* \
         coeff.ravel(), axis=1)
+    
+    #kcoordT = np.transpose(kcoord, (0,2,1))
+    #
+    #total = np.zeros(npos, dtype='complex')
+    #
+    #for pt in xrange(npos):
+    #    
+    #    r = delta_r[pt,:]
+    #    magr = mag(r)
+    #    rhat = r/mag(r)
+    #
+    #    cos_angle = rhat.dot(kcoordT)
+    #    
+    #    total[pt] = np.sum(weights*m2l(magr, cos_angle, k, order)*coeff)
     
     return -k**2*rho*c/(16*np.pi**2)*total
     
@@ -265,33 +280,6 @@ def quadrule(order):
     
     return kdir, weights, weights1, weights2
 
-def quadrule2(order):
-    
-    absc1 = np.linspace(0, 2*np.pi, 2*order)
-    w1 = np.ones(2*order)*2*np.pi/(2*order - 1)
-    w1[0] = w1[0]/2
-    w1[-1] = w1[-1]/2
-    weights1 = w1
-    theta = absc1
-    
-    absc2, w2 = leggauss(order)
-    
-    #theta = (absc1 + 1)*np.pi
-    phi = (absc2 + 1)*np.pi/2
-    
-    weights2 = w2*np.pi/2*np.sin(phi)
-    weights = weights1[:,None].dot(weights2[None,:])
-    
-    ntheta = theta.shape[0]
-    nphi = phi.shape[0]
-    
-    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), 
-        np.tile(phi[None,:, None], (ntheta, 1, 1)))
-    
-    kdir = np.concatenate(kdir, axis=2)
-    
-    return kdir, weights, weights1, weights2
-
 #factorial2 =np.vectorize(factorial, excluded=('exact'))
 
 def lpml(m, l, z):
@@ -309,74 +297,248 @@ def lpml(m, l, z):
     
     return out
 
-def interpolate(coeff, weights, kdir, newkdir):
+#def interpolate(coeff, weights, kdir, newkdir):
+#    
+#    M, L = kdir.shape[:2]
+#    kphi = kdir[0,:,1]
+#    newM, newL = newkdir.shape[:2]
+#    newkphi = newkdir[0,:,1]
+#    
+#    b_m1 = fft(coeff, axis=0)
+#    
+#    lp = lpml(L - 1, L - 1, np.cos(kphi))
+#    lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
+#        np.flipud(lp[1:,:,:])), axis=0)
+#
+#    b_lm = np.sum(weights[None,None,:]*lp*b_m1[:,None,:], axis=2)
+#
+#    newlp = lpml(L - 1, L - 1, np.cos(newkphi))
+#    newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
+#        np.flipud(newlp[1:,:,:])), axis=0)
+#    
+#    b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
+#    
+#    padded = np.zeros((newM, newL), dtype='complex')
+#    padded[0:M/2,:] = b_m2[0:M/2,:]
+#    padded[-M/2:,:] = b_m2[M/2:M,:]
+#    
+#    #padded = np.zeros((newL*2, newL), dtype='complex')
+#    #padded[0:L,:] = b_m2[0:L,:]
+#    #padded[-L:,:] = b_m2[L:2*L,:]
+#    
+#    newcoeff = newM/np.double(M)*ifft(padded, axis=0)
+#    #newcoeff = ifft(np.sum(b_lm[:,:,None]*newlp, axis=1), axis=0, n=newL*2)
+#        
+#    #b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*
+#        #b_m[:L,None,:], axis=2)
+#
+#    #newcoeff = ifft(np.sum(b_lm[:,:,None]*lpml(L - 1, L - 1, np.cos(newkphi)), 
+#    #    axis=1), axis=0, n=newL*2)
+#
+#    return newcoeff
+
+#def filter(coeff, weights, kdir, newkdir):
+#    
+#    M, L = kdir.shape[:2]
+#    kphi = kdir[0,:,1]
+#    newM, newL = newkdir.shape[:2]
+#    newkphi = newkdir[0,:,1]
+#    
+#    b_m1 = fft(coeff, axis=0)
+#    
+#    lp = lpml(L - 1, L - 1, np.cos(kphi))
+#    lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
+#        np.flipud(lp[1:,:,:])), axis=0)
+#
+#    b_lm = np.sum(weights[None,None,:]*lp*b_m1[:,None,:], axis=2)
+#
+#    newlp = lpml(L - 1, L - 1, np.cos(newkphi))
+#    newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
+#        np.flipud(newlp[1:,:,:])), axis=0)
+#    
+#    b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
+#    
+#    padded = np.zeros((newM, newL), dtype='complex')
+#    padded[0:newM/2,:] = b_m2[0:newM/2,:newL]
+#    padded[-newM/2:,:] = b_m2[newM/2:newM,:newL]
+#    
+#    newcoeff = newM/np.double(M)*ifft(padded, axis=0)
+#
+#    return newcoeff
+'''
+Interpolation, filtering, and quadrature functions for Legendre/FFT method.
+'''
+def legquadrule(order):
+    '''
+    '''
+    # 1: theta/azimuthal
+    M = 2*(order + 1)
+    absc1 = np.linspace(0, 2*np.pi, M, endpoint=False)
+    w1 = np.ones(M)*2*np.pi/M
+    weights1 = w1
+    theta = absc1
     
-    M, L = kdir.shape[:2]
-    kphi = kdir[0,:,1]
-    newM, newL = newkdir.shape[:2]
-    newkphi = newkdir[0,:,1]
+    # 2: phi/polar
+    N = order + 1
+    
+    absc2, w2 = leggauss(N)
+    phi = (absc2 + 1)*np.pi/2
+    weights2 = w2*np.pi/2*np.sin(phi)
+    
+    weights = weights1[:,None].dot(weights2[None,:])
+    
+    ntheta = theta.shape[0]
+    nphi = phi.shape[0]
+    
+    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), 
+        np.tile(phi[None,:, None], (ntheta, 1, 1)))
+    
+    kdir = np.concatenate(kdir, axis=2)
+    
+    return kdir, weights, weights1, weights2
+    
+def leginterpolate(coeff, weights, kdir, newkdir):
+    
+    M1, N1 = kdir.shape[:2]
+    kphi1 = kdir[0,:,1]
+    M2, N2 = newkdir.shape[:2]
+    kphi2 = newkdir[0,:,1]
+    
+    padM = (M2 - M1)/2
     
     b_m1 = fft(coeff, axis=0)
     
-    lp = lpml(L - 1, L - 1, np.cos(kphi))
-    lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
-        np.flipud(lp[1:,:,:])), axis=0)
+    lp1 = lpml(N1 - 1, N1 - 1, np.cos(kphi1))
+    lp1 = np.concatenate((np.pad(lp1, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(lp1[1:,:,:])), axis=0)
 
-    b_lm = np.sum(weights[None,None,:]*lp*b_m1[:,None,:], axis=2)
+    b_lm = np.sum(weights[None,None,:]*lp1*b_m1[:,None,:], axis=2)
 
-    newlp = lpml(L - 1, L - 1, np.cos(newkphi))
-    newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
-        np.flipud(newlp[1:,:,:])), axis=0)
+    lp2 = lpml(N1 - 1, N1 - 1, np.cos(kphi2))
+    lp2 = np.concatenate((np.pad(lp2, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(lp2[1:,:,:])), axis=0)
     
-    b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
+    b_m2 = np.sum(b_lm[:,:,None]*lp2, axis=1)
     
-    padded = np.zeros((newM, newL), dtype='complex')
-    padded[0:M/2,:] = b_m2[0:M/2,:]
-    padded[-M/2:,:] = b_m2[M/2:M,:]
+    padded = np.pad(fftshift(b_m2, axes=0), ((padM, padM),(0,0)), 
+        mode='constant')
     
-    #padded = np.zeros((newL*2, newL), dtype='complex')
-    #padded[0:L,:] = b_m2[0:L,:]
-    #padded[-L:,:] = b_m2[L:2*L,:]
+    newcoeff = M2/np.double(M1)*ifft(ifftshift(padded, axes=0), axis=0)
+
+    return newcoeff
+
+def legfilter(coeff, weights, kdir, newkdir):
     
-    newcoeff = newM/np.double(M)*ifft(padded, axis=0)
-    #newcoeff = ifft(np.sum(b_lm[:,:,None]*newlp, axis=1), axis=0, n=newL*2)
+    M1, N1 = kdir.shape[:2]
+    kphi1 = kdir[0,:,1]
+    M2, N2 = newkdir.shape[:2]
+    kphi2 = newkdir[0,:,1]
+    
+    Mstart = (M1 - M2)/2
+    Mstop = Mstart + M2
+    
+    b_m1 = fft(coeff, axis=0)
+    
+    lp1 = lpml(N1 - 1, N1 - 1, np.cos(kphi1))
+    lp1 = np.concatenate((np.pad(lp1, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(lp1[1:,:,:])), axis=0)
+
+    b_lm = np.sum(weights[None,None,:]*lp1*b_m1[:,None,:], axis=2)
+
+    lp2 = lpml(N1 - 1, N1 - 1, np.cos(kphi2))
+    lp2 = np.concatenate((np.pad(lp2, ((0,1), (0,0), (0,0)), mode='constant'), 
+        np.flipud(lp2[1:,:,:])), axis=0)
+    
+    b_m2 = np.sum(b_lm[:,:,None]*lp2, axis=1)
+    
+    truncated = fftshift(b_m2, axes=0)[Mstart:Mstop, ...]
+    
+    newcoeff = M2/np.double(M1)*ifft(ifftshift(truncated, axes=0), axis=0)
+
+    return newcoeff
+
+'''
+Interpolation, filtering, and quadrature functions for entirely FFT method
+'''
+def fftquadrule(order):
+    '''
+    '''
+    # 1: theta/azimuthal
+    M = 2*(order + 1)
+    absc1 = np.linspace(0, 2*np.pi, M, endpoint=False)
+    theta = absc1
+    w1 = np.ones(M)*2*np.pi/M
+    #w1[0] = w1[0]/2
+    #w1[-1] = w1[-1]/2
+    
+    thetaweights = w1
+
+    # 2: phi/polar
+    N = 2*(order + 1) + 1
+    absc2 = np.linspace(-np.pi, np.pi, N, endpoint=False)
+    phi = absc2
+    w2 = np.ones(N)*2*np.pi/N
+    #w2[0] = w2[0]/2
+    #w2[-1] = w2[-1]/2
+    w2 = w2/2 # divide by 2 for special considerations due to fft
+    
+    # handle special considerations for |sin(phi)| factor
+    m = np.arange(-N, N + 1)
+    sinabs = np.exp(1j*phi[:,None]*m[None,:])
+    prefactor = np.zeros(2*N + 1)
+    prefactor[1::2] = (2/np.pi/(1 - m[1::2]**2))
+    sinabs = np.abs(np.sum(sinabs*prefactor, axis=1))
+    
+    phiweights = w2*sinabs
+    
+    weights = thetaweights[:,None].dot(phiweights[None,:])
+    
+    ntheta = theta.shape[0]
+    nphi = phi.shape[0]
+    
+    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), 
+        np.tile(phi[None,:, None], (ntheta, 1, 1)))
+    
+    kdir = np.concatenate(kdir, axis=2)
+    
+    kdir[:,:(N-1)/2,0] += np.pi
+    kdir[:,:(N-1)/2,1] *= -1
+    
+    return kdir, weights, thetaweights, phiweights
+
+def fftinterpolate(coeff, kdir, newkdir):
+    
+    M1, N1 = kdir.shape[:2]
+    M2, N2 = newkdir.shape[:2]
+    
+    padM = (M2 - M1)/2
+    padN = (N2 - N1)/2
+    
+    spectrum1 = fft2(coeff)
+    spectrum2 = np.pad(fftshift(spectrum1), ((padM, padM),(padN, padN)), 
+        mode='constant')
+    
+    newcoeff = M2*N2/np.double(M1*N1)*ifft2(ifftshift(spectrum2))
         
-    #b_lm = np.sum(weights[None,None,:]*lpml(L - 1, L - 1, np.cos(kphi))*
-        #b_m[:L,None,:], axis=2)
+    return newcoeff
+    
+def fftfilter(coeff, kdir, newkdir):
 
-    #newcoeff = ifft(np.sum(b_lm[:,:,None]*lpml(L - 1, L - 1, np.cos(newkphi)), 
-    #    axis=1), axis=0, n=newL*2)
-
+    M1, N1 = kdir.shape[:2]
+    M2, N2 = newkdir.shape[:2]
+    
+    Mstart = (M1 - M2)/2
+    Mstop = Mstart + M2
+    Nstart = (N1 - N2)/2
+    Nstop = Nstart + N2
+    
+    spectrum1 = fft2(coeff)
+    spectrum2 = fftshift(spectrum1)[Mstart:Mstop, Nstart:Nstop]
+    
+    newcoeff = M2*N2/np.double(M1*N1)*ifft2(ifftshift(spectrum2))
+        
     return newcoeff
 
-def filter(coeff, weights, kdir, newkdir):
-    
-    M, L = kdir.shape[:2]
-    kphi = kdir[0,:,1]
-    newM, newL = newkdir.shape[:2]
-    newkphi = newkdir[0,:,1]
-    
-    b_m1 = fft(coeff, axis=0)
-    
-    lp = lpml(L - 1, L - 1, np.cos(kphi))
-    lp = np.concatenate((np.pad(lp, ((0,1), (0,0), (0,0)), mode='constant'), 
-        np.flipud(lp[1:,:,:])), axis=0)
-
-    b_lm = np.sum(weights[None,None,:]*lp*b_m1[:,None,:], axis=2)
-
-    newlp = lpml(L - 1, L - 1, np.cos(newkphi))
-    newlp = np.concatenate((np.pad(newlp, ((0,1), (0,0), (0,0)), mode='constant'), 
-        np.flipud(newlp[1:,:,:])), axis=0)
-    
-    b_m2 = np.sum(b_lm[:,:,None]*newlp, axis=1)
-    
-    padded = np.zeros((newM, newL), dtype='complex')
-    padded[0:newM/2,:] = b_m2[0:newM/2,:newL]
-    padded[-newM/2:,:] = b_m2[newM/2:newM,:newL]
-    
-    newcoeff = newM/np.double(M)*ifft(padded, axis=0)
-
-    return newcoeff
 
 
 

@@ -39,7 +39,7 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, points, k, rho, c)
     
-    kdir, weights, w1, w2 = quadrule2(order + 1)
+    kdir, weights, w1, w2 = fftquadrule(order)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)
