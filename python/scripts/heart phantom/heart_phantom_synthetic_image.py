@@ -51,7 +51,7 @@ if __name__ == '__main__':
     ax = fig.add_subplot(111)
     
     pc = imdisp(image[rstart:rstop, phistart:phistop], r=r[rstart:rstop], 
-        phi=phi[phistart:phistop], dyn=50, ax=ax, interp=True)
+        phi=phi[phistart:phistop], dyn=60, ax=ax, interp=False)
         
     ax.invert_yaxis()
     ax.set_xticks([-3, -1, 1, 3])

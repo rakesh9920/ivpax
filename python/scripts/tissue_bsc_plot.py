@@ -4,7 +4,7 @@ import h5py
 import numpy as np
 from matplotlib import pyplot as plt
 
-file_path = './data/tissue_bsc_data.h5'
+file_path = './data/tissue bsc/tissue_bsc_data.h5'
 tissue_names = ['aorta_normal_landini','aorta_calcified_landini',
     'blood_hmtc8_shung','dermis_wrist_raju','fat_wrist_raju',
     'heart_dog_odonnell']
