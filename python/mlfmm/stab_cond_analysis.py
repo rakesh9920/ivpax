@@ -6,7 +6,6 @@ import matplotlib.pyplot as pp
 D0 = 0.007
 C = 1
 
-
 f = np.linspace(0, 40e6, 1000)
 k = 2*np.pi*f/1540
 
@@ -27,6 +26,6 @@ ax.set_ylim(0, 2.5)
 ax.legend(('l=2','l=3','l=4','l=5','l=6','cutoff'), loc='best')
 ax.set_xlabel('Frequency (MHz)')
 ax.set_ylabel('Stability Condition (> 1 is stable)')
-ax.set_title('''Stability analysis of M2L translation for \n$D_0$ = 1mm and ~5% accuracy''')
+ax.set_title('''Stability analysis of M2L translation for \n$D_0$ = 7mm and ~5% accuracy''')
 pp.show()
 
