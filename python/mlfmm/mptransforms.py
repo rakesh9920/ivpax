@@ -16,9 +16,12 @@ mp_sphhankel1 = np.frompyfunc(mp_sphhankel1_pyfunc, 2, 1)
 def mp_m2lop(r, cos_angle, k, order):
     
     l = np.arange(0, order + 1)
+
+    kr = mp.mpf(k*r)
+    ca = mp.mpf(cos_angle)
     
-    operator =  np.sum((2*l + 1)*(1j**l)*mp_sphhankel1(l, k*r)*mp_legendre(l, 
-        cos_angle))
+    operator =  np.sum((2*l + 1)*(1j**l)*mp_sphhankel1(l, kr)*mp_legendre(l, 
+        ca))
         
     return operator
     
@@ -85,7 +88,8 @@ def mp_fftquadrule(order):
     
     kdir = np.concatenate(kdir, axis=2)
     
-    kdir[:,:(N-1)/2,0] += np.pi
+    kdir[:,:(N-1)/2,0] += mpmath.pi()
     kdir[:,:(N-1)/2,1] *= -1
     
+    #return kdir.astype(float), weights, thetaweights, phiweights
     return kdir, weights, thetaweights, phiweights

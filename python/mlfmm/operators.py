@@ -343,3 +343,53 @@ class CachedOperator:
                     # use conjugate of shifter to reverse its direction
                     child().aggr_coeffs = (np.conj(shifters[l + 1][key])*
                         aggr_coeffs + child().ntnn_coeffs) 
+    
+    def precompute_estimate(self, dps=5):
+        
+        qt = self.quadtree
+        leveldata = self.leveldata
+        prms = self.params
+        k = prms['wave_number']
+        
+        translators = dict()
+        
+        for l, lvl in qt.levels.iteritems(): 
+            
+            kcoord = leveldata[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            order = leveldata[l]['order']
+            
+            for group in lvl.itervalues():
+                
+                #group.translators = []
+                
+                for neighbor in group.ntnn:
+                    
+                    r = group.center - neighbor().center
+                    rmag = mag(r)
+                    rhat = r/rmag
+                    cos_angle = rhat.dot(kcoordT)
+                    
+                    #trans = np.zeros_like(kcoord[:,:,0], dtype='complex')
+                    
+                    for theta in xrange(kcoord.shape[0]):
+                        for phi in xrange(kcoord.shape[1]):
+                            
+                            ca = cos_angle[theta, phi]
+                            
+                            key = (round(float(rmag), dps), round(float(ca), dps))
+                            if key in translators:
+                                
+                                pass
+                                
+                            else:
+                                
+                                translators[key] = None
+                            
+                            #trans[theta, phi] = value
+                    
+                    #group.translators.append(trans)
+            
+            #del translators 
+        
+        return translators

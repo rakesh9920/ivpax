@@ -6,22 +6,22 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-nsource = 10
+nsource = 20
 nfieldpos = 20
-box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*64
-f = 1e6
+D0 = 0.001
+level = 5
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
+f = 0.5e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
 D = box[0,1] - box[0,0]
-#L = np.int(np.ceil(k*D + 5/1.6*np.log(k*D + np.pi)))
-#ml_order = L
 obs_d = 2*D
 center1 = np.array([0, 0, 0])
 center2 = np.array([0, 1, 0])*obs_d
 
 v = np.sqrt(3)*D*k
-C = 1
+C = 3/1.6
 order = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 print order, stab_cond, stab_cond > C
@@ -33,18 +33,18 @@ if __name__ == '__main__':
     srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz] + center1
+    sources = np.c_[srcx, srcy, srcz] + center1 - 0.5*D
     strengths = np.ones(nsource)
     
     srcx = sp.rand(nfieldpos)*(box[0,1] - box[0,0])
     srcy = sp.rand(nfieldpos)*(box[1,1] - box[1,0])
     srcz = sp.rand(nfieldpos)*(box[2,1] - box[2,0])
-    fieldpos = np.c_[srcx, srcy, srcz] + center2
+    fieldpos = np.c_[srcx, srcy, srcz] + center2 - 0.5*D
     dist = distance(fieldpos, sources)
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = quadrule2(order)
+    kdir, weights, w1, w2 = fftquadrule(order)
     kcoord = dir2coord(kdir)
     kcoordT = np.transpose(kcoord, (0,2,1))
     
@@ -56,6 +56,8 @@ if __name__ == '__main__':
     translator = m2l(mag(r), cos_angle, k, order)
     pres_fmm = nfeval(coeff*translator, fieldpos, center2, weights, k, kcoord, 
         rho, c)
+    
+    perr = np.abs(np.abs(pres_fmm) - np.abs(pres_exact))/np.abs(pres_exact)*100
     
     fig1 = pp.figure()
     fig1.add_subplot(111)

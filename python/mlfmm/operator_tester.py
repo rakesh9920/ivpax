@@ -9,13 +9,13 @@ from mlfmm.fasttransforms import *
 
 rho = 1000
 c = 1540
-f = 3e6
+f = 0.05e6
 origin = np.array([0.0, 0.0, 0.0])
 mfac = 100
 dim = np.array([70.1e-6, 70.1e-6])*mfac
 k = 2*np.pi*f/c
-nxnodes = 60
-nynodes = 60
+nxnodes = 30
+nynodes = 30
 
 if __name__ == '__main__':
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     op.params['origin'] = origin
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
-    op.params['max_level'] = 3
+    op.params['max_level'] = 6
     
     op.setup()
 #    op.precompute()
