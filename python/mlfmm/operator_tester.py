@@ -9,7 +9,7 @@ from mlfmm.fasttransforms import *
 
 rho = 1000
 c = 1540
-f = 0.5e6
+f = 1e6
 origin = np.array([0.0, 0.0, 0.0])
 D0 = 0.007
 dim = np.array([1.01, 1.01])*D0
@@ -26,11 +26,11 @@ if __name__ == '__main__':
     s_n = (D0/(nxnodes-1))**2
     
     u = np.zeros((nxnodes, nynodes), dtype='cfloat')
-    u[7,7] = 1
+    #u[7,7] = 1
     #u[0,0] = 1
     u = u.ravel()
-    #u[0:50] = 1
-    #np.random.shuffle(u)
+    u[0:50] = 1
+    np.random.shuffle(u)
     
     q = 1j*rho*c*2*np.pi*f/c*s_n*u
 
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     op.params['box_dims'] = dim
     op.params['origin'] = origin
     op.params['nodes'] = nodes
-    op.params['min_level'] = 2
-    op.params['max_level'] = 5
+    op.params['min_level'] = 3
+    op.params['max_level'] = 4
     
     op.setup()
     op.precompute()

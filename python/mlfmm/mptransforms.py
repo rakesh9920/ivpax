@@ -27,6 +27,27 @@ def mp_m2lop(r, cos_angle, k, order):
     
 mp_m2l = np.vectorize(mp_m2lop, excluded=['r', 'k', 'order'])
 
+def mp_ffcoeff(q, srcpos, centerpos, k, kcoord):
+    '''
+    Returns the far-field signature coefficients of a collection of sources in
+    the specified far-field directions.
+    '''
+    delta_r = centerpos - srcpos
+    ntheta, nphi = kcoord.shape[:2]
+    #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
+    
+    #coeff = np.zeros((ntheta, nphi), dtype='complex')
+    
+    #for i in xrange(ntheta):
+    #    for j in xrange(nphi):
+    #        
+    #        coeff[i, j] = np.sum(q*np.exp(1j*k*delta_r.dot(kcoord[i,j,:])))
+    
+    shift = mp_exp(1j*k*delta_r.dot(np.transpose(kcoord, (0,2,1))))
+    coeff = np.sum((q*shift.T).T, axis=0)
+        
+    return coeff
+    
 def mp_nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
     
     r = fieldpos - centerpos

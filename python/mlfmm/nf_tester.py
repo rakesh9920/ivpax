@@ -6,8 +6,8 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-nsource = 20
-nfieldpos = 20
+nsource = 50
+nfieldpos = 50
 D0 = 0.001
 level = 5
 box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
@@ -24,9 +24,9 @@ v = np.sqrt(3)*D*k
 C = 3/1.6
 order = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
-print order, stab_cond, stab_cond > C
-
-order = 5
+wavelength = c/f
+print order, stab_cond, stab_cond > C, wavelength/D
+#order = 5
 ####
 
 if __name__ == '__main__':
@@ -34,13 +34,13 @@ if __name__ == '__main__':
     srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz] + center1 - 0.5*D
+    sources = np.c_[srcx, srcy, srcz] + center1 - 0.5*np.array([D, D, 0])
     strengths = np.ones(nsource)
     
     srcx = sp.rand(nfieldpos)*(box[0,1] - box[0,0])
     srcy = sp.rand(nfieldpos)*(box[1,1] - box[1,0])
     srcz = sp.rand(nfieldpos)*(box[2,1] - box[2,0])
-    fieldpos = np.c_[srcx, srcy, srcz] + center2 - 0.5*D
+    fieldpos = np.c_[srcx, srcy, srcz] + center2 - 0.5*np.array([D, D, 0])
     dist = distance(fieldpos, sources)
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)

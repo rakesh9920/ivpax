@@ -6,8 +6,8 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-nsource = 10
-box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*20
+nsource = 50
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*2
 f = 2e6
 rho = 1000
 c = 1540
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz]
+    sources = np.c_[srcx, srcy, srcz] - 0.5*D
     strengths = np.ones(nsource)
     
     r_obs, theta_obs, phi_obs = np.mgrid[obs_d:(obs_d+1):1, 0:2*np.pi:360j, 

@@ -7,8 +7,10 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 nsource = 10
-box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*70e-6*20
-f = 2e6
+D0 = 0.001
+level = 3
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
+f = 1e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -17,13 +19,13 @@ obs_d = 4*D
 center = np.array([0, 0, 0])
 
 v = np.sqrt(3)*D*k
-C = 1
+C = 3/1.6
 order1 = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 print order1, stab_cond, stab_cond > C
 
 v = np.sqrt(3)*D*k*2
-C = 1
+C = 3/1.6
 order2 = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 print order2, stab_cond, stab_cond > C
@@ -33,7 +35,7 @@ if __name__ == '__main__':
     srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz]
+    sources = np.c_[srcx, srcy, srcz] - 0.5*np.array([D, D, 0])
     strengths = np.ones(nsource)
     
     r_obs, theta_obs, phi_obs = np.mgrid[obs_d:(obs_d+1):1, 0:2*np.pi:360j, 

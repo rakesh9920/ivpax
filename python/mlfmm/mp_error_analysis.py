@@ -8,9 +8,9 @@ from matplotlib import pyplot as pp
 
 nsource = 50
 nfieldpos = 50
-level = 4
-D0 = 0.007
-f = 1e6
+level = 5
+D0 = 0.001
+f = 0.05e6
 rho = 1000
 c = 1540
 dps = 2
@@ -39,13 +39,13 @@ if __name__ == '__main__':
     srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
     srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
     srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz] + center1
+    sources = np.c_[srcx, srcy, srcz] + center1 -0.5*D
     strengths = np.ones(nsource)
     
     srcx = sp.rand(nfieldpos)*(box[0,1] - box[0,0])
     srcy = sp.rand(nfieldpos)*(box[1,1] - box[1,0])
     srcz = sp.rand(nfieldpos)*(box[2,1] - box[2,0])
-    fieldpos = np.c_[srcx, srcy, srcz] + center2
+    fieldpos = np.c_[srcx, srcy, srcz] + center2 - 0.5*D
     dist = distance(fieldpos, sources)
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
@@ -58,19 +58,19 @@ if __name__ == '__main__':
     for order in xrange(1, 20):
         
         kdir, weights, w1, w2 = mp_fftquadrule(order)
-        kcoord = dir2coord(kdir)
+        kcoord = mp_dir2coord(kdir)
         kcoordT = np.transpose(kcoord, (0,2,1))
         
         r = center2 - center1
         rhat = r/mag(r)
         cos_angle = rhat.dot(kcoordT)
         
-        coeff = ffcoeff(strengths, sources, center1, k, kcoord)
-    
         ####
-        translator = m2l(mag(r), cos_angle, k, order)
+        coeff = ffcoeff(strengths, sources, center1, k, kcoord.astype(float))
+        
+        translator = m2l(mag(r), cos_angle.astype(float), k, order)
         pres_fmm = nfeval(coeff*translator, fieldpos, center2, np.cfloat(weights), 
-            k, kcoord, rho, c)
+            k, kcoord.astype(float), rho, c)
         
         perr = np.abs(np.abs(pres_fmm) - np.abs(pres_exact))/np.abs(pres_exact)*100
         mean_perr = np.mean(perr)
@@ -80,8 +80,10 @@ if __name__ == '__main__':
         float64_perr.append(peak_perr)
         
         ####
+        mp_coeff = mp_ffcoeff(strengths, sources, center1, k, kcoord)
+        
         mp_translator = mp_m2l(mag(r), cos_angle, k, order)
-        pres_mp = mp_nfeval(coeff*mp_translator, fieldpos, center2, weights, k, 
+        pres_mp = mp_nfeval(mp_coeff*mp_translator, fieldpos, center2, weights, k, 
             kcoord, rho, c)
     
         perr = np.abs(np.abs(pres_mp) - np.abs(pres_exact))/np.abs(pres_exact)*100
@@ -94,10 +96,13 @@ if __name__ == '__main__':
         if peak_perr > 100 or mean_perr > 100:
             break
     
-    pp.plot(mp_perr)
-    pp.plot(float64_perr)
-    
-    pp.gca().set_ylim(0, 15)
+    pp.plot(np.arange(1,20), mp_perr)
+    pp.plot(np.arange(1,20), float64_perr)
+    pp.title('Error analysis for multi-precision FMM \n D0=1mm, f=50kHz, level 5, D ~ $\lambda/985$')
+    pp.xlabel('truncation number L')
+    pp.ylabel('maximum relative error (percent)')
+    pp.legend(('float336 (100-digits)','float64'))
+    pp.gca().set_ylim(0, 6)
     pp.show()
     
     
