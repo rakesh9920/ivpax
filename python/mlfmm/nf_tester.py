@@ -11,7 +11,7 @@ nfieldpos = 20
 D0 = 0.001
 level = 5
 box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
-f = 0.5e6
+f = 0.05e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -26,6 +26,7 @@ order = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 print order, stab_cond, stab_cond > C
 
+order = 5
 ####
 
 if __name__ == '__main__':
@@ -59,19 +60,21 @@ if __name__ == '__main__':
     
     perr = np.abs(np.abs(pres_fmm) - np.abs(pres_exact))/np.abs(pres_exact)*100
     
-    fig1 = pp.figure()
-    fig1.add_subplot(111)
-    pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
-    pp.plot(np.abs(pres_fmm),'r.')
-    pp.title('amplitude')
+    print np.max(perr)
     
-    fig2 = pp.figure()
-    fig2.add_subplot(111)
-    pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
-    pp.plot(np.angle(pres_fmm),'r.')
-    pp.title('phase')
-    
-    pp.show()
+    #fig1 = pp.figure()
+    #fig1.add_subplot(111)
+    #pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
+    #pp.plot(np.abs(pres_fmm),'r.')
+    #pp.title('amplitude')
+    #
+    #fig2 = pp.figure()
+    #fig2.add_subplot(111)
+    #pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
+    #pp.plot(np.angle(pres_fmm),'r.')
+    #pp.title('phase')
+    #
+    #pp.show()
     
     #plot(np.abs(pres_exact), 'b')
     #plot(np.abs(pres_fmm1), 'r--')

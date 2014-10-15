@@ -4,30 +4,30 @@ import numpy as np
 import scipy as sp
 from matplotlib import pyplot as pp
 from mlfmm.operators import CachedOperator
-from mlfmm.quadtree2 import Operator
+#from mlfmm.quadtree2 import Operator
 from mlfmm.fasttransforms import *
 
 rho = 1000
 c = 1540
-f = 0.05e6
+f = 0.5e6
 origin = np.array([0.0, 0.0, 0.0])
-mfac = 100
-dim = np.array([70.1e-6, 70.1e-6])*mfac
+D0 = 0.007
+dim = np.array([1.01, 1.01])*D0
 k = 2*np.pi*f/c
-nxnodes = 30
-nynodes = 30
+nxnodes = 60
+nynodes = 60
 
 if __name__ == '__main__':
 
-    x, y, z = np.mgrid[0:70e-6:(nxnodes*1j), 0:70e-6:(nynodes*1j), 0:1:1]*mfac
+    x, y, z = np.mgrid[0:D0:(nxnodes*1j), 0:D0:(nynodes*1j), 0:1:1]
     nodes = np.c_[x.ravel(), y.ravel(), z.ravel()]
     nnodes = nodes.shape[0]
     
-    s_n = (70e-6*mfac/(nxnodes-1))**2
+    s_n = (D0/(nxnodes-1))**2
     
     u = np.zeros((nxnodes, nynodes), dtype='cfloat')
-    #u[14,14] = 1
-    u[0,0] = 1
+    u[7,7] = 1
+    #u[0,0] = 1
     u = u.ravel()
     #u[0:50] = 1
     #np.random.shuffle(u)
@@ -43,59 +43,62 @@ if __name__ == '__main__':
     op.params['origin'] = origin
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
-    op.params['max_level'] = 6
+    op.params['max_level'] = 5
     
     op.setup()
-#    op.precompute()
-#    pressure = op.apply(u).reshape((nxnodes,nynodes))
-#    
-#    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((nxnodes,
-#        nynodes))
-#    
-#    maskedu = np.abs(u.reshape((nxnodes,nynodes)))
-#    maskedu = np.ma.masked_where(maskedu < 0.5, maskedu)
-#    
-#    error_amp = (np.abs(np.abs(pressure) - np.abs(pressure_exact))/ 
-#        np.abs(pressure_exact))*100
-#    
-#    error_phase = np.abs(np.angle(pressure) - np.angle(pressure_exact))
-#        
-#    pp.figure(tight_layout=True)
-#    pp.imshow(np.abs(pressure), interpolation='none')
-#    cb = pp.colorbar()
-#    pp.imshow(maskedu, interpolation='none', cmap='gray')
-#    cb.set_label('Pressure (Pa)')
-#    pp.title('Pressure amplitude with source distr. overlay \n MLFMM, 3 MHz, '
-#        '7x7mm area, 3600 nodes')
-#    pp.show()
-#    
-#    pp.figure(tight_layout=True)
-#    pp.imshow(np.angle(pressure), interpolation='none')
-#    cb = pp.colorbar()
-#    pp.imshow(maskedu, interpolation='none', cmap='gray')
-#    cb.set_label('Phase (radians)')
-#    pp.title('Pressure phase with source distr. overlay \n MLFMM, 3 MHz, '
-#        '7x7mm area, 3600 nodes')
-#    pp.show()
-#    
-#    pp.figure(tight_layout=True)
-#    pp.imshow(np.abs(pressure_exact), interpolation='none')
-#    cb = pp.colorbar()
-#    pp.imshow(maskedu, interpolation='none', cmap='gray')
-#    cb.set_label('Pressure (Pa)')
-#    pp.title('Pressure amplitude with source distr. overlay \n Exact, 3 MHz, '
-#        '7x7mm area, 3600 nodes')
-#    pp.show()
-#    
-#    pp.figure(tight_layout=True)
-#    pp.imshow(np.angle(pressure_exact), interpolation='none')
-#    cb = pp.colorbar()
-#    pp.imshow(maskedu, interpolation='none', cmap='gray')
-#    cb.set_label('Phase (radians)')
-#    pp.title('Pressure phase with source distr. overlay \n Exact, 3 MHz, '
-#        '7x7mm area, 3600 nodes')
-#    pp.show()
-#    
+    op.precompute()
+    pressure = op.apply(u).reshape((nxnodes,nynodes))
+
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((nxnodes,
+        nynodes))
+    
+    maskedu = np.abs(u.reshape((nxnodes,nynodes)))
+    maskedu = np.ma.masked_where(maskedu < 0.5, maskedu)
+    
+    error_amp = (np.abs(np.abs(pressure) - np.abs(pressure_exact))/ 
+        np.abs(pressure_exact))*100
+    
+    error_amp[np.isnan(error_amp)] = 0
+    error_phase = np.abs(np.angle(pressure) - np.angle(pressure_exact))
+        
+    print np.mean(error_amp), np.max(error_amp)
+    
+    pp.figure(tight_layout=True)
+    pp.imshow(np.abs(pressure), interpolation='none')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Pressure (Pa)')
+    pp.title('Pressure amplitude with source distr. overlay \n MLFMM, 3 MHz, '
+        '7x7mm area, 3600 nodes')
+    pp.show()
+    
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.angle(pressure), interpolation='none')
+    #cb = pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Phase (radians)')
+    #pp.title('Pressure phase with source distr. overlay \n MLFMM, 3 MHz, '
+    #    '7x7mm area, 3600 nodes')
+    #pp.show()
+    
+    pp.figure(tight_layout=True)
+    pp.imshow(np.abs(pressure_exact), interpolation='none')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Pressure (Pa)')
+    pp.title('Pressure amplitude with source distr. overlay \n Exact, 3 MHz, '
+        '7x7mm area, 3600 nodes')
+    pp.show()
+    
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.angle(pressure_exact), interpolation='none')
+    #cb = pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Phase (radians)')
+    #pp.title('Pressure phase with source distr. overlay \n Exact, 3 MHz, '
+    #    '7x7mm area, 3600 nodes')
+    #pp.show()
+    
 #    pp.figure(tight_layout=True)
 #    pp.imshow(error_amp, interpolation='none')
 #    cb = pp.colorbar()
@@ -113,5 +116,5 @@ if __name__ == '__main__':
 #    pp.title('Phase error with source distr. overlay \n 3 MHz, '
 #        '7x7mm area, 3600 nodes')
 #    pp.show()
-#    
+
     

@@ -43,7 +43,7 @@ class CachedOperator:
             
             D = np.max(box_dims/(2**l))
             v = np.sqrt(3)*D*k
-            C = 1
+            C = 2/1.6
         
             order = np.int(np.ceil(v + C*np.log(v + np.pi)))
             stab_cond = 0.15*v/np.log(v + np.pi)

@@ -8,7 +8,7 @@ from matplotlib import pyplot as pp
 
 nsource = 20
 nfieldpos = 20
-level = 5
+level = 2
 D0 = 0.001
 f = 0.5e6
 rho = 1000
