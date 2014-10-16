@@ -6,61 +6,85 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-nsource = 50
-nfieldpos = 50
 D0 = 0.001
-level = 5
-box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
+level = 4
 f = 0.05e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
-D = box[0,1] - box[0,0]
-obs_d = 2*D
+nsource = 50
+nfieldpos = 50
+
+box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
+Dx = box[0,1] - box[0,0]
+Dy = box[1,1] - box[1,0]
+Dz = box[2,1] - box[2,0]
+obs_d = 2*Dx
 center1 = np.array([0, 0, 0])
 center2 = np.array([0, 1, 0])*obs_d
-
-v = np.sqrt(3)*D*k
+v = np.sqrt(3)*Dx*k
 C = 3/1.6
 order = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 wavelength = c/f
-print order, stab_cond, stab_cond > C, wavelength/D
 #order = 5
+#print 'order ', order, stab_cond, stab_cond > C, wavelength/D
+#print 'order', order, '|', 'D = lambda*' + str(wavelength/Dx)
+
 ####
 
 if __name__ == '__main__':
     
-    srcx = sp.rand(nsource)*(box[0,1] - box[0,0])
-    srcy = sp.rand(nsource)*(box[1,1] - box[1,0])
-    srcz = sp.rand(nsource)*(box[2,1] - box[2,0])
-    sources = np.c_[srcx, srcy, srcz] + center1 - 0.5*np.array([D, D, 0])
-    strengths = np.ones(nsource)
+    mean_error = []
+    max_error = []
     
-    srcx = sp.rand(nfieldpos)*(box[0,1] - box[0,0])
-    srcy = sp.rand(nfieldpos)*(box[1,1] - box[1,0])
-    srcz = sp.rand(nfieldpos)*(box[2,1] - box[2,0])
-    fieldpos = np.c_[srcx, srcy, srcz] + center2 - 0.5*np.array([D, D, 0])
-    dist = distance(fieldpos, sources)
+    freq = np.arange(50e3, 20e6, 50e3)
     
-    pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
+    for f in freq:
     
-    kdir, weights, w1, w2 = fftquadrule(order)
-    kcoord = dir2coord(kdir)
-    kcoordT = np.transpose(kcoord, (0,2,1))
+        k = 2*np.pi*f/c
+        v = np.sqrt(3)*Dx*k
+        order = np.int(np.ceil(v + C*np.log(v + np.pi)))
     
-    r = center2 - center1
-    rhat = r/mag(r)
-    cos_angle = rhat.dot(kcoordT)
+        srcx = sp.rand(nsource)*Dx
+        srcy = sp.rand(nsource)*Dy
+        srcz = sp.rand(nsource)*Dz
+        sources = np.c_[srcx, srcy, srcz] + center1 - 0.5*np.array([Dx, Dy, Dz])
+        strengths = np.ones(nsource)
+        
+        srcx = sp.rand(nfieldpos)*Dx
+        srcy = sp.rand(nfieldpos)*Dy
+        srcz = sp.rand(nfieldpos)*Dz
+        fieldpos = np.c_[srcx, srcy, srcz] + center2 - 0.5*np.array([Dx, Dy, Dz])
+        dist = distance(fieldpos, sources)
+        
+        pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
+        
+        kdir, weights, w1, w2 = fftquadrule(order)
+        kcoord = dir2coord(kdir)
+        kcoordT = np.transpose(kcoord, (0,2,1))
+        
+        r = center2 - center1
+        rhat = r/mag(r)
+        cos_angle = rhat.dot(kcoordT)
+        
+        coeff = ffcoeff(strengths, sources, center1, k, kcoord)
+        translator = m2l(mag(r), cos_angle, k, order)
+        pres_fmm = nfeval(coeff*translator, fieldpos, center2, weights, k, kcoord, 
+            rho, c)
+        
+        perr = np.abs(np.abs(pres_fmm) - np.abs(pres_exact))/np.abs(pres_exact)*100
     
-    coeff = ffcoeff(strengths, sources, center1, k, kcoord)
-    translator = m2l(mag(r), cos_angle, k, order)
-    pres_fmm = nfeval(coeff*translator, fieldpos, center2, weights, k, kcoord, 
-        rho, c)
+        #print 'mean error:', str(np.mean(perr)) + '%', '|', 'max error:',  \
+            #str(np.max(perr)) + '%'
     
-    perr = np.abs(np.abs(pres_fmm) - np.abs(pres_exact))/np.abs(pres_exact)*100
+        mean_error.append(np.mean(perr))
+        max_error.append(np.max(perr))
     
-    print np.max(perr)
+    pp.plot(freq, mean_error)
+    pp.plot(freq, max_error)
+    
+    pp.show()
     
     #fig1 = pp.figure()
     #fig1.add_subplot(111)

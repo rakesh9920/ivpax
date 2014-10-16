@@ -11,7 +11,7 @@ rho = 1000
 c = 1540
 f = 1e6
 origin = np.array([0.0, 0.0, 0.0])
-D0 = 0.007
+D0 = 0.001
 dim = np.array([1.01, 1.01])*D0
 k = 2*np.pi*f/c
 nxnodes = 60
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     op.params['box_dims'] = dim
     op.params['origin'] = origin
     op.params['nodes'] = nodes
-    op.params['min_level'] = 3
+    op.params['min_level'] = 2
     op.params['max_level'] = 4
     
     op.setup()
@@ -81,14 +81,14 @@ if __name__ == '__main__':
     #    '7x7mm area, 3600 nodes')
     #pp.show()
     
-    pp.figure(tight_layout=True)
-    pp.imshow(np.abs(pressure_exact), interpolation='none')
-    cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Pressure (Pa)')
-    pp.title('Pressure amplitude with source distr. overlay \n Exact, 3 MHz, '
-        '7x7mm area, 3600 nodes')
-    pp.show()
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.abs(pressure_exact), interpolation='none')
+    #cb = pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Pressure (Pa)')
+    #pp.title('Pressure amplitude with source distr. overlay \n Exact, 3 MHz, '
+    #    '7x7mm area, 3600 nodes')
+    #pp.show()
     
     #pp.figure(tight_layout=True)
     #pp.imshow(np.angle(pressure_exact), interpolation='none')

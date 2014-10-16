@@ -1,4 +1,4 @@
-# mlfmm / fftinterpolate_tester.py
+# mlfmm / fftfilter_tester.py
 
 import numpy as np
 import scipy as sp
@@ -8,8 +8,8 @@ from matplotlib import pyplot as pp
 
 
 D0 = 0.001
-level = 2
-f = 20e6
+level = 5
+f = 0.05e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -26,7 +26,7 @@ C = 3/1.6
 order1 = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 #print order1, stab_cond, stab_cond > C
-v = np.sqrt(3)*Dx*k*2
+v = np.sqrt(3)*Dx*k/2
 C = 3/1.6
 order2 = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     newkdir, newweights, _, _ = fftquadrule(order2)
     newkcoord = dir2coord(newkdir)
     
-    newcoeff = fftinterpolate(coeff, kdir, newkdir)
+    newcoeff = fftfilter(coeff, kdir, newkdir)
     pres_fmm2 = ffeval(newcoeff, fieldpos, center, newweights, k, newkcoord, 
         order2, rho, c)
     pres_fmm1 = ffeval(coeff, fieldpos, center, weights, k, kcoord, 
