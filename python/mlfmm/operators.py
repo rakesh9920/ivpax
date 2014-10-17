@@ -146,7 +146,7 @@ class CachedOperator:
             shifters[l][(0,0)] = shift_ll
             shifters[l][(1,0)] = shift_lr
             shifters[l][(0,1)] = shift_ul
-            shifters[l][(1,1)] = shift_ur   
+            shifters[l][(1,1)] = shift_ur
         
     def apply(self, u):
         '''
@@ -268,7 +268,7 @@ class CachedOperator:
             lvl = qt.levels[l]
             
             kdir = leveldata[l + 1]['kdir']
-            phiweights = leveldata[l + 1]['phiweights']
+            #phiweights = leveldata[l + 1]['phiweights']
             newkdir = leveldata[l]['kdir']
             
             for group in lvl.itervalues():
@@ -279,8 +279,10 @@ class CachedOperator:
                     
                     #sum_coeffs += leginterpolate(shifters[l + 1][key]*
                         #(child().coeffs), phiweights, kdir, newkdir)
-                    sum_coeffs += fftinterpolate(shifters[l + 1][key]*
-                        (child().coeffs), kdir, newkdir)
+                    #sum_coeffs += fftinterpolate(shifters[l + 1][key]*
+                        #(child().coeffs), kdir, newkdir)
+                    sum_coeffs += fftinterpolate(child().coeffs, kdir, newkdir)\
+                        *shifters[l][key]
                         
                 group.coeffs = sum_coeffs
         
@@ -327,22 +329,26 @@ class CachedOperator:
             
             newkdir = leveldata[l + 1]['kdir']
             kdir = leveldata[l]['kdir']
-            phiweights = leveldata[l]['phiweights']
+            #phiweights = leveldata[l]['phiweights']
   
             for group in lvl.itervalues():
                 
                 # calculate filtered coefficients
                 #aggr_coeffs = legfilter(group.aggr_coeffs, phiweights, kdir, 
                     #newkdir)
-                aggr_coeffs = fftfilter(group.aggr_coeffs, kdir, newkdir)
+                #aggr_coeffs = fftfilter(group.aggr_coeffs, kdir, newkdir)
+                aggr_coeffs = group.aggr_coeffs
                 
                 # for each child group, shift filtered coefficients and add the 
                 # child group's ntnn coefficients    
                 for key, child in group.children.iteritems():
                     
                     # use conjugate of shifter to reverse its direction
-                    child().aggr_coeffs = (np.conj(shifters[l + 1][key])*
-                        aggr_coeffs + child().ntnn_coeffs) 
+                    #child().aggr_coeffs = (np.conj(shifters[l + 1][key])*
+                        #aggr_coeffs + child().ntnn_coeffs) 
+                    child().aggr_coeffs = child().ntnn_coeffs + \
+                        fftfilter(np.conj(shifters[l][key])*aggr_coeffs,
+                        kdir, newkdir) 
     
     def precompute_estimate(self, dps=5):
         
@@ -357,7 +363,7 @@ class CachedOperator:
             
             kcoord = leveldata[l]['kcoord']
             kcoordT = np.transpose(kcoord, (0, 2, 1))
-            order = leveldata[l]['order']
+            #order = leveldata[l]['order']
             
             for group in lvl.itervalues():
                 
