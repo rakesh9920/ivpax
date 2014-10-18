@@ -128,7 +128,7 @@ class CachedOperator:
             kcoordT = np.transpose(kcoord, (0, 2, 1))
             
             group_dims = leveldata[l]['group_dims']
-            r = mag(group_dims)/2
+            r = mag(group_dims)/4
             
             # define direction unit vectors for the four quadrants
             rhat_ul = np.array([1, -1, 0])/np.sqrt(2) # upper left group

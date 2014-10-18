@@ -9,7 +9,7 @@ from matplotlib import pyplot as pp
 
 D0 = 0.001
 level = 2
-f = 20e6
+f = 0.5e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     pp.xlabel('angle (degrees)')
     pp.ylabel('pressure')
     pp.title('pressure amplitude after interpolation')
-    pp.legend(('exact','l='+str(order1), 'l='+str(order2)), loc='best')
+    pp.legend(('exact','L='+str(order1), 'L='+str(order2)), loc='best')
     
     fig2 = pp.figure()
     fig2.add_subplot(111)
@@ -80,6 +80,6 @@ if __name__ == '__main__':
     pp.xlabel('angle (degrees)')
     pp.ylabel('phase')
     pp.title('pressure phase after interpolation')
-    pp.legend(('exact','l='+str(order1), 'l='+str(order2)), loc='best')
+    pp.legend(('exact','L='+str(order1), 'L='+str(order2)), loc='best')
     
     pp.show()

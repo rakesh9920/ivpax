@@ -39,10 +39,10 @@ if __name__ == '__main__':
     op.params['sound_speed'] = c
     op.params['node_area'] = s_n
     op.params['wave_number'] = 2*np.pi*f/c
-    op.params['box_dims'] = dim
+    op.params['box_dims'] = diml
     op.params['origin'] = origin
     op.params['nodes'] = nodes
-    op.params['min_level'] = 2
+    op.params['min_level'] = 4
     op.params['max_level'] = 4
     
     op.setup()
