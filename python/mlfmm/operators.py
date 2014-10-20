@@ -49,7 +49,7 @@ class CachedOperator:
             stab_cond = 0.15*v/np.log(v + np.pi)
             
             #kdir, weights, thetaweights, phiweights = legquadrule(order)
-            kdir, weights, thetaweights, phiweights = fftquadrule(order)
+            kdir, weights, thetaweights, phiweights = fftquadrule(order*3)
             kcoord = dir2coord(kdir)
             
             leveldata[l] = dict()

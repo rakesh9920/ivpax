@@ -9,7 +9,7 @@ from mlfmm.fasttransforms import *
 
 rho = 1000
 c = 1540
-f = 5e6
+f = 1e6
 origin = np.array([0.0, 0.0, 0.0])
 D0 = 0.001
 dim = np.array([1.01, 1.01])*D0
@@ -39,10 +39,10 @@ if __name__ == '__main__':
     op.params['sound_speed'] = c
     op.params['node_area'] = s_n
     op.params['wave_number'] = 2*np.pi*f/c
-    op.params['box_dims'] = diml
+    op.params['box_dims'] = dim
     op.params['origin'] = origin
     op.params['nodes'] = nodes
-    op.params['min_level'] = 4
+    op.params['min_level'] = 2
     op.params['max_level'] = 4
     
     op.setup()

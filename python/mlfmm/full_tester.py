@@ -8,8 +8,8 @@ from matplotlib import pyplot as pp
 
 # set parameters
 D0 = 0.001
-level = 4
-f = 0.05e6
+level = 3
+f = 1e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -51,11 +51,11 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = fftquadrule(order1)
+    kdir, weights, w1, w2 = fftquadrule(order1*2)
     kcoord = dir2coord(kdir)
     kcoordT = np.transpose(kcoord, (0,2,1))
 
-    newkdir, newweights, _, _ = fftquadrule(order2)
+    newkdir, newweights, _, _ = fftquadrule(order2*2)
     newkcoord = dir2coord(newkdir)    
     newkcoordT = np.transpose(newkcoord, (0,2,1))
     
@@ -64,22 +64,27 @@ if __name__ == '__main__':
     r = center2 - center1
     rhat = r/mag(r)
     cos_angle = rhat.dot(newkcoordT)
+    #cos_angle = rhat.dot(kcoordT)
     shifter1 = m2m(mag(r), cos_angle, k)
 
     r = center3 - center2
     rhat = r/mag(r)
     cos_angle = rhat.dot(newkcoordT)
+    #cos_angle = rhat.dot(kcoordT)
     translator = m2l(mag(r), cos_angle, k, order2)
 
     r = center4 - center3
     rhat = r/mag(r)
     cos_angle = rhat.dot(newkcoordT)
+    #cos_angle = rhat.dot(kcoordT)
     shifter2 = m2m(mag(r), cos_angle, k)
     
     newffcoeff = shifter1*fftinterpolate(coeff, kdir, newkdir)
     newnfcoeff = newffcoeff*translator*shifter2
     
     nfcoeff = fftfilter(newnfcoeff, newkdir, kdir)
+    
+    #nfcoeff = shifter1*shifter2*coeff*translator
 
     pres_fmm = nfeval(nfcoeff, fieldpos, center4, weights, k, kcoord, 
         rho, c)
