@@ -6,7 +6,6 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-
 D0 = 0.001
 level = 2
 f = 0.5e6

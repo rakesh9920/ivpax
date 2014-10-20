@@ -57,9 +57,14 @@ def mp_nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
 
     return np.cfloat(-k**2*rho*c/(16*mpmath.pi()**2)*total)
 
+def mp_m2m(r, cos_angle, k):
+    
+    return mp_exp(1j*k*r*cos_angle)
+    
 mp_exp = np.frompyfunc(mp.exp, 1, 1)
 mp_cos = np.frompyfunc(mp.cos, 1, 1)
 mp_sin = np.frompyfunc(mp.sin, 1, 1)
+mp_conj = np.frompyfunc(mp.conj, 1, 1)
 
 def mp_dir2coord(kdir):
     
@@ -114,3 +119,97 @@ def mp_fftquadrule(order):
     
     #return kdir.astype(float), weights, thetaweights, phiweights
     return kdir, weights, thetaweights, phiweights
+
+def _fft(x):
+    
+    N = len(x)
+    
+    if N <= 1: return x
+    
+    even = _fft(x[0::2])
+    odd = _fft(x[1::2])
+    
+    k = np.arange(N/2)
+    
+    return np.concatenate((even[k] + mp_exp(-2j*mpmath.pi()*k/N)*odd[k],
+        even[k] - mp_exp(-2j*mpmath.pi()*k/N)*odd[k]))
+
+def _slowfft(x):
+    
+    N = len(x)
+    
+    n = np.arange(N)
+    
+    return np.sum(x*(mp_exp(-1j*2*mpmath.pi()*n[:,None]*n[None,:]/mp.mpf(N))), 
+        axis=1)
+
+def slowfft(x, axis=-1):
+    return np.apply_along_axis(_slowfft, axis, x)
+
+def slowfft2(x):
+    return slowfft(slowfft(x, axis=0), axis=1)
+
+def _slowifft(x):
+    
+    N = len(x)
+    
+    n = np.arange(N)
+    
+    return np.sum(x*(mp_exp(1j*2*mpmath.pi()*n[:,None]*n[None,:]/mp.mpf(N))), 
+        axis=1)/N
+
+def slowifft(x, axis=-1):
+    return np.apply_along_axis(_slowifft, axis, x)
+
+def slowifft2(x):
+    return slowifft(slowifft(x, axis=0), axis=1)
+
+def mp_fftinterpolate(coeff, kdir, newkdir):
+    
+    M1, N1 = kdir.shape[:2]
+    M2, N2 = newkdir.shape[:2]
+    
+    padM = (M2 - M1)/2
+    padN = (N2 - N1)/2
+    
+    spectrum1 = fftshift(slowfft2(coeff))
+    spectrum2 = np.pad(spectrum1, ((padM, padM), (padN, padN)), 
+        mode='constant')
+    
+    newcoeff = M2*N2/np.double(M1*N1)*slowifft2(ifftshift(spectrum2))
+        
+    return newcoeff  
+
+def mp_fftfilter(coeff, kdir, newkdir):
+
+    M1, N1 = kdir.shape[:2]
+    M2, N2 = newkdir.shape[:2]
+    
+    Mstart = (M1 - M2)/2
+    Mstop = Mstart + M2
+    Nstart = (N1 - N2)/2
+    Nstop = Nstart + N2
+    
+    spectrum1 = fftshift(slowfft2(coeff))
+    spectrum2 = spectrum1[Mstart:Mstop, Nstart:Nstop]
+    
+    newcoeff = M2*N2/np.double(M1*N1)*slowifft2(ifftshift(spectrum2))
+        
+    return newcoeff
+
+
+#def mp_fft(x, axis=-1):
+#    return np.apply_along_axis(_fft, axis, x)
+#    
+#def mp_ifft(x, axis=-1):
+#    
+#    N = x.shape[axis]
+#    return mp_conj(np.apply_along_axis(_fft, axis, mp_conj(x)))/N
+#    
+#def mp_fft2(x):
+#    return mp_fft(mp_fft(x, axis=0), axis=1)
+#
+#def mp_ifft2(x): 
+#    return mp_ifft(mp_ifft(x, axis=0), axis=1)      
+
+ 
