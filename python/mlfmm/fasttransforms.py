@@ -626,8 +626,14 @@ def halffft2(x):
     
     w = fftshift(fft(v[:,:M/2+1], axis=0), axes=0)
     dummy = np.fliplr(w[:,:-1]).copy()
-    for n in xrange(dummy.shape[0]):
-        dummy[n,:] *= (-1)**n
+    
+    if N % 2 == 0: # not 100% sure why DC appears differently since full FFT 
+                    #is always even here
+        for n in xrange(dummy.shape[0]):
+            dummy[n,:] *= (-1)**(n)
+    else:
+        for n in xrange(dummy.shape[0]):
+            dummy[n,:] *= (-1)**(n + 1)
     
     return np.concatenate((w, dummy), axis=1)
 

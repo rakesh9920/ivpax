@@ -8,8 +8,8 @@ from matplotlib import pyplot as pp
 
 # set parameters
 D0 = 0.001
-level = 3
-f = 1e6
+level = 4
+f = 3e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
