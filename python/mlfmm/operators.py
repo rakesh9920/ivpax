@@ -49,7 +49,7 @@ class CachedOperator:
             stab_cond = 0.15*v/np.log(v + np.pi)
             
             #kdir, weights, thetaweights, phiweights = legquadrule(order)
-            kdir, weights, thetaweights, phiweights = fftquadrule(order*3)
+            kdir, weights, thetaweights, phiweights = fftquadrule2(order*3)
             kcoord = dir2coord(kdir)
             
             leveldata[l] = dict()
@@ -281,7 +281,7 @@ class CachedOperator:
                         #(child().coeffs), phiweights, kdir, newkdir)
                     #sum_coeffs += fftinterpolate(shifters[l + 1][key]*
                         #(child().coeffs), kdir, newkdir)
-                    sum_coeffs += fftinterpolate(child().coeffs, kdir, newkdir)\
+                    sum_coeffs += fftinterpolate2(child().coeffs, kdir, newkdir)\
                         *shifters[l][key]
                         
                 group.coeffs = sum_coeffs
@@ -347,7 +347,7 @@ class CachedOperator:
                     #child().aggr_coeffs = (np.conj(shifters[l + 1][key])*
                         #aggr_coeffs + child().ntnn_coeffs) 
                     child().aggr_coeffs = child().ntnn_coeffs + \
-                        fftfilter(np.conj(shifters[l][key])*aggr_coeffs,
+                        fftfilter2(np.conj(shifters[l][key])*aggr_coeffs,
                         kdir, newkdir) 
     
     def precompute_estimate(self, dps=5):
