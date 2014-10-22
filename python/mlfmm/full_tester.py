@@ -51,11 +51,11 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = fftquadrule(order1*2)
+    kdir, weights, w1, w2 = fftquadrule2(order1*2)
     kcoord = dir2coord(kdir)
     kcoordT = np.transpose(kcoord, (0,2,1))
 
-    newkdir, newweights, _, _ = fftquadrule(order2*2)
+    newkdir, newweights, _, _ = fftquadrule2(order2*2)
     newkcoord = dir2coord(newkdir)    
     newkcoordT = np.transpose(newkcoord, (0,2,1))
     
@@ -79,10 +79,10 @@ if __name__ == '__main__':
     #cos_angle = rhat.dot(kcoordT)
     shifter2 = m2m(mag(r), cos_angle, k)
     
-    newffcoeff = shifter1*fftinterpolate(coeff, kdir, newkdir)
+    newffcoeff = shifter1*fftinterpolate2(coeff, kdir, newkdir)
     newnfcoeff = newffcoeff*translator*shifter2
     
-    nfcoeff = fftfilter(newnfcoeff, newkdir, kdir)
+    nfcoeff = fftfilter2(newnfcoeff, newkdir, kdir)
     
     #nfcoeff = shifter1*shifter2*coeff*translator
 
@@ -116,3 +116,7 @@ if __name__ == '__main__':
     pp.title('pressure phase after interpolation')
     
     pp.show()
+
+    
+    
+    

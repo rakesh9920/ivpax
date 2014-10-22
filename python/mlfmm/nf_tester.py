@@ -6,8 +6,8 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-D0 = 0.007
-level = 2
+D0 = 0.001
+level = 4
 f = 0.05e6
 rho = 1000
 c = 1540
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     mean_error = []
     max_error = []
     
-    freq = np.arange(50e3, 20e6, 50e3)
+    freq = np.arange(50e3, 100e3, 50e3)
     
     for f in freq:
     

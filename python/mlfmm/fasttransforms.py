@@ -476,6 +476,7 @@ def fftquadrule(order):
     # 2: phi/polar
     N = 2*(order + 1) + 1
     absc2 = np.linspace(-np.pi, np.pi, N, endpoint=False)
+    #absc2 = np.linspace(-np.pi, np.pi, N, endpoint=True)
     phi = absc2
     w2 = np.ones(N)*2*np.pi/N
     #w2[0] = w2[0]/2
@@ -503,6 +504,8 @@ def fftquadrule(order):
     
     kdir[:,:(N-1)/2,0] += np.pi
     kdir[:,:(N-1)/2,1] *= -1
+    #kdir[:,-(N-1)/2:,0] += np.pi
+    #kdir[:,-(N-1)/2:,1] *= -1
     
     return kdir, weights, thetaweights, phiweights
 
@@ -538,6 +541,102 @@ def fftfilter(coeff, kdir, newkdir):
     newcoeff = M2*N2/np.double(M1*N1)*ifft2(ifftshift(spectrum2))
         
     return newcoeff
+
+def fftquadrule2(order):
+    '''
+    '''
+    # 1: theta/azimuthal
+    M = (order + 1)
+    absc1 = np.linspace(0, np.pi, M, endpoint=False)
+    theta = absc1
+    w1 = np.ones(M)*np.pi/M
+    thetaweights = w1
+
+    # 2: phi/polar
+    N = 2*(order + 1) + 1
+    absc2 = np.linspace(-np.pi, np.pi, N, endpoint=False)
+    phi = absc2
+    w2 = np.ones(N)*2*np.pi/N
+    #w2[1:] /= 2 # divide by 2 for special considerations due to fft
+    
+    # handle special considerations for |sin(phi)| factor
+    m = np.arange(-N, N + 1)
+    sinabs = np.exp(1j*phi[:,None]*m[None,:])
+    prefactor = np.zeros(2*N + 1)
+    prefactor[1::2] = (2/np.pi/(1 - m[1::2]**2))
+    sinabs = np.abs(np.sum(sinabs*prefactor, axis=1))
+    
+    phiweights = w2*sinabs
+    
+    weights = thetaweights[:,None].dot(phiweights[None,:])
+    
+    ntheta = theta.shape[0]
+    nphi = phi.shape[0]
+    
+    kdir = (np.tile(theta[:,None, None], (1, nphi, 1)), 
+        np.tile(phi[None,:, None], (ntheta, 1, 1)))
+    
+    kdir = np.concatenate(kdir, axis=2)
+    
+    kdir[:,:(N-1)/2,0] += np.pi
+    kdir[:,:(N-1)/2,1] *= -1
+    
+    return kdir, weights, thetaweights, phiweights
+    
+def fftinterpolate2(coeff, kdir, newkdir):
+    
+    M1, N1 = kdir.shape[:2]
+    M2, N2 = newkdir.shape[:2]
+    
+    padM = (M2 - M1)
+    padN = (N2 - N1)/2
+    
+    spectrum1 = halffft2(coeff)
+    spectrum2 = np.pad(spectrum1, ((padM, padM),(padN, padN)), 
+        mode='constant')
+    
+    newcoeff = M2*N2/np.double(M1*N1)*halfifft2(spectrum2)
+    
+    return newcoeff
+
+def fftfilter2(coeff, kdir, newkdir):
+    
+    M1, N1 = kdir.shape[:2]
+    M2, N2 = newkdir.shape[:2]
+    
+    Mstart = (M1 - M2)
+    Mstop = Mstart + 2*M2
+    Nstart = (N1 - N2)/2
+    Nstop = Nstart + N2
+    
+    spectrum1 = halffft2(coeff)
+    spectrum2 = spectrum1[Mstart:Mstop, Nstart:Nstop]
+    
+    newcoeff = M2*N2/np.double(M1*N1)*halfifft2(spectrum2)
+        
+    return newcoeff  
+
+def halffft2(x):
+    
+    N, M = x.shape
+    
+    v = fftshift(fft(x, axis=1), axes=1)
+    dummy = np.fliplr(v).copy()
+    v = np.concatenate((v, dummy), axis=0)
+    
+    w = fftshift(fft(v[:,:M/2+1], axis=0), axes=0)
+    dummy = np.fliplr(w[:,:-1]).copy()
+    for n in xrange(dummy.shape[0]):
+        dummy[n,:] *= (-1)**n
+    
+    return np.concatenate((w, dummy), axis=1)
+
+def halfifft2(x):
+    
+    N, M = x.shape
+    
+    return ifft2(ifftshift(x))[:N/2,:]
+    
 
 
 

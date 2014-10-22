@@ -7,8 +7,8 @@ from pyfield.util import distance
 from matplotlib import pyplot as pp
 
 D0 = 0.001
-level = 2
-f = 0.5e6
+level = 3
+f = 1e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -45,21 +45,21 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = fftquadrule(order1)
+    kdir, weights, w1, w2 = fftquadrule2(order1*2)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)
 
-    newkdir, newweights, _, _ = fftquadrule(order2)
+    newkdir, newweights, _, _ = fftquadrule2(order2*2)
     newkcoord = dir2coord(newkdir)
     
-    newcoeff = fftinterpolate(coeff, kdir, newkdir)
+    newcoeff = fftinterpolate2(coeff, kdir, newkdir)
     pres_fmm2 = ffeval(newcoeff, fieldpos, center, newweights, k, newkcoord, 
         order2, rho, c)
     pres_fmm1 = ffeval(coeff, fieldpos, center, weights, k, kcoord, 
         order1, rho, c)
     
-    newcoeff_ref = ffcoeff(strengths, sources, center, k, newkcoord)
+    #newcoeff_ref = ffcoeff(strengths, sources, center, k, newkcoord)
 
     fig1 = pp.figure()
     fig1.add_subplot(111)
@@ -82,3 +82,5 @@ if __name__ == '__main__':
     pp.legend(('exact','L='+str(order1), 'L='+str(order2)), loc='best')
     
     pp.show()
+    
+    
