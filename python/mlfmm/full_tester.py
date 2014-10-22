@@ -8,8 +8,8 @@ from matplotlib import pyplot as pp
 
 # set parameters
 D0 = 0.001
-level = 4
-f = 3e6
+level = 3
+f = 1e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -99,23 +99,23 @@ if __name__ == '__main__':
     print 'mean error:', '%.4f' % np.mean(perr) + '%'
     print 'max error:', '%.4f' % np.max(perr) + '%'
     
-    fig1 = pp.figure()
-    fig1.add_subplot(111)
-    pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
-    pp.plot(np.abs(pres_fmm),'r.')
-    pp.xlabel('point no.')
-    pp.ylabel('pressure')
-    pp.title('pressure amplitude after interpolation')
-    
-    fig2 = pp.figure()
-    fig2.add_subplot(111)
-    pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
-    pp.plot(np.angle(pres_fmm),'r.')
-    pp.xlabel('point no.')
-    pp.ylabel('phase')
-    pp.title('pressure phase after interpolation')
-    
-    pp.show()
+    #fig1 = pp.figure()
+    #fig1.add_subplot(111)
+    #pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
+    #pp.plot(np.abs(pres_fmm),'r.')
+    #pp.xlabel('point no.')
+    #pp.ylabel('pressure')
+    #pp.title('pressure amplitude after interpolation')
+    #
+    #fig2 = pp.figure()
+    #fig2.add_subplot(111)
+    #pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
+    #pp.plot(np.angle(pres_fmm),'r.')
+    #pp.xlabel('point no.')
+    #pp.ylabel('phase')
+    #pp.title('pressure phase after interpolation')
+    #
+    #pp.show()
 
     
     
