@@ -15,6 +15,7 @@ k = 2*np.pi*f/c
 nsource = 100
 nfieldpos = 100
 C = 3/1.6
+freqs = np.arange(50e3, 20e6, 50e3)
 
 # define geometry
 box = np.array([[-0.5, 0.5],[-0.5, 0.5],[0, 0]])*D0/(2**level)
@@ -45,11 +46,14 @@ if __name__ == '__main__':
         Dz/2])
     
     orders = []
+    orders1 = []
     errors = []
         
-    for freq in np.arange(50e3, 5e6, 50e3):
+    for f in freqs:
         
-        k = 2*np.pi*freq/c
+        print f
+        
+        k = 2*np.pi*f/c
         
         pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
         
@@ -61,6 +65,9 @@ if __name__ == '__main__':
         
         angles1 = order1
         angles2 = order2
+        
+        temperr = 0
+        threshold = 1.0
         
         while True:
         
@@ -100,20 +107,57 @@ if __name__ == '__main__':
             perr = np.abs(np.abs(pres_fmm) - np.abs(pres_exact))/np.abs(pres_exact)*100
             
             maxerr = np.max(perr)
-            if maxerr < 1.0:
+            
+            #error_delta = np.abs(maxerr - temperr)
+            
+            if maxerr < threshold:
                 
                 errors.append(maxerr)
                 orders.append(angles2)
+                orders1.append(angles1)
                 break
                 
-            elif angles1 > 25 or angles2 > 25:
+            elif angles1 > 60 or angles2 > 60:
                 
-                orders.append(np.nan)
-                errors.append(np.nan)
-                break
+                #orders.append(np.nan)
+                #errors.append(np.nan)
+                if threshold > 10.0:
+                    orders.append(np.nan)
+                    orders1.append(np.nan)
+                    errors.append(np.nan)
+                    break
+                    
+                threshold += 0.5
+                angles1 = order1
+                angles2 = order2
+            
+  
+            #elif error_delta <= 0.05 and maxerr < 1.0:
+            #    
+            #    errors.append(maxerr)
+            #    orders.append(angles2)
+            #    break
                 
+            #if maxerr < 1.0:
+            #    
+            #    errors.append(maxerr)
+            #    orders.append(angles2)
+            #    break
+                
+            temperr = maxerr
             angles1 += 1
             angles2 += 1
     
+    k = 2*np.pi*freqs/c
+    v = np.sqrt(3)*Dx*k
+    sugg_orders = np.ceil(v + C*np.log(v + np.pi))
     
+    pp.figure()
+    pp.plot(freqs/1e6, orders, '-.')
+    pp.plot(freqs/1e6, sugg_orders, '-.')
+    
+    pp.figure()
+    pp.plot(freqs/1e6, errors, '-.')
+    
+    pp.show()
     
