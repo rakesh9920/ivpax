@@ -9,13 +9,13 @@ from mlfmm.fasttransforms import *
 
 rho = 1000
 c = 1540
-f = 2.05e6
+f = 5e6
 origin = np.array([0.0, 0.0, 0.0])
 D0 = 0.001
 dim = np.array([1.01, 1.01])*D0
 k = 2*np.pi*f/c
-nxnodes = 40
-nynodes = 40
+nxnodes = 60
+nynodes = 60
 
 if __name__ == '__main__':
 
@@ -27,10 +27,10 @@ if __name__ == '__main__':
     
     u = np.zeros((nxnodes, nynodes), dtype='cfloat')
     #u[7,7] = 1
-    u[0,0] = 1
+    #u[0,0] = 1
     u = u.ravel()
-    #u[0:10] = 1
-    #np.random.shuffle(u)
+    u[0:30] = 1
+    np.random.shuffle(u)
     
     q = 1j*rho*c*2*np.pi*f/c*s_n*u
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     cb = pp.colorbar()
     pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Pressure (Pa)')
-    pp.title('Pressure amplitude with source distr. overlay \n MLFMM, 50 KHz, '
+    pp.title('Pressure amplitude with source distr. overlay \n MLFMM, 5 MHz, '
         '1x1mm area, 3600 nodes')
     pp.show()
     
@@ -76,34 +76,34 @@ if __name__ == '__main__':
     cb = pp.colorbar()
     pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Phase (radians)')
-    pp.title('Pressure phase with source distr. overlay \n MLFMM, 50 KHz, '
+    pp.title('Pressure phase with source distr. overlay \n MLFMM, 5 MHz, '
         '1x1mm area, 3600 nodes')
     pp.show()
     
-    #pp.figure(tight_layout=True)
-    #pp.imshow(np.abs(pressure_exact), interpolation='none')
-    #cb = pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    #cb.set_label('Pressure (Pa)')
-    #pp.title('Pressure amplitude with source distr. overlay \n Exact, 50 KHz, '
-    #    '1x1mm area, 3600 nodes')
-    #pp.show()
-    #
-    #pp.figure(tight_layout=True)
-    #pp.imshow(np.angle(pressure_exact), interpolation='none')
-    #cb = pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    #cb.set_label('Phase (radians)')
-    #pp.title('Pressure phase with source distr. overlay \n Exact, 50 KHz, '
-    #    '1x1mm area, 3600 nodes')
-    #pp.show()
+    pp.figure(tight_layout=True)
+    pp.imshow(np.abs(pressure_exact), interpolation='none')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Pressure (Pa)')
+    pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
+        '1x1mm area, 3600 nodes')
+    pp.show()
+    
+    pp.figure(tight_layout=True)
+    pp.imshow(np.angle(pressure_exact), interpolation='none')
+    cb = pp.colorbar()
+    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    cb.set_label('Phase (radians)')
+    pp.title('Pressure phase with source distr. overlay \n Exact, 5 MHz, '
+        '1x1mm area, 3600 nodes')
+    pp.show()
     
     pp.figure(tight_layout=True)
     pp.imshow(error_amp, interpolation='none')
     cb = pp.colorbar()
     pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Error (%)')
-    pp.title('Amplitude error with source distr. overlay \n 50 KHz, '
+    pp.title('Amplitude error with source distr. overlay \n 5 MHz, '
         '1x1mm area, 3600 nodes')
     pp.show()
 
@@ -112,8 +112,8 @@ if __name__ == '__main__':
     cb = pp.colorbar()
     pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Error (radians)')
-    pp.title('Phase error with source distr. overlay \n 3 MHz, '
-        '7x7mm area, 3600 nodes')
+    pp.title('Phase error with source distr. overlay \n 5 MHz, '
+        '1x1mm area, 3600 nodes')
     pp.show()
 
     
