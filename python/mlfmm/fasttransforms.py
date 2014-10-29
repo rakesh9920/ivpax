@@ -121,10 +121,14 @@ def ffcoeff(q, srcpos, centerpos, k, kcoord):
     the specified far-field directions.
     '''
     delta_r = centerpos - srcpos
+    
+    if delta_r.ndim == 1:
+        delta_r = delta_r[None,:]
+    
     ntheta, nphi = kcoord.shape[:2]
     #kpos = sph2cart(np.c_[np.ones_like(ktheta), ktheta, kphi], cat=True)
     
-    coeff = np.zeros((ntheta, nphi), dtype='complex')
+    #coeff = np.zeros((ntheta, nphi), dtype='complex')
     
     #for i in xrange(ntheta):
     #    for j in xrange(nphi):
@@ -176,6 +180,9 @@ def nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
     signature coefficients.
     '''
     r = fieldpos - centerpos
+    
+    if r.ndim == 1:
+        r = r[None,:]
 
     total = np.sum(np.sum(np.exp(1j*k*r.dot(np.transpose(kcoord, (0,2,1))))*
         coeff*weights, axis=1), axis=1)

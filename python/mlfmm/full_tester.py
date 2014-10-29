@@ -9,7 +9,7 @@ from matplotlib import pyplot as pp
 # set parameters
 D0 = 0.001
 level = 3
-f = 1e6
+f = 2e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -51,11 +51,11 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = fftquadrule2(order1*2)
+    kdir, weights, w1, w2 = fftquadrule2(order1*3)
     kcoord = dir2coord(kdir)
     kcoordT = np.transpose(kcoord, (0,2,1))
 
-    newkdir, newweights, _, _ = fftquadrule2(order2*2)
+    newkdir, newweights, _, _ = fftquadrule2(order2*3)
     newkcoord = dir2coord(newkdir)    
     newkcoordT = np.transpose(newkcoord, (0,2,1))
     

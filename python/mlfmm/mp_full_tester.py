@@ -9,8 +9,8 @@ from matplotlib.patches import Rectangle
 
 # set parameters
 D0 = 0.001
-level = 2
-f = 0.5e6
+level = 3
+f = 0.05e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -145,5 +145,7 @@ if __name__ == '__main__':
     ax3.add_patch(box3)
     ax3.add_patch(box4)
     ax3.set_xticks((-Dx, 0, Dx))
+    ax3.set_xlabel('x (m)')
+    ax3.set_ylabel('y (m)')
     
     pp.show()
