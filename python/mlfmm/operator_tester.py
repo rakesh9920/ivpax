@@ -27,10 +27,10 @@ if __name__ == '__main__':
     
     u = np.zeros((nxnodes, nynodes), dtype='cfloat')
     #u[7,7] = 1
-    #u[0,0] = 1
+    u[0,0] = 1
     u = u.ravel()
-    u[0:30] = 1
-    np.random.shuffle(u)
+    #u[0:30] = 1
+    #np.random.shuffle(u)
     
     q = 1j*rho*c*2*np.pi*f/c*s_n*u
 
@@ -43,9 +43,9 @@ if __name__ == '__main__':
     op.params['origin'] = origin
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
-    op.params['max_level'] = 4
+    op.params['max_level'] = 5
     
-    op.setup()
+    op.setup(verbose=True)
     op.precompute()
     pressure = op.apply(u).reshape((nxnodes,nynodes))
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     error_amp[np.isnan(error_amp)] = 0
     error_phase = np.abs(np.angle(pressure) - np.angle(pressure_exact))
         
-    print np.mean(error_amp), np.max(error_amp)
+    print np.mean(error_amp), np.max(error_amp), np.max(error_phase)
     
     pp.figure(tight_layout=True)
     pp.imshow(np.abs(pressure), interpolation='none')
@@ -80,23 +80,23 @@ if __name__ == '__main__':
         '1x1mm area, 3600 nodes')
     pp.show()
     
-    pp.figure(tight_layout=True)
-    pp.imshow(np.abs(pressure_exact), interpolation='none')
-    cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Pressure (Pa)')
-    pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
-        '1x1mm area, 3600 nodes')
-    pp.show()
-    
-    pp.figure(tight_layout=True)
-    pp.imshow(np.angle(pressure_exact), interpolation='none')
-    cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Phase (radians)')
-    pp.title('Pressure phase with source distr. overlay \n Exact, 5 MHz, '
-        '1x1mm area, 3600 nodes')
-    pp.show()
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.abs(pressure_exact), interpolation='none')
+    #cb = pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Pressure (Pa)')
+    #pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
+    #    '1x1mm area, 3600 nodes')
+    #pp.show()
+    #
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.angle(pressure_exact), interpolation='none')
+    #cb = pp.colorbar()
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Phase (radians)')
+    #pp.title('Pressure phase with source distr. overlay \n Exact, 5 MHz, '
+    #    '1x1mm area, 3600 nodes')
+    #pp.show()
     
     pp.figure(tight_layout=True)
     pp.imshow(error_amp, interpolation='none')

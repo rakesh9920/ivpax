@@ -8,19 +8,62 @@ from mlfmm.quadtree2 import QuadTree
 from scipy.interpolate import interp1d
 
 sugg_angles = dict()
-sugg_freqs = np.arange(50e3, 10e6, 50e4)
-
+sugg_freqs = np.arange(50e3, 20e6, 50e3)
 sugg_angles[4] = np.fromstring('''
-    5  8  9 11 13 15 17 19 21 21 21 23 25 27 29 31 31 33 35 35
+    5  5  7  7  7  7  7  7  8  8  8  8  8  8  9  9  9  9  9  9  9 11 11 11 11
+    11 11 11 13 13 13 13 13 13 13 13 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+    15 15 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 19 19 19 19 19 19 19
+    19 19 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 23 23 23 23 23 23
+    23 23 23 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 27 27 27 27
+    27 27 27 27 27 27 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29
+    31 31 31 31 31 31 31 31 31 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33
+    33 33 33 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 37 37
+    37 37 37 37 37 37 37 37 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39
+    39 39 39 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 43 43
+    43 43 43 43 43 43 43 43 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45
+    45 45 45 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 49
+    49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
     ''', sep=' ')
-    
 sugg_angles[3] = np.fromstring('''
-    6  9 10 11 13 15 17 19 21 21 21 23 25 27 29 31 31 33 35 35
+    6  6  8  8  8  8  8  8  9  9  9  9  9  9 10 10 10 10 10 10 10 11 11 11 11
+    11 11 11 13 13 13 13 13 13 13 13 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+    15 15 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 19 19 19 19 19 19 19
+    19 19 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 23 23 23 23 23 23
+    23 23 23 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 27 27 27 27
+    27 27 27 27 27 27 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29
+    31 31 31 31 31 31 31 31 31 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33
+    33 33 33 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 37 37
+    37 37 37 37 37 37 37 37 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39
+    39 39 39 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 43 43
+    43 43 43 43 43 43 43 43 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45
+    45 45 45 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 49
+    49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
     ''', sep=' ')
-  
 sugg_angles[2] = np.fromstring('''
-    7 10 11 11 13 15 17 19 21 21 21 23 25 27 29 31 31 33 35 35
+    7  7  9  9  9  9  9  9  9 10 10 10 10 10 11 11 11 11 11 11 11 11 11 11 11
+    11 11 11 13 13 13 13 13 13 13 13 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+    15 15 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 17 19 19 19 19 19 19 19
+    19 19 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 21 23 23 23 23 23 23
+    23 23 23 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 25 27 27 27 27
+    27 27 27 27 27 27 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29 29
+    31 31 31 31 31 31 31 31 31 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33 33
+    33 33 33 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 35 37 37
+    37 37 37 37 37 37 37 37 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39 39
+    39 39 39 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 43 43
+    43 43 43 43 43 43 43 43 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45 45
+    45 45 45 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 47 49
+    49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 49 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
+    51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
     ''', sep=' ')
+sugg_angles[5] = sugg_angles[4]
 
 class CachedOperator:
     '''
@@ -265,7 +308,9 @@ class CachedOperator:
             
                 pres = directeval(strengths, sources, node, k, rho, c)
                 pressure[node_id] += pres[0]
-
+        
+        # add self pressure for each node
+        
         return pressure
         
     def uptree(self):
@@ -291,6 +336,8 @@ class CachedOperator:
             #phiweights = leveldata[l + 1]['phiweights']
             newkdir = leveldata[l]['kdir']
             
+            interpolate = kdir.shape != newkdir.shape
+            
             for group in lvl.itervalues():
                 
                 sum_coeffs = np.zeros_like(newkdir[:,:,0], dtype='complex')
@@ -301,8 +348,11 @@ class CachedOperator:
                         #(child().coeffs), phiweights, kdir, newkdir)
                     #sum_coeffs += fftinterpolate(shifters[l + 1][key]*
                         #(child().coeffs), kdir, newkdir)
-                    sum_coeffs += fftinterpolate2(child().coeffs, kdir, newkdir)\
-                        *shifters[l][key]
+                    if interpolate:
+                        sum_coeffs += fftinterpolate2(child().coeffs, kdir, 
+                            newkdir)*shifters[l][key]
+                    else:
+                        sum_coeffs += child().coeffs*shifters[l][key]
                         
                 group.coeffs = sum_coeffs
         
@@ -350,6 +400,8 @@ class CachedOperator:
             newkdir = leveldata[l + 1]['kdir']
             kdir = leveldata[l]['kdir']
             #phiweights = leveldata[l]['phiweights']
+            
+            anterpolate = kdir.shape != newkdir.shape
   
             for group in lvl.itervalues():
                 
@@ -366,11 +418,15 @@ class CachedOperator:
                     # use conjugate of shifter to reverse its direction
                     #child().aggr_coeffs = (np.conj(shifters[l + 1][key])*
                         #aggr_coeffs + child().ntnn_coeffs) 
-                    child().aggr_coeffs = child().ntnn_coeffs + \
-                        fftfilter2(np.conj(shifters[l][key])*aggr_coeffs,
-                        kdir, newkdir) 
+                    if anterpolate:
+                        child().aggr_coeffs = child().ntnn_coeffs + \
+                            fftfilter2(np.conj(shifters[l][key])*aggr_coeffs,
+                            kdir, newkdir) 
+                    else:
+                        child().aggr_coeffs = child().ntnn_coeffs + \
+                            np.conj(shifters[l][key])*aggr_coeffs
     
-    def precompute_estimate(self, dps=5):
+    def precompute_estimate(self, dps=10):
         
         qt = self.quadtree
         leveldata = self.leveldata
