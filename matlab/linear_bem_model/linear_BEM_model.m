@@ -75,7 +75,8 @@ B=mech_damping*eye(size(M));
 
 R=K-K;
 
-parfor ind=1:numel(K)
+% parfor ind=1:numel(K)
+for ind=1:numel(K)
     [r_ind,c_ind]=ind2sub(size(K),ind);
     if r_ind>=c_ind
           R(ind)=norm(node_x(r_ind,:)-node_x(c_ind,:));
@@ -90,7 +91,7 @@ end
 
 %% construct Zr matrix
 
-f=18e6;
+f=5e6;
 w=2*pi*f;
 k=w/fluid_c;
 
@@ -186,8 +187,9 @@ end
 
 %%
 
-filename = './data/bem_vars.mat';
-save(filename, 'K', 'node_x', 'M', 'membranes', 'fluid_c', 'fluid_rho', 'w');
+filename = './bem_vars.mat';
+save(filename, 'K', 'node_x', 'M', 'B', 'membranes', 'fluid_c', 'fluid_rho', 'w', ...
+    'dx', 'dy', 'P', 'U', 'Zr');
 
 
 
