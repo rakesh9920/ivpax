@@ -32,7 +32,7 @@ if __name__ == '__main__':
     #u[0:30] = 1
     #np.random.shuffle(u)
     
-    q = 1j*rho*c*2*np.pi*f/c*s_n*u
+    q = s_n*u
 
     op = CachedOperator()
     op.params['density'] = rho
@@ -43,17 +43,20 @@ if __name__ == '__main__':
     op.params['origin'] = origin
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
-    op.params['max_level'] = 5
+    op.params['max_level'] = 4
     
     op.setup(verbose=True)
     op.precompute()
     pressure = op.apply(u).reshape((nxnodes,nynodes))
 
-    pressure_exact = directeval(q, nodes, nodes, k, rho, c).reshape((nxnodes,
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c)*2
+    a_eff = np.sqrt(s_n/np.pi)
+    pressure_exact += rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*k*a_eff)/2.0*u
+    pressure_exact = pressure_exact.reshape((nxnodes,
         nynodes))
     
-    maskedu = np.abs(u.reshape((nxnodes,nynodes)))
-    maskedu = np.ma.masked_where(maskedu < 0.5, maskedu)
+    #maskedu = np.abs(u.reshape((nxnodes,nynodes)))
+    #maskedu = np.ma.masked_where(maskedu < 0.5, maskedu)
     
     error_amp = np.abs(pressure - pressure_exact)/np.abs(pressure_exact)*100
     
@@ -65,7 +68,7 @@ if __name__ == '__main__':
     pp.figure(tight_layout=True)
     pp.imshow(np.abs(pressure), interpolation='none')
     cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #pp.imshow(np.abs(pressure), interpolation='none', cmap='gray')
     cb.set_label('Pressure (Pa)')
     pp.title('Pressure amplitude with source distr. overlay \n MLFMM, 5 MHz, '
         '1x1mm area, 3600 nodes')
@@ -74,34 +77,34 @@ if __name__ == '__main__':
     pp.figure(tight_layout=True)
     pp.imshow(np.angle(pressure), interpolation='none')
     cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Phase (radians)')
     pp.title('Pressure phase with source distr. overlay \n MLFMM, 5 MHz, '
         '1x1mm area, 3600 nodes')
     pp.show()
     
-    #pp.figure(tight_layout=True)
-    #pp.imshow(np.abs(pressure_exact), interpolation='none')
-    #cb = pp.colorbar()
+    pp.figure(tight_layout=True)
+    pp.imshow(np.abs(pressure_exact), interpolation='none')
+    cb = pp.colorbar()
     #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    #cb.set_label('Pressure (Pa)')
-    #pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
-    #    '1x1mm area, 3600 nodes')
-    #pp.show()
-    #
-    #pp.figure(tight_layout=True)
-    #pp.imshow(np.angle(pressure_exact), interpolation='none')
-    #cb = pp.colorbar()
+    cb.set_label('Pressure (Pa)')
+    pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
+        '1x1mm area, 3600 nodes')
+    pp.show()
+    
+    pp.figure(tight_layout=True)
+    pp.imshow(np.angle(pressure_exact), interpolation='none')
+    cb = pp.colorbar()
     #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    #cb.set_label('Phase (radians)')
-    #pp.title('Pressure phase with source distr. overlay \n Exact, 5 MHz, '
-    #    '1x1mm area, 3600 nodes')
-    #pp.show()
+    cb.set_label('Phase (radians)')
+    pp.title('Pressure phase with source distr. overlay \n Exact, 5 MHz, '
+        '1x1mm area, 3600 nodes')
+    pp.show()
     
     pp.figure(tight_layout=True)
     pp.imshow(error_amp, interpolation='none')
     cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Error (%)')
     pp.title('Amplitude error with source distr. overlay \n 5 MHz, '
         '1x1mm area, 3600 nodes')
@@ -110,7 +113,7 @@ if __name__ == '__main__':
     pp.figure(tight_layout=True)
     pp.imshow(error_phase, interpolation='none', clim=[0, np.pi/16])
     cb = pp.colorbar()
-    pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #pp.imshow(maskedu, interpolation='none', cmap='gray')
     cb.set_label('Error (radians)')
     pp.title('Phase error with source distr. overlay \n 5 MHz, '
         '1x1mm area, 3600 nodes')

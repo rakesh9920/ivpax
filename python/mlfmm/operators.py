@@ -228,7 +228,7 @@ class CachedOperator:
         min_level = prms['min_level']
         
         # calculate node source strength from velocity
-        q = 1j*rho*c*k*s_n*(u.ravel())*2 # 2x for baffle
+        q = s_n*(u.ravel())*2 # 2x for baffle
         
         # calculate far-field coefficients for each group in max level
         maxl = qt.levels[max_level]
@@ -311,7 +311,7 @@ class CachedOperator:
         
         # add self pressure for each node
         a_eff = np.sqrt(s_n/np.pi)
-        pressure += rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*k*a_eff)
+        pressure += rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*k*a_eff)*(u.ravel())
         
         return pressure.reshape(u.shape)
         
