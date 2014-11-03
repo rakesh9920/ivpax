@@ -187,14 +187,15 @@ def nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
     total = np.sum(np.sum(np.exp(1j*k*r.dot(np.transpose(kcoord, (0,2,1))))*
         coeff*weights, axis=1), axis=1)
 
-    return -k**2*rho*c/(16*np.pi**2)*total
-
+    # conj(-x) needed to match -jkr convention
+    return k**2*rho*c/(16*np.pi**2)*np.conj(total) 
+    
 def directeval(q, srcpos, fieldpos, k, rho, c):
     '''
     '''
     r = distance(fieldpos, srcpos)
     
-    mat = (1j*k*rho*c/(4*np.pi)*np.exp(1j*k*r)/r)*q
+    mat = (1j*k*rho*c/(4*np.pi)*np.exp(-1j*k*r)/r)*q
     
     mat[np.isnan(mat)] = 0
     

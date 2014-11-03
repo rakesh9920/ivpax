@@ -95,7 +95,8 @@ f=5e6;
 w=2*pi*f;
 k=w/fluid_c;
 
-alpha=0.217*(f./1e6).^2;    %attenuation in water
+% alpha=0.217*(f./1e6).^2;    %attenuation in water
+alpha = 0.0;
 % alpha=17*(f./1e6).^1.7;    %attenuation in oil
 
 Zr=calc_Zr(fluid_rho,fluid_c,w,k,node_S,R,alpha);

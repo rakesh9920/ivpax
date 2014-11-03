@@ -14,8 +14,8 @@ origin = np.array([0.0, 0.0, 0.0])
 D0 = 0.001
 dim = np.array([1.01, 1.01])*D0
 k = 2*np.pi*f/c
-nxnodes = 60
-nynodes = 60
+nxnodes = 40
+nynodes = 40
 
 if __name__ == '__main__':
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     op.precompute()
     pressure = op.apply(u).reshape((nxnodes,nynodes))
 
-    pressure_exact = directeval(q, nodes, nodes, k, rho, c)*2
+    pressure_exact = directeval(q, nodes, nodes, k, rho, c)
     a_eff = np.sqrt(s_n/np.pi)
     pressure_exact += rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*k*a_eff)/2.0*u
     pressure_exact = pressure_exact.reshape((nxnodes,
@@ -83,14 +83,14 @@ if __name__ == '__main__':
         '1x1mm area, 3600 nodes')
     pp.show()
     
-    pp.figure(tight_layout=True)
-    pp.imshow(np.abs(pressure_exact), interpolation='none')
-    cb = pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Pressure (Pa)')
-    pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
-        '1x1mm area, 3600 nodes')
-    pp.show()
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.abs(pressure_exact), interpolation='none')
+    #cb = pp.colorbar()
+    ##pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Pressure (Pa)')
+    #pp.title('Pressure amplitude with source distr. overlay \n Exact, 5 MHz, '
+    #    '1x1mm area, 3600 nodes')
+    #pp.show()
     
     pp.figure(tight_layout=True)
     pp.imshow(np.angle(pressure_exact), interpolation='none')
@@ -101,22 +101,22 @@ if __name__ == '__main__':
         '1x1mm area, 3600 nodes')
     pp.show()
     
-    pp.figure(tight_layout=True)
-    pp.imshow(error_amp, interpolation='none')
-    cb = pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Error (%)')
-    pp.title('Amplitude error with source distr. overlay \n 5 MHz, '
-        '1x1mm area, 3600 nodes')
-    pp.show()
-
-    pp.figure(tight_layout=True)
-    pp.imshow(error_phase, interpolation='none', clim=[0, np.pi/16])
-    cb = pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Error (radians)')
-    pp.title('Phase error with source distr. overlay \n 5 MHz, '
-        '1x1mm area, 3600 nodes')
-    pp.show()
+#    pp.figure(tight_layout=True)
+#    pp.imshow(error_amp, interpolation='none')
+#    cb = pp.colorbar()
+#    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+#    cb.set_label('Error (%)')
+#    pp.title('Amplitude error with source distr. overlay \n 5 MHz, '
+#        '1x1mm area, 3600 nodes')
+#    pp.show()
+#
+#    pp.figure(tight_layout=True)
+#    pp.imshow(error_phase, interpolation='none', clim=[0, np.pi/16])
+#    cb = pp.colorbar()
+#    #pp.imshow(maskedu, interpolation='none', cmap='gray')
+#    cb.set_label('Error (radians)')
+#    pp.title('Phase error with source distr. overlay \n 5 MHz, '
+#        '1x1mm area, 3600 nodes')
+#    pp.show()
 
     
