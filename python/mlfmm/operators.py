@@ -311,7 +311,7 @@ class CachedOperator:
         
         # add self pressure for each node
         a_eff = np.sqrt(s_n/np.pi)
-        pressure += rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*k*a_eff)/2*(u.ravel())
+        pressure += rho*c*(0.5*(k*a_eff)**2 + 1j*8/(3*np.pi)*k*a_eff)/2.0*(u.ravel())
         
         return pressure.reshape(u.shape)
         

@@ -1,7 +1,7 @@
 # mlfmm / fasttransforms.py
 
 import numpy as np
-from scipy.special import sph_harm, jn, yv, lpmv, eval_legendre, hankel1, lpmn
+from scipy.special import sph_harm, jn, yv, lpmv, eval_legendre, hankel1, lpmn, hankel2
 from scipy.misc import factorial
 from numpy.polynomial.legendre import leggauss
 from scipy.fftpack import fft, ifft, fft2, ifft2, fftshift, ifftshift
@@ -105,6 +105,11 @@ def sphhankel1(l, z):
     '''
     '''
     return np.sqrt(np.pi/(2*z))*hankel1(l + 0.5, z)
+
+def sphhankel2(l, z):
+    '''
+    '''
+    return np.sqrt(np.pi/(2*z))*hankel2(l + 0.5, z)
     
 def sphharm(l, m, theta, phi):
     '''
@@ -187,8 +192,8 @@ def nfeval(coeff, fieldpos, centerpos, weights, k, kcoord, rho, c):
     total = np.sum(np.sum(np.exp(1j*k*r.dot(np.transpose(kcoord, (0,2,1))))*
         coeff*weights, axis=1), axis=1)
 
-    # conj(-x) needed to match -jkr convention
-    return k**2*rho*c/(16*np.pi**2)*np.conj(total) 
+    # -1/1 selected to match -jkr convention
+    return k**2*rho*c/(16*np.pi**2)*total
     
 def directeval(q, srcpos, fieldpos, k, rho, c):
     '''
@@ -241,7 +246,8 @@ def m2lop(r, cos_angle, k, order):
     '''
     l = np.arange(0, order + 1)
     
-    operator =  np.sum((2*l + 1)*(1j**l)*sphhankel1(l, k*r)*eval_legendre(l, 
+    # use hankel1 for jkr and hankel2 for -jkr definition
+    operator =  np.sum((2*l + 1)*(1j**l)*sphhankel2(l, k*r)*eval_legendre(l, 
         cos_angle))
     
     return operator
