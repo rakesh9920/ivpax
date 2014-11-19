@@ -47,16 +47,20 @@ def cart2sph(points, cat=True):
 def mag(r, axis=-1):
     '''
     '''
-    return np.sqrt(np.sum(r**2, axis=axis, keepdims=True))
+    return np.sqrt(np.sum(r*r, axis=axis, keepdims=True))
            
 def distance(a, b):
     '''
     '''
-    a = a.reshape((-1,3)).T
-    b = b.reshape((-1,3)).T
+    a = a.reshape((-1,3))
+    b = b.reshape((-1,3))
+    #a = a.reshape((-1,3)).T
+    #b = b.reshape((-1,3)).T
     
-    return np.sqrt(np.sum(b*b, 0)[None,:] + np.sum(a*a, 0)[:,None] - \
-        2*np.dot(a.T, b))
+    return np.sqrt(np.sum(a*a, axis=1, keepdims=True) + np.sum(b*b, axis=1, 
+        keepdims=True).T - 2*np.dot(a, b.T))
+    #return np.sqrt(np.sum(b*b, axis=0)[None,:] + np.sum(a*a, axis=0)[:,None] -\
+        #2*np.dot(a.T, b))
         
 def dir2coord(kdir):
     '''
@@ -139,7 +143,7 @@ def ffcoeff(q, srcpos, centerpos, k, kcoord):
     #    for j in xrange(nphi):
     #        
     #        coeff[i, j] = np.sum(q*np.exp(1j*k*delta_r.dot(kcoord[i,j,:])))
-    
+       
     shift = np.exp(1j*k*delta_r.dot(np.transpose(kcoord, (0,2,1))))
     coeff = np.sum((q*shift.T).T, axis=0)
         
