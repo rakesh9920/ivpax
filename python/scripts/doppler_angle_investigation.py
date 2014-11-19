@@ -1,12 +1,11 @@
-# scripts / dopper_angle_investigation.py
+# scripts / doppler_angle_investigation.py
 
 import numpy as np
 import scipy.signal as sig
 import scipy as sp
 from matplotlib import pyplot as pp
 from pyfield.field import Field
-from pyfield.signal import xcorr, xcorr2
-from pyfield.util import distance
+from pyfield.signal import xcorr2
 
 fc = 5e6
 fbw = 1
@@ -95,14 +94,14 @@ if __name__ == '__main__':
     #f2.xdc_apodization(subrx2, np.zeros((1,1)), apod)
     
     #htx1, t0 = f2.calc_hhp(tx1, tx1, pos1)
-    htx1, t0 = f2.calc_hhp(planetx1, tx1, pos1)
+    htx1, t0 = f2.calc_scat(planetx1, tx1, pos1, np.ones((1,1)))
     htx1 = np.pad(htx1, ((np.round(t0*fs), 0), (0,0)), mode='constant')
     #hrx1, t0 = f2.calc_hhp(tx1, subrx1, pos1)
     #hrx1 = np.pad(hrx1, ((np.round(t0*fs), 0), (0,0)), mode='constant')
 #
     #htx2, t0 = f2.calc_hhp(tx2, tx2, pos2)
     #htx2, t0 = f2.calc_hhp(tx1, tx1, pos2)
-    htx2, t0 = f2.calc_hhp(planetx1, tx1, pos2)
+    htx2, t0 = f2.calc_scat(planetx1, tx1, pos2, np.ones((1,1)))
     htx2 = np.pad(htx2, ((np.round(t0*fs), 0), (0,0)), mode='constant')
     #hrx2, t0 = f2.calc_hhp(tx2, subrx2, pos2)
     #hrx2 = np.pad(hrx2, ((np.round(t0*fs), 0), (0,0)), mode='constant')
@@ -120,18 +119,19 @@ if __name__ == '__main__':
     
     for idx in xrange(128):
         
+        print idx
         apod = np.zeros((1, 128))
         apod[:,idx] = 1
         f2.xdc_apodization(subrx1, np.zeros((1,1)), apod)
         #f2.xdc_apodization(subrx2, np.zeros((1,1)), apod)
         
         #hrx1, t0 = f2.calc_hhp(tx1, subrx1, pos1)
-        hrx1, t0 = f2.calc_hhp(planetx1, subrx1, pos1)
+        hrx1, t0 = f2.calc_scat(planetx1, subrx1, pos1, np.ones((1,1)))
         hrx1 = np.pad(hrx1, ((np.round(t0*fs), 0), (0,0)), mode='constant')
         
         #hrx2, t0 = f2.calc_hhp(tx2, subrx2, pos2)
         #hrx2, t0 = f2.calc_hhp(tx1, subrx1, pos2)
-        hrx2, t0 = f2.calc_hhp(planetx1, subrx1, pos2)
+        hrx2, t0 = f2.calc_scat(planetx1, subrx1, pos2, np.ones((1,1)))
         hrx2 = np.pad(hrx2, ((np.round(t0*fs), 0), (0,0)), mode='constant')
         
         xc_rx, lags_rx = xcorr2(hrx2, hrx1, fs=fs)
