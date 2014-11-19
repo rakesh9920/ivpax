@@ -4,7 +4,6 @@ import numpy as np
 import scipy as sp
 from matplotlib import pyplot as pp
 from mlfmm.operators import CachedOperator
-#from mlfmm.quadtree2 import Operator
 from mlfmm.fasttransforms import *
 
 rho = 1000
@@ -66,10 +65,10 @@ if __name__ == '__main__':
         
     print np.mean(error_amp), np.max(error_amp), np.max(error_phase)
     
-    pp.plot(np.angle(pressure_exact[0,:]))
-    pp.plot(np.angle(pressure[0,:]))
-    #pp.plot(np.angle(pressure[0,:]*np.exp(1j*np.pi)))
-    pp.show()
+    #pp.plot(np.angle(pressure_exact[0,:]))
+    #pp.plot(np.angle(pressure[0,:]))
+    ##pp.plot(np.angle(pressure[0,:]*np.exp(1j*np.pi)))
+    #pp.show()
     
 #    pp.figure(tight_layout=True)
 #    pp.imshow(np.abs(pressure), interpolation='none')
@@ -80,14 +79,14 @@ if __name__ == '__main__':
 #        '1x1mm area, 3600 nodes')
 #    pp.show()
 #    
-    pp.figure(tight_layout=True)
-    pp.imshow(np.angle(pressure), interpolation='none')
-    cb = pp.colorbar()
-    #pp.imshow(maskedu, interpolation='none', cmap='gray')
-    cb.set_label('Phase (radians)')
-    pp.title('Pressure phase with source distr. overlay \n MLFMM, 5 MHz, '
-        '1x1mm area, 3600 nodes')
-    pp.show()
+    #pp.figure(tight_layout=True)
+    #pp.imshow(np.angle(pressure), interpolation='none')
+    #cb = pp.colorbar()
+    ##pp.imshow(maskedu, interpolation='none', cmap='gray')
+    #cb.set_label('Phase (radians)')
+    #pp.title('Pressure phase with source distr. overlay \n MLFMM, 5 MHz, '
+    #    '1x1mm area, 3600 nodes')
+    #pp.show()
 #    
 #    pp.figure(tight_layout=True)
 #    pp.imshow(np.abs(pressure_exact), interpolation='none')

@@ -14,7 +14,7 @@ origin = np.array([0.0, 0.0, 0.0])
 D0 = 0.001
 dim = np.array([1.0, 1.0])*D0
 matfilename = './data/bem_vars.mat'
-f = 19e6
+f = 5e6
       
 if __name__ == '__main__':
     

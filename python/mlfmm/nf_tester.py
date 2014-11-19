@@ -9,7 +9,7 @@ from matplotlib.patches import Rectangle
 
 D0 = 0.001
 level = 4
-f = 0.05e6
+f = 5e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -24,7 +24,7 @@ obs_d = 2*Dx
 center1 = np.array([0, 0, 0])
 center2 = np.array([0, 1, 0])*obs_d
 v = np.sqrt(3)*Dx*k
-C = 3/1.6
+C = 5/1.6
 order = np.int(np.ceil(v + C*np.log(v + np.pi)))
 stab_cond = 0.15*v/np.log(v + np.pi)
 wavelength = c/f
@@ -39,7 +39,8 @@ if __name__ == '__main__':
     mean_error = []
     max_error = []
     
-    freq = np.arange(50e3, 20e6, 50e3)
+    #freq = np.arange(50e3, 100e3, 50e3)
+    freq = [5e6]
     
     for f in freq:
     
@@ -61,7 +62,7 @@ if __name__ == '__main__':
         
         pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
         
-        kdir, weights, w1, w2 = fftquadrule(order*2)
+        kdir, weights, w1, w2 = fftquadrule2(order*4)
         kcoord = dir2coord(kdir)
         kcoordT = np.transpose(kcoord, (0,2,1))
         
@@ -87,51 +88,51 @@ if __name__ == '__main__':
     #
     #pp.show()
     
-    #fig1 = pp.figure()
-    #fig1.add_subplot(111)
-    #pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
-    #pp.plot(np.abs(pres_fmm),'r.')
-    #pp.title('amplitude')
-    #
-    #fig2 = pp.figure()
-    #fig2.add_subplot(111)
-    #pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
-    #pp.plot(np.angle(pres_fmm),'r.')
-    #pp.title('phase')
-    #
-    #pp.show()
+    fig1 = pp.figure()
+    fig1.add_subplot(111)
+    pp.plot(np.abs(pres_exact),'o', markerfacecolor='none')
+    pp.plot(np.abs(pres_fmm),'r.')
+    pp.title('amplitude')
     
-    #plot(np.abs(pres_exact), 'b')
-    #plot(np.abs(pres_fmm1), 'r--')
-    #plot(np.abs(pres_fmm2), 'g--')
-    #plot(np.abs(pres_fmm3), 'c--')
-    #plot(np.abs(pres_fmm4), 'y--')
-    #plot(np.abs(pres_fmm5), 'k--')
-    #xlabel('angle (degrees)')
-    #ylabel('pressure')
-    #title('pressure amplitude convergence behavior')
-    #legend(('exact', 'L=1', 'L=2', 'L=3', 'L=4', 'L=5'), loc='best')
+    fig2 = pp.figure()
+    fig2.add_subplot(111)
+    pp.plot(np.angle(pres_exact),'o', markerfacecolor='none')
+    pp.plot(np.angle(pres_fmm),'r.')
+    pp.title('phase')
     
-    #plot(np.angle(pres_exact), 'b')
-    #plot(np.angle(pres_fmm1), 'r--')
-    #plot(np.angle(pres_fmm2), 'g--')
-    #plot(np.angle(pres_fmm3), 'c--')
-    #plot(np.angle(pres_fmm4), 'y--')
-    #plot(np.angle(pres_fmm5), 'k--')
-    #xlabel('angle (degrees)')
-    #ylabel('phase')
-    #title('pressure phase convergence behavior')
-    #legend(('exact', 'L=1', 'L=2', 'L=3', 'L=4', 'L=5'), loc='best')
-
-    #plot(np.angle(pres_exact), 'b')
-    #plot(np.angle(pres_fmm25), 'r--')
-    #plot(np.angle(pres_fmm26), 'g--')
-    #plot(np.angle(pres_fmm27), 'c--')
-    #xlabel('angle (degrees)')
-    #ylabel('pressure')
-    #title('pressure amplitude divergence behavior')
-    #legend(('exact', 'L=25', 'L=26', 'L=27'), loc='lower right')
+    pp.show()
     
+#    #plot(np.abs(pres_exact), 'b')
+#    #plot(np.abs(pres_fmm1), 'r--')
+#    #plot(np.abs(pres_fmm2), 'g--')
+#    #plot(np.abs(pres_fmm3), 'c--')
+#    #plot(np.abs(pres_fmm4), 'y--')
+#    #plot(np.abs(pres_fmm5), 'k--')
+#    #xlabel('angle (degrees)')
+#    #ylabel('pressure')
+#    #title('pressure amplitude convergence behavior')
+#    #legend(('exact', 'L=1', 'L=2', 'L=3', 'L=4', 'L=5'), loc='best')
+#    
+#    #plot(np.angle(pres_exact), 'b')
+#    #plot(np.angle(pres_fmm1), 'r--')
+#    #plot(np.angle(pres_fmm2), 'g--')
+#    #plot(np.angle(pres_fmm3), 'c--')
+#    #plot(np.angle(pres_fmm4), 'y--')
+#    #plot(np.angle(pres_fmm5), 'k--')
+#    #xlabel('angle (degrees)')
+#    #ylabel('phase')
+#    #title('pressure phase convergence behavior')
+#    #legend(('exact', 'L=1', 'L=2', 'L=3', 'L=4', 'L=5'), loc='best')
+#
+#    #plot(np.angle(pres_exact), 'b')
+#    #plot(np.angle(pres_fmm25), 'r--')
+#    #plot(np.angle(pres_fmm26), 'g--')
+#    #plot(np.angle(pres_fmm27), 'c--')
+#    #xlabel('angle (degrees)')
+#    #ylabel('pressure')
+#    #title('pressure amplitude divergence behavior')
+#    #legend(('exact', 'L=25', 'L=26', 'L=27'), loc='lower right')
+#    
     #box1 = Rectangle((center1[0] - 0.5*Dx, center1[1] - 0.5*Dy), Dx, Dy,
     #    facecolor='blue', alpha=0.5)
     #box2 = Rectangle((center2[0] - 0.5*Dx, center2[1] - 0.5*Dy), Dx, Dy,
@@ -151,5 +152,5 @@ if __name__ == '__main__':
     #ax3.set_ylabel('y (m)')
     #
     #pp.show()
-    
+    #
     
