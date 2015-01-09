@@ -6,8 +6,8 @@ function D = sqdistance(A, B, M)
 %   D: n1 x n2 pairwise square distance matrix
 % Written by Michael Chen (sth4nth@gmail.com).
 
-A = A.';
-B = B.';
+%A = A.';
+%B = B.';
 if nargin == 1
     A = bsxfun(@minus,A,mean(A,2));
     S = full(dot(A,A,1));

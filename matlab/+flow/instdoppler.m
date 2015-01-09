@@ -2,7 +2,7 @@ function [VelEst] = instdoppler(BfSigMat, varargin)
 %
 % interleave, nsum, progress
 
-import tools.upicbar tools.iqdemod
+import tools.upicbar sigproc.iqdemod
 
 % read in optional arguments
 if nargin > 1

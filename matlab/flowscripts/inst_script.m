@@ -5,7 +5,7 @@ import flow.*
 global PULSE_REPITITION_RATE SAMPLE_FREQUENCY SOUND_SPEED CENTER_FREQUENCY;
 SOUND_SPEED = 1540;
 PULSE_REPITITION_RATE = 2000;
-SAMPLE_FREQUENCY = 50e6;
+SAMPLE_FREQUENCY = 40e6;
 CENTER_FREQUENCY = 6e6;
 
 % SET PARAMETERS
@@ -13,7 +13,7 @@ prms = containers.Map();
 
 % filtering
 prms('filter') = true;
-prms('bw') = 5.66e6;
+prms('bw') = 6e6*0.8;
 prms('fc') = 6e6;
 
 % beamforming & preprocessing
@@ -27,22 +27,23 @@ prms('ensemble') = 1;
 prms('range gate') = 1;
 prms('averaging') = 1;
 prms('interleave') = 0;
-prms('window') = 'rectwin';
+prms('window') = 'hanning';
 
 % misc
 prms('progress') = true;
-startPath = './data/sct3/';
+startPath = './';
 
 % DEFINE GEOMETRY
-%RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
-RxPos = Centers;
+RxPos = [((0:127).*300e-6 + 150e-6 - 64*300e-6); zeros(1,128); zeros(1,128)];
+% RxPos = Centers;
 %FieldPos = [zeros(1,101); zeros(1,101); 0:0.0001:0.01];
-[X, Y, Z] = ndgrid(-0.02:0.0005:0.02, 0, 0:0.0005:0.02);
-grd = [X(:) Y(:) Z(:)];
-FieldPos = grd.';
+% [X, Y, Z] = ndgrid(-0.02:0.0005:0.02, 0, 0:0.0005:0.02);
+% grd = [X(:) Y(:) Z(:)];
+% FieldPos = grd.';
+FieldPos = [0; 0; 0.01];
 
 % SET OTHER PARAMETER
-nWindowSample = 61;
+nWindowSample = 101;
 
 % CALCULATE MISC. VALUES
 windowTime = nWindowSample/SAMPLE_FREQUENCY/prms('resample');
