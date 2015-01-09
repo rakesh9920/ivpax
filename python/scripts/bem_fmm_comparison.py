@@ -118,8 +118,8 @@ if __name__ == '__main__':
     fig1 = pp.figure()
     ax1 = fig1.add_subplot(111)
     #ax1 = fig1.add_subplot(111, projection='3d')
-    xmax = np.max(np.abs(x_fmm))
-    xmin = np.min(np.abs(x_fmm))
+    xmax = np.max(np.abs(x_fmm)*np.angle(x_fmm))
+    xmin = np.min(np.abs(x_fmm)*np.angle(x_fmm))
     for mem in membranes:
         
         membrane_nodes = mem['node_x'][0,0].astype(float)
@@ -134,15 +134,13 @@ if __name__ == '__main__':
         nodesx, nodesy = np.mgrid[corner1[0]:corner2[0]:20*1j,corner1[1]:\
             corner2[1]:20*1j] - (width/19/2)[:,None,None]
         disp = x_fmm[idx].reshape((19,19))
-        pc = ax1.pcolormesh(nodesx, nodesy, np.abs(disp), vmax=xmax, vmin=0, 
-            cmap='jet')
+        pc = ax1.pcolormesh(nodesx, nodesy, np.abs(disp)*np.angle(disp), 
+            vmax=xmax, vmin=xmin, cmap='jet')
         #ax1.plot_surface(nodesx, nodesy, np.abs(disp), vmax=xmax, vmin=xmin,
             #rstride=1, cstride=1)
     
     pp.colorbar(pc)
     ax1.set_aspect('equal')
-    
-    
     
     fig2 = pp.figure()
     ax2 = fig2.add_subplot(111)
