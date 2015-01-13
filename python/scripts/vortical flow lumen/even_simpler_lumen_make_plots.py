@@ -1,25 +1,34 @@
 from mayavi import mlab
 import numpy as np
 from mayavi.api import Engine
+import h5py
 
-with np.load('./data/xyz_flow_data.npz') as data:
+#with np.load('./data/xyz_flow_data.npz') as data:
+#    
+#    #fdata_inst = data['fdata_inst']
+#    fdata_corrlag = data['fdata_corrlag']
+#    fdata_actual = data['fdata_actual']
+#    x = data['x']
+#    y = data['y']
+#    z = data['z']
+
+with h5py.File('./data/simple lumen flow/vortical_lumen_data.hdf5','r') as root:
     
-    #fdata_inst = data['fdata_inst']
-    fdata_corrlag = data['fdata_corrlag']
-    fdata_actual = data['fdata_actual']
-    x = data['x']
-    y = data['y']
-    z = data['z']
-
+    fdata_corrlag = root['flowdata/fluid2_3d'].reshape((20,20,30,3,-1))
+    view = root['view/view0'].reshape((20,20,30, 3))
+    x = view[...,0]
+    y = view[...,1]
+    z = view[...,2]
+    
 if __name__ == '__main__':
 
     
     #v = fdata_actual.reshape((20, 20, 30, 3))
-    actual = fdata_actual[...,0]
+    #actual = fdata_actual[...,0]
     
     flow = fdata_corrlag[...,0]
     #flow = fdata_corrlag[...,0]
-    error = flow - actual
+    #error = flow - actual
     
     v = flow
     

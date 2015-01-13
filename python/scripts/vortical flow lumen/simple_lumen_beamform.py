@@ -4,15 +4,16 @@ from pyfield.beamform import Beamformer
 
 import numpy as np
 import h5py
+from sys import stdout
 
 ######################### SET SCRIPT PARAMETERS HERE ###########################
-file_path = './data/diagonal_lumen_data.h5'
-input_key = 'field/rfdata/blood/fluid0'
+file_path = './data/simple lumen flow/vortical_lumen_data.hdf5'
+input_key = 'field/rfdata/blood/fluid2'
 view_key = 'view/view0'
-sub_rx_no = 0
+sub_rx_no = 15
 nsubch = 8
-#output_key = 'bfdata/fluid0_sub' + '{:01d}'.format(sub_rx_no)
-output_key = 'bfdata/fluid0_full'
+output_key = 'bfdata/fluid2_sub' + '{:01d}'.format(sub_rx_no) + '_' + str(128/nsubch)
+#output_key = 'bfdata/fluid2_full'
 nproc = 1
 frames = None
 centers = (np.arange(0,128) - 63.5)*300e-6
@@ -33,9 +34,9 @@ centers = np.c_[centers, np.zeros((128, 2))]
 #                            [0.0132, 0, 0],
 #                            [0.0156, 0, 0],
 #                            [0.018, 0, 0]])
-#chmask = np.zeros(128)
-#chmask[sub_rx_no*nsubch:sub_rx_no*nsubch+nsubch] = 1
-chmask = False
+chmask = np.zeros(128)
+chmask[sub_rx_no*nsubch:sub_rx_no*nsubch+nsubch] = 1
+#chmask = False
 
 sub_rx_position = np.mean(centers[(chmask==1),:], axis=0)
 
@@ -44,7 +45,7 @@ opt = { 'nwin': 801,
         'chmask': chmask,
         'planetx': True,
         'overwrite': True,
-        'maxpointsperchunk': 10000,
+        'maxpointsperchunk': 4000,
         'maxframesperchunk': 1000 }  
 ################################################################################
        
@@ -77,14 +78,14 @@ if __name__ == '__main__':
     bf.start(nproc=nproc, frames=frames)
     
     print bf
-    #stdout.flush()
-    #bf.join()
+    stdout.flush()
+    bf.join()
     
-    #with h5py.File(file_path, 'a') as root:
-    #    
-    #    bfdata = root[output_key]
-    #    bfdata.attrs['sub_rx_no'] = sub_rx_no
-    #    bfdata.attrs['sub_rx_position'] = sub_rx_position
+    with h5py.File(file_path, 'a') as root:
+        
+        bfdata = root[output_key]
+        bfdata.attrs['sub_rx_no'] = sub_rx_no
+        bfdata.attrs['sub_rx_position'] = sub_rx_position
     
     
     
