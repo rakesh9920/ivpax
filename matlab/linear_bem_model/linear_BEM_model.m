@@ -115,6 +115,7 @@ Zr=calc_Zr(fluid_rho,fluid_c,w,k,node_S,R,alpha);
     U=G\P;
     
     
+    
 %% plot the displacement amplitude on the array surface
 
 % amplitude plot

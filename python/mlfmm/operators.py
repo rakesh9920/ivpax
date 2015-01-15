@@ -64,6 +64,8 @@ sugg_angles[2] = np.fromstring('''
     51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51 51
     ''', sep=' ')
 sugg_angles[5] = sugg_angles[4]
+sugg_angles[6] = sugg_angles[4]
+sugg_angles[7] = sugg_angles[4]
 
 class CachedOperator:
     '''
