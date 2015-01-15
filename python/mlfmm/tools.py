@@ -1,6 +1,8 @@
 
 import numpy as np
 from scipy import sparse as sps
+from matplotlib.patches import Rectangle
+from matplotlib import pyplot as plt
     
 def make_bem(membranes):
     
@@ -109,6 +111,45 @@ def make_b(mem):
     nnodes = mem['nnodes']
     
     mem['B'] = att_mech*sps.eye(nnodes)
+
+def draw_quadtree(op):
+    
+    
+    qt = op.quadtree
+    nodes = op.params['nodes']
+    
+    for level_no, level in qt.levels.iteritems():
+        
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111)
+        ax1.set_aspect('equal')
+        
+        ax1.plot(nodes[:,0], nodes[:,1], marker='o', markersize=1, ls='none')
+        
+        xmax = 0
+        ymax = 0
+        
+        for group in level.itervalues():
+            
+            center = group.center[:2]
+            xlength, ylength = group.group_dims
+            
+            lcorner = center - np.array([xlength, ylength])/2.
+            rcorner = center + np.array([xlength, ylength])/2.
+            
+            if rcorner[0] > xmax:
+                xmax = rcorner[0]
+            
+            if rcorner[1] > ymax:
+                ymax = rcorner[1]
+
+            rect = Rectangle(lcorner, xlength, ylength, facecolor='none')
+            ax1.add_patch(rect)
+        
+        ax1.set_xlim(xmax*-0.05, xmax*1.05)
+        ax1.set_ylim(ymax*-0.05, ymax*1.05)
+        plt.show()
+        
 
 if __name__ == '__main__':
     

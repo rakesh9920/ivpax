@@ -6,6 +6,7 @@ import weakref
 from mlfmm.fasttransforms import *
 from mlfmm.quadtree2 import QuadTree
 from scipy.interpolate import interp1d
+import cPickle as pickle
 
 sugg_angles = dict()
 sugg_freqs = np.arange(50e3, 20e6, 50e3)
@@ -137,16 +138,22 @@ class CachedOperator:
         Precompute translators and shifters.
         '''
         qt = self.quadtree
-        #translators = self.translators
+        params = self.params
         shifters = self.shifters
         leveldata = self.leveldata
         prms = self.params
         k = prms['wave_number']
         
+        if 'translators_file' in params:
+            translators = self.load_translators(params['translators_file'])
+        else:
+            translators = dict()
+        
         # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
-            translators = dict()
+            if l not in translators:
+                translators[l] = dict()
             
             kcoord = leveldata[l]['kcoord']
             kcoordT = np.transpose(kcoord, (0, 2, 1))
@@ -184,7 +191,7 @@ class CachedOperator:
                     
                     group.translators.append(trans)
             
-            del translators 
+        del translators 
                                 
         # precompute shifters for each level
         for l, lvl in qt.levels.iteritems():
@@ -479,7 +486,68 @@ class CachedOperator:
             #del translators 
         
         return translators
-
+        
+    def save_translators(self, filename):
+        '''
+        Precompute and save translators.
+        '''
+        qt = self.quadtree
+        #translators = self.translators
+        shifters = self.shifters
+        leveldata = self.leveldata
+        prms = self.params
+        k = prms['wave_number']
+        
+        translators = dict()
+        # precompute translators operators for each level
+        for l, lvl in qt.levels.iteritems(): 
+            
+            translators[l] = dict()
+            
+            kcoord = leveldata[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            order = leveldata[l]['order']
+            
+            for group in lvl.itervalues():
+                
+                group.translators = []
+                
+                for neighbor in group.ntnn:
+                    
+                    r = group.center - neighbor().center
+                    rmag = mag(r)
+                    rhat = r/rmag
+                    cos_angle = rhat.dot(kcoordT)
+                    
+                    trans = np.zeros_like(kcoord[:,:,0], dtype='complex')
+                    
+                    for theta in xrange(kcoord.shape[0]):
+                        for phi in xrange(kcoord.shape[1]):
+                            
+                            ca = cos_angle[theta, phi]
+                            
+                            key = (round(float(rmag), 8), round(float(ca), 8))
+                            if key in translators[l]:
+                                
+                                value = translators[l][key]
+                                
+                            else:
+                                
+                                value = m2lop(rmag, ca, k, order)
+                                translators[l][key] = value
+                            
+                            trans[theta, phi] = value
+                    
+                    group.translators.append(trans)
+            
+        with open(filename, 'wb') as outfile:
+            pickle.dump(translators, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+    
+    def load_translators(self, filename):
+        
+        return pickle.load(open(filename, 'rb'))
+        
+              
 #sugg_angles = dict()
 #sugg_angles[2] = np.fromstring('''
 #    4  4  4  4  4  4  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  6  9  9  9

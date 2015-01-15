@@ -14,11 +14,11 @@ from mpl_toolkits.mplot3d import Axes3D
 origin = np.array([0.0, 0.0, 0.0])
 D0 = 0.001
 dim = np.array([1.0, 1.0])*D0
-f = 5e6
+f = 19e6
 c = 1500.
 rho = 1000.
-nmems_x = 6
-nmems_y = 6
+nmems_x = 4
+nmems_y = 4
 pitch_x = 45e-6
 pitch_y = 45e-6
 
@@ -69,7 +69,8 @@ if __name__ == '__main__':
     op.params['origin'] = origin
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
-    op.params['max_level'] = 5
+    op.params['max_level'] = 6
+    op.params['translators_file'] = './data/test.dat'
     
     op.setup(verbose=False)
     op.precompute()
