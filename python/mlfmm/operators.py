@@ -145,21 +145,26 @@ class CachedOperator:
         k = prms['wave_number']
         
         if 'translators_file' in params:
-            translators = self.load_translators(params['translators_file'])
-        else:
-            translators = dict()
+            test = self.load_translators(params['translators_file'])
+        
+        translators = dict()
         
         # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
-            if l not in translators:
-                translators[l] = dict()
+
+            translators[l] = dict()
             
             kcoord = leveldata[l]['kcoord']
             kcoordT = np.transpose(kcoord, (0, 2, 1))
             order = leveldata[l]['order']
             
-            for group in lvl.itervalues():
+            for group_id, group in lvl.iteritems():
+                
+                if 'translators_file' in params:
+                    if group_id in test:
+                        group.translators = test[group_id]
+                        continue
                 
                 group.translators = []
                 
@@ -178,18 +183,19 @@ class CachedOperator:
                             ca = cos_angle[theta, phi]
                             
                             key = (round(float(rmag), 8), round(float(ca), 8))
-                            if key in translators:
+                            if key in translators[l]:
                                 
-                                value = translators[key]
+                                value = translators[l][key]
                                 
                             else:
                                 
                                 value = m2lop(rmag, ca, k, order)
-                                translators[key] = value
+                                translators[l][key] = value
                             
                             trans[theta, phi] = value
                     
                     group.translators.append(trans)
+                    
             
         del translators 
                                 
@@ -499,6 +505,7 @@ class CachedOperator:
         k = prms['wave_number']
         
         translators = dict()
+        test = dict()
         # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
@@ -508,7 +515,7 @@ class CachedOperator:
             kcoordT = np.transpose(kcoord, (0, 2, 1))
             order = leveldata[l]['order']
             
-            for group in lvl.itervalues():
+            for group_id, group in lvl.iteritems():
                 
                 group.translators = []
                 
@@ -540,8 +547,10 @@ class CachedOperator:
                     
                     group.translators.append(trans)
             
+                test[group_id] = group.translators
+            
         with open(filename, 'wb') as outfile:
-            pickle.dump(translators, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(test, outfile, protocol=pickle.HIGHEST_PROTOCOL)
     
     def load_translators(self, filename):
         
