@@ -19,9 +19,9 @@ class Group:
             0.5), ydim/(2**lvl)*(j + 0.5), 0])
         
         if isinstance(group_id, np.ndarray):
-            self.group_id = tuple(group_id.ravel())
+            self.group_id = tuple(group_id.ravel().astype(int))
         else:
-            self.group_id = group_id
+            self.group_id = (int(lvl), int(i), int(j))
         self.children = dict()
         self.parent = None
         self.neighbors = [] 
@@ -99,9 +99,13 @@ class Group:
 class QuadTree:
     '''
     '''
-    def __init__(self, nodes, origin, dim):
+    def __init__(self, nodes=None, origin=None, dim=None):
         
-        self.nodes = np.array(nodes)
+        if nodes is None:
+            self.nodes = None
+        else:
+            self.nodes = np.array(nodes)
+            
         self.group_ids = None
         self.origin = np.array(origin, dtype='float').reshape(3)
         self.dim = np.array(dim, dtype='float').reshape(2)
@@ -183,7 +187,60 @@ class QuadTree:
         # delete dummy levels if they were added
         if minlevel > 0:
             del self.levels[minlevel - 1]
-          
+
+    def setup_fully_populated(self, minlevel, maxlevel):
+        
+        origin = self.origin
+        dim = self.dim
+        nodes = self.nodes
+        levels = self.levels
+        
+        # create empty levels
+        for lvl in xrange(minlevel, maxlevel + 1):
+            self.add_level(lvl)
+        
+        # create extra dummy level needed for finding ntnn if necessary
+        if minlevel > 0:
+            self.add_level(minlevel - 1)
+        
+        # populate finest level with ALL possible groups      
+        ngroupx = 2**maxlevel
+        group_ids = []
+        
+        for i in xrange(ngroupx):
+            for j in xrange(ngroupx):
+                group_ids.append((maxlevel, i, j))
+        #ids = np.c_[np.ones(ngroupx)*maxlevel, np.arange(ngroupx), 
+        #    np.arange(ngroupx)].astype(int)
+        #group_ids = [tuple(row) for row in ids]
+        
+        for group_id in group_ids:
+            self.add_member(Group(group_id, origin, dim))
+            
+        # populate remaining levels
+        for lvl in xrange(maxlevel, minlevel, -1):
+            for group in levels[lvl].itervalues():
+                group.spawn_parent(self)
+        
+        # populate dummy level if it was created
+        if minlevel > 0:
+            for group in levels[minlevel].itervalues():
+                group.spawn_parent(self)
+        
+        # populate neighbor lists
+        for lvl in levels.itervalues():
+            for group in lvl.itervalues():
+                group.find_neighbors(self)
+        
+        # populate ntnn lists
+        for lvl in levels.itervalues():
+            for group in lvl.itervalues():
+                group.find_ntnn()
+        
+        # delete dummy levels if they were added
+        if minlevel > 0:
+            del self.levels[minlevel - 1]
+                  
     def assign_nodes(self, maxlevel):
         
         ids = np.floor((self.nodes[:,:2] - self.origin[None,:2])/ \

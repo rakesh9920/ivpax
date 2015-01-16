@@ -7,6 +7,7 @@ from mlfmm.fasttransforms import *
 from mlfmm.quadtree2 import QuadTree
 from scipy.interpolate import interp1d
 import cPickle as pickle
+import bz2
 
 sugg_angles = dict()
 sugg_freqs = np.arange(50e3, 20e6, 50e3)
@@ -81,7 +82,7 @@ class CachedOperator:
         self.shifters = dict()
         self.leveldata = dict()
     
-    def setup(self, verbose=True):
+    def setup(self, verbose=True, full=False):
         '''
         Initialize operator and setup quadrature rules for each level.
         '''
@@ -98,7 +99,10 @@ class CachedOperator:
         
         # create and initialize quadtree
         qt = QuadTree(nodes, origin, box_dims)
-        qt.setup(min_level, max_level)
+        if full:
+            qt.setup_fully_populated(min_level, max_level)
+        else:
+            qt.setup(min_level, max_level)
         self.quadtree = qt
         
         # compute far-field angles for each level
@@ -497,6 +501,7 @@ class CachedOperator:
         '''
         Precompute and save translators.
         '''
+        self.setup(full=True)
         qt = self.quadtree
         #translators = self.translators
         shifters = self.shifters
@@ -505,7 +510,7 @@ class CachedOperator:
         k = prms['wave_number']
         
         translators = dict()
-        test = dict()
+        translators_cache = dict()
         # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
@@ -547,10 +552,17 @@ class CachedOperator:
                     
                     group.translators.append(trans)
             
-                test[group_id] = group.translators
+                translators_cache[group_id] = group.translators
+                print group_id
+            
+            del translators[l]
             
         with open(filename, 'wb') as outfile:
-            pickle.dump(test, outfile, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(translators_cache, outfile, 
+                protocol=pickle.HIGHEST_PROTOCOL)
+        #with bz2.BZ2file(filename, 'w') as outfile:
+        #    pickle.dump(translators_cache, outfile, 
+        #        protocol=pickle.HIGHEST_PROTOCOL)
     
     def load_translators(self, filename):
         

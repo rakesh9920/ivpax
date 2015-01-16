@@ -112,19 +112,19 @@ def make_b(mem):
     
     mem['B'] = att_mech*sps.eye(nnodes)
 
-def draw_quadtree(op):
+def draw_quadtree(quadtree):
     
+    nodes = quadtree.nodes
     
-    qt = op.quadtree
-    nodes = op.params['nodes']
-    
-    for level_no, level in qt.levels.iteritems():
+    for level_no, level in quadtree.levels.iteritems():
         
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111)
         ax1.set_aspect('equal')
         
-        ax1.plot(nodes[:,0], nodes[:,1], marker='o', markersize=1, ls='none')
+        if nodes is not None:
+            ax1.plot(nodes[:,0], nodes[:,1], marker='o', markersize=1, 
+                ls='none')
         
         xmax = 0
         ymax = 0
