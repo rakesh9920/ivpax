@@ -17,8 +17,8 @@ dim = np.array([1.0, 1.0])*D0
 f = 19e6
 c = 1500.
 rho = 1000.
-nmems_x = 4
-nmems_y = 4
+nmems_x = 5
+nmems_y = 5
 pitch_x = 45e-6
 pitch_y = 45e-6
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
     op.params['max_level'] = 6
-    op.params['translators_file'] = './data/test.dat'
+    #op.params['translators_file'] = './data/test.dat'
     
     op.setup(verbose=False)
     op.precompute()
@@ -156,6 +156,8 @@ if __name__ == '__main__':
     G = Gmech + 1j*omega*Zr
     x_exact = sp.linalg.solve(G, P)
     error = np.abs(np.abs(x_fmm) - np.abs(x_exact))/np.abs(x_exact)*100
+    error_abs = np.abs(x_fmm) - np.abs(x_exact)
+    error_rel_max = np.abs(np.abs(x_fmm) - np.abs(x_exact))/np.max(np.abs(x_exact))*100
      
     fig2 = pp.figure()
     ax2 = fig2.add_subplot(111)
@@ -169,7 +171,8 @@ if __name__ == '__main__':
 
     fig3 = pp.figure()
     ax3 = fig3.add_subplot(111)
-    ax3.plot(error)
+    #ax3.plot(error)
+    ax3.plot(error_abs)
     ax3.set_xlabel('Node no.')
     ax3.set_ylabel('Error (%)')
     ax3.set_title('Displacement error for f = %2.2f MHz' % (f/1e6))
