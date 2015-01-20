@@ -8,8 +8,8 @@ from matplotlib.patches import Rectangle
 
 # set parameters
 D0 = 0.001
-level = 2
-f = 5e6
+level = 6
+f = 19e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c

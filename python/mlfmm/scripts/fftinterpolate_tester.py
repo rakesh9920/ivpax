@@ -6,9 +6,9 @@ from mlfmm.fasttransforms import *
 from pyfield.util import distance
 from matplotlib import pyplot as pp
 
-D0 = 0.002
-level = 3
-f = 1e6
+D0 = 0.001
+level = 5
+f = 10e6
 rho = 1000
 c = 1540
 k = 2*np.pi*f/c
@@ -45,12 +45,12 @@ if __name__ == '__main__':
     
     pres_exact = directeval(strengths, sources, fieldpos, k, rho, c)
     
-    kdir, weights, w1, w2 = fftquadrule2(order1)
+    kdir, weights, w1, w2 = fftquadrule2(4*order1)
     kcoord = dir2coord(kdir)
     
     coeff = ffcoeff(strengths, sources, center, k, kcoord)
 
-    newkdir, newweights, _, _ = fftquadrule2(order2)
+    newkdir, newweights, _, _ = fftquadrule2(4*order2)
     newkcoord = dir2coord(newkdir)
     
     newcoeff = fftinterpolate2(coeff, kdir, newkdir)
