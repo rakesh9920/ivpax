@@ -110,7 +110,7 @@ if __name__ == '__main__':
         dtype='cfloat')
         
     x_fmm, niter = spsl.cgs(operator1, P, x0=np.zeros(nnodes), M=Gmech_inv, 
-        tol=1e-10, maxiter=20)
+        tol=1e-10, maxiter=30)
     
     #x_fmm, niter = spsl.cgs(operator2, Gmech_inv.dot(P).T, x0=np.zeros(nnodes), 
     #    tol=1e-9, maxiter=20)
@@ -172,10 +172,12 @@ if __name__ == '__main__':
     fig3 = pp.figure()
     ax3 = fig3.add_subplot(111)
     #ax3.plot(error)
-    #ax3.plot(error_abs)
-    ax3.plot(error_rel_max)
+    ax3.plot(error_abs)
+    #ax3.plot(error_rel_max)
     ax3.set_xlabel('Node no.')
-    ax3.set_ylabel('Error re max (%)')
+    #ax3.set_ylabel('Error re max (%)')
+    ax3.set_ylabel('Error (absolute) (m)')
+    #ax3.set_ylabel('Error (%)')
     ax3.set_title('Displacement error for f = %2.2f MHz' % (f/1e6))
     pp.show()
 

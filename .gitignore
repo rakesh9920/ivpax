@@ -6,8 +6,11 @@
 *.daq
 *.tif
 *.txt
-*.pyc
+*.py[cod]
 *.hdf5
+*.h5
+*.np
+*.npz
 *.asv
 *.ncb
 *.sln
