@@ -17,8 +17,8 @@ dim = np.array([1.0, 1.0])*D0
 f = 19e6
 c = 1500.
 rho = 1000.
-nmems_x = 6
-nmems_y = 6
+nmems_x = 4
+nmems_y = 4
 pitch_x = 45e-6
 pitch_y = 45e-6
 

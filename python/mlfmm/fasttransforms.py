@@ -244,6 +244,22 @@ def mlop(pos, k, kcoord, order):
     
     return total
 
+def ff2nf_legendre_part(cos_angle, order):
+    
+    total = np.zeros(cos_angle.shape + (order + 1,), dtype='complex')
+    
+    for l in xrange(order + 1):
+        
+        total[...,l] = (2*l + 1)*(1j**l)*eval_legendre(l, cos_angle)
+    
+    return total
+    
+def ff2nf_hankel_part(r, k, order):
+    
+    l = np.arange(0, order + 1)
+    
+    return sphhankel2(l, k*r)
+    
 def m2lop(r, cos_angle, k, order):
     '''
     Far to local transform.
@@ -257,7 +273,7 @@ def m2lop(r, cos_angle, k, order):
     return operator
 
 m2l = np.vectorize(m2lop, excluded=['r', 'k', 'order'])
-
+ 
 def m2m(r, cos_angle, k):
     
     return np.exp(1j*k*r*cos_angle)

@@ -113,7 +113,7 @@ class CachedOperator:
             v = np.sqrt(3)*D*k
             C = 5/1.6
         
-            order = np.int(np.ceil(v + C*np.log(v + np.pi)))
+            order = (np.ceil(v + C*np.log(v + np.pi))).astype(int)
             stab_cond = 0.15*v/np.log(v + np.pi)
             
             #kdir, weights, thetaweights, phiweights = legquadrule(order)
@@ -149,10 +149,6 @@ class CachedOperator:
         prms = self.params
         k = prms['wave_number']
         
-        if 'translators_file' in params:
-            #test = self.load_translators(params['translators_file'])
-            root = h5py.File(params['translators_file'], 'r')
-        
         # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
@@ -163,11 +159,6 @@ class CachedOperator:
             order = leveldata[l]['order']
             
             for group_id, group in lvl.iteritems():
-                
-                if 'translators_file' in params:
-                    if str(group_id) in root:
-                        group.translators = list(root[str(group_id)][:])
-                        continue
                 
                 group.translators = []
                 
@@ -200,10 +191,7 @@ class CachedOperator:
                     group.translators.append(trans)
                     
             del translators
-        
-        if 'translators_file' in params:
-            root.close()
-                                
+                              
         # precompute shifters for each level
         for l, lvl in qt.levels.iteritems():
             
@@ -498,73 +486,8 @@ class CachedOperator:
             #del translators 
         
         return translators
-        
-    def save_translators(self, filename):
-        '''
-        Precompute and save translators.
-        '''
-        self.setup(full=True)
-        qt = self.quadtree
-        #translators = self.translators
-        shifters = self.shifters
-        leveldata = self.leveldata
-        prms = self.params
-        k = prms['wave_number']
-        
-        translators = dict()
-        translators_cache = dict()
-        # precompute translators operators for each level
-        for l, lvl in qt.levels.iteritems(): 
-            
-            translators[l] = dict()
-            
-            kcoord = leveldata[l]['kcoord']
-            kcoordT = np.transpose(kcoord, (0, 2, 1))
-            order = leveldata[l]['order']
-            
-            for group_id, group in lvl.iteritems():
-                
-                group.translators = []
-                
-                for neighbor in group.ntnn:
-                    
-                    r = group.center - neighbor().center
-                    rmag = mag(r)
-                    rhat = r/rmag
-                    cos_angle = rhat.dot(kcoordT)
-                    
-                    
-                    trans = np.zeros_like(kcoord[:,:,0], dtype='complex')
-                    
-                    for theta in xrange(kcoord.shape[0]):
-                        for phi in xrange(kcoord.shape[1]):
-                            
-                            ca = cos_angle[theta, phi]
-                            
-                            key = (round(float(rmag), 8), round(float(ca), 8))
-                            if key in translators[l]:
-                                
-                                value = translators[l][key]
-                                
-                            else:
-                                
-                                value = m2lop(rmag, ca, k, order)
-                                translators[l][key] = value
-                            
-                            trans[theta, phi] = value
-                    
-                    group.translators.append(trans)
-            
-                translators_cache[group_id] = group.translators
-                print group_id
-            
-            del translators[l]
-            
-    def load_translators(self, filename):
-        
-        return pickle.load(open(filename, 'rb'))
-
-    def save_cache(self, filename):
+                 
+    def save_min_cache(self, filename):
         '''
         Precompute and save translators.
         '''
@@ -575,6 +498,7 @@ class CachedOperator:
         k = prms['wave_number']
         
         cache = dict()
+        
         # precompute translators operators for each level
         for l, lvl in qt.levels.iteritems(): 
             
@@ -619,7 +543,7 @@ class CachedOperator:
         pickle.dump(cache, open(filename, 'wb'),
             protocol=pickle.HIGHEST_PROTOCOL)
             
-    def precompute_with_cache(self, filename):
+    def precompute_with_min_cache(self, filename):
         '''
         Precompute translators and shifters.
         '''
@@ -692,7 +616,214 @@ class CachedOperator:
             shifters[l][(1,0)] = shift_lr
             shifters[l][(0,1)] = shift_ul
             shifters[l][(1,1)] = shift_ur
-              
+
+    def save_full_cache(self, filename):
+        '''
+        Precompute and save translators.
+        '''
+        qt = self.quadtree
+        leveldata = self.leveldata
+        prms = self.params
+        k = prms['wave_number']
+        
+        cache = dict()
+        
+        # precompute translators operators for each level
+        for l, lvl in qt.levels.iteritems(): 
+            
+            translators = dict()
+            
+            kcoord = leveldata[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            order = leveldata[l]['order']
+            
+            for group_id, group in lvl.iteritems():
+                
+                group.translators = []
+                
+                for neighbor in group.ntnn:
+                    
+                    r = group.center - neighbor().center
+                    rmag = mag(r)
+                    rhat = r/rmag
+                    cos_angle = rhat.dot(kcoordT)
+                    
+                    trans = np.zeros_like(kcoord[:,:,0], dtype='complex')
+                    
+                    for theta in xrange(kcoord.shape[0]):
+                        for phi in xrange(kcoord.shape[1]):
+                            
+                            ca = cos_angle[theta, phi]
+                            
+                            key = (round(float(rmag), 8), round(float(ca), 8))
+                            if key in translators:
+                                
+                                value = translators[key]
+                                
+                            else:
+                                
+                                value = m2lop(rmag, ca, k, order)
+                                translators[key] = value
+                            
+                            trans[theta, phi] = value
+                    
+                    group.translators.append(trans)
+                
+                cache[group_id] = group.translators
+            
+            del translators
+            
+        with h5py.File(filename, 'a') as root:
+            
+            for group_id, value in cache:
+                root.create_dataset(str(group_id), data=value, 
+                    compression='gzip', compression_opts=9)
+            
+    def precompute_with_full_cache(self, filename):
+        '''
+        Precompute translators and shifters.
+        '''
+        qt = self.quadtree
+        params = self.params
+        shifters = self.shifters
+        leveldata = self.leveldata
+        prms = self.params
+        k = prms['wave_number']
+        
+
+        with h5py.File(filename, 'r') as root:
+        
+            # precompute translators operators for each level
+            for l, lvl in qt.levels.iteritems(): 
+                
+                kcoord = leveldata[l]['kcoord']
+                kcoordT = np.transpose(kcoord, (0, 2, 1))
+                order = leveldata[l]['order']
+                
+                for group_id, group in lvl.iteritems():
+                    group.translators = list(root[str(group_id)][:])
+                     
+        # precompute shifters for each level
+        for l, lvl in qt.levels.iteritems():
+            
+            kcoord = leveldata[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            
+            group_dims = leveldata[l]['group_dims']
+            r = mag(group_dims)/4
+            
+            # define direction unit vectors for the four quadrants
+            rhat_ul = np.array([1, -1, 0])/np.sqrt(2) # upper left group
+            rhat_ur = np.array([-1, -1, 0])/np.sqrt(2) # upper right group
+            rhat_ll = np.array([1, 1, 0])/np.sqrt(2) # lower left group
+            rhat_lr = np.array([-1, 1, 0])/np.sqrt(2) # lower right group
+            
+            # calculate shifters from magnitude and angle
+            shift_ul = m2m(r, rhat_ul.dot(kcoordT), k)
+            shift_ur = m2m(r, rhat_ur.dot(kcoordT), k)
+            shift_ll = m2m(r, rhat_ll.dot(kcoordT), k)
+            shift_lr = m2m(r, rhat_lr.dot(kcoordT), k)
+            
+            shifters[l] = dict()
+            shifters[l][(0,0)] = shift_ll
+            shifters[l][(1,0)] = shift_lr
+            shifters[l][(0,1)] = shift_ul
+            shifters[l][(1,1)] = shift_ur
+
+    def save_optimal_cache(self, filename):
+        '''
+        Precompute and save translators.
+        '''
+        qt = self.quadtree
+        leveldata = self.leveldata
+        prms = self.params
+        k = prms['wave_number']
+        
+        with h5py.File(filename, 'a') as root:
+        
+            # precompute translators operators for each level
+            for l, lvl in qt.levels.iteritems(): 
+                
+                kcoord = leveldata[l]['kcoord']
+                kcoordT = np.transpose(kcoord, (0, 2, 1))
+                order = leveldata[l]['order']
+                
+                for group_id, group in lvl.iteritems():
+                    
+                    hankel_cache = []
+                    legendre_cache = []
+                    
+                    for neighbor in group.ntnn:
+                        
+                        r = group.center - neighbor().center
+                        rmag = mag(r)
+                        rhat = r/rmag
+                        cos_angle = rhat.dot(kcoordT)
+                        
+                        legendre_cache.append(ff2nf_legendre_part(cos_angle, order))
+                        hankel_cache.append(ff2nf_hankel_part(rmag, k, order))
+                    
+                    cache[group_id] = group.translators
+            
+                    root.create_dataset('legendre/' + str(group_id), 
+                        data=legendre_cache, compression='gzip')
+                    root.create_dataset('hankel/' + str(group_id), 
+                        data=hankel_cache, compression='gzip')
+                    
+                    del hankel_cache, legendre_cache
+    
+    def precompute_with_optimal_cache(self, filename):
+        '''
+        Precompute translators and shifters.
+        '''
+        qt = self.quadtree
+        shifters = self.shifters
+        leveldata = self.leveldata
+        prms = self.params
+        k = prms['wave_number']
+        
+        with h5py.File(filename, 'r') as root:
+        
+            # precompute translators operators for each level
+            for l, lvl in qt.levels.iteritems(): 
+    
+                order = leveldata[l]['order']
+                
+                for group_id, group in lvl.iteritems():
+                    
+                    legendre_part = list(root['legendre/' + str(group_id)][:])
+                    hankel_part = list(root['hankel/' + str(group_id)][:])
+                    
+                    group.translators = [lp*hp for lp, hp in 
+                        zip(legendre_part, hankel_part)]
+                   
+        # precompute shifters for each level
+        for l, lvl in qt.levels.iteritems():
+            
+            kcoord = leveldata[l]['kcoord']
+            kcoordT = np.transpose(kcoord, (0, 2, 1))
+            
+            group_dims = leveldata[l]['group_dims']
+            r = mag(group_dims)/4
+            
+            # define direction unit vectors for the four quadrants
+            rhat_ul = np.array([1, -1, 0])/np.sqrt(2) # upper left group
+            rhat_ur = np.array([-1, -1, 0])/np.sqrt(2) # upper right group
+            rhat_ll = np.array([1, 1, 0])/np.sqrt(2) # lower left group
+            rhat_lr = np.array([-1, 1, 0])/np.sqrt(2) # lower right group
+            
+            # calculate shifters from magnitude and angle
+            shift_ul = m2m(r, rhat_ul.dot(kcoordT), k)
+            shift_ur = m2m(r, rhat_ur.dot(kcoordT), k)
+            shift_ll = m2m(r, rhat_ll.dot(kcoordT), k)
+            shift_lr = m2m(r, rhat_lr.dot(kcoordT), k)
+            
+            shifters[l] = dict()
+            shifters[l][(0,0)] = shift_ll
+            shifters[l][(1,0)] = shift_lr
+            shifters[l][(0,1)] = shift_ul
+            shifters[l][(1,1)] = shift_ur    
+                       
 #sugg_angles = dict()
 
 #sugg_angles[2] = np.fromstring('''
