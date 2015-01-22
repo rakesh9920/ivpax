@@ -69,9 +69,8 @@ if __name__ == '__main__':
     op.params['nodes'] = nodes
     op.params['min_level'] = 2
     op.params['max_level'] = 6
-    #op.params['translators_file'] = './data/test.dat'
     
-    op.setup(verbose=False)
+    op.setup(verbose=False, full=False)
     op.precompute()
 
     # create matrices for mechanical dynamics and full dynamics

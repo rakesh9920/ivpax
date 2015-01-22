@@ -762,8 +762,6 @@ class CachedOperator:
                         
                         legendre_cache.append(ff2nf_legendre_part(cos_angle, order))
                         hankel_cache.append(ff2nf_hankel_part(rmag, k, order))
-                    
-                    cache[group_id] = group.translators
             
                     root.create_dataset('legendre/' + str(group_id), 
                         data=legendre_cache, compression='gzip')
@@ -794,7 +792,7 @@ class CachedOperator:
                     legendre_part = list(root['legendre/' + str(group_id)][:])
                     hankel_part = list(root['hankel/' + str(group_id)][:])
                     
-                    group.translators = [lp*hp for lp, hp in 
+                    group.translators = [np.sum(lp*hp, axis=-1) for lp, hp in 
                         zip(legendre_part, hankel_part)]
                    
         # precompute shifters for each level
