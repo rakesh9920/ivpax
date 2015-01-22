@@ -1,10 +1,10 @@
 
 import numpy as np
-from scipy import sparse as sps
+from scipy import sparse as sps, linalg 
 from matplotlib.patches import Rectangle
 from matplotlib import pyplot as plt
     
-def make_bem(membranes):
+def make_bem(membranes, inverse=True, freq=None):
     
     mem_counter = 0
     for mem in membranes.itervalues():
@@ -38,12 +38,25 @@ def make_bem(membranes):
     B_list = [mem['B'] for mem in membranes.itervalues()] 
     nodes_list = [mem['nodes'] for mem in membranes.itervalues()]
     
+    if inverse:
+        
+        omega = 2*np.pi*freq
+        Gmech_list = [-omega**2*M + 1j*omega*B + K for M, B, K in 
+            zip(M_list, B_list, K_list)]
+        
+        Gmech_inv_list = [linalg.inv(Gmech.todense()) for Gmech in Gmech_list]
+        
+        Gmech_inv = sps.block_diag(Gmech_inv_list, format='csr')
+  
     K = sps.block_diag(K_list, format='csr')
     M = sps.block_diag(M_list, format='csr')
     B = sps.block_diag(B_list, format='csr')
     nodes = np.concatenate(nodes_list, axis=0)
     
-    return nodes, M, B, K
+    if inverse:
+        return nodes, M, B, K, Gmech_inv
+    else:
+        return nodes, M, B, K
     
 def make_k(mem):
     

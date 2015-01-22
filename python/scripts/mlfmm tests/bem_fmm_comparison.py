@@ -17,8 +17,8 @@ dim = np.array([1.0, 1.0])*D0
 f = 19e6
 c = 1500.
 rho = 1000.
-nmems_x = 5
-nmems_y = 5
+nmems_x = 6
+nmems_y = 6
 pitch_x = 45e-6
 pitch_y = 45e-6
 
@@ -48,13 +48,12 @@ if __name__ == '__main__':
         mems[x]['att_mech'] = 1e5
         mems[x]['center'] = centers[x,:]
     
-    nodes, M, B, K = make_bem(mems)
+    nodes, M, B, K, Gmech_inv = make_bem(mems, inverse=True, freq=f)
     nnodes = nodes.shape[0]
     s_n = mems[0]['dx']*mems[0]['dy']
     
     P = np.zeros(nnodes, dtype='cfloat')
     P[mems[0]['nodes_idx']] = 1e6
-    
     
     omega = 2*np.pi*f
     k = 2*np.pi*f/c
@@ -77,7 +76,7 @@ if __name__ == '__main__':
 
     # create matrices for mechanical dynamics and full dynamics
     Gmech = -omega**2*M + 1j*omega*B + K
-    Gmech_inv = spsl.inv(sps.csc_matrix(Gmech))
+    #Gmech_inv = spsl.inv(sps.csc_matrix(Gmech))
     
     # define matrix-vector products that use fmm
     counter = 0
@@ -111,7 +110,7 @@ if __name__ == '__main__':
         dtype='cfloat')
         
     x_fmm, niter = spsl.cgs(operator1, P, x0=np.zeros(nnodes), M=Gmech_inv, 
-        tol=1e-9, maxiter=20)
+        tol=1e-10, maxiter=20)
     
     #x_fmm, niter = spsl.cgs(operator2, Gmech_inv.dot(P).T, x0=np.zeros(nnodes), 
     #    tol=1e-9, maxiter=20)
@@ -157,7 +156,8 @@ if __name__ == '__main__':
     x_exact = sp.linalg.solve(G, P)
     error = np.abs(np.abs(x_fmm) - np.abs(x_exact))/np.abs(x_exact)*100
     error_abs = np.abs(x_fmm) - np.abs(x_exact)
-    error_rel_max = np.abs(np.abs(x_fmm) - np.abs(x_exact))/np.max(np.abs(x_exact))*100
+    error_rel_max = (np.abs(np.abs(x_fmm) - np.abs(x_exact))/
+        np.max(np.abs(x_exact))*100)
      
     fig2 = pp.figure()
     ax2 = fig2.add_subplot(111)
@@ -172,9 +172,10 @@ if __name__ == '__main__':
     fig3 = pp.figure()
     ax3 = fig3.add_subplot(111)
     #ax3.plot(error)
-    ax3.plot(error_abs)
+    #ax3.plot(error_abs)
+    ax3.plot(error_rel_max)
     ax3.set_xlabel('Node no.')
-    ax3.set_ylabel('Error (%)')
+    ax3.set_ylabel('Error re max (%)')
     ax3.set_title('Displacement error for f = %2.2f MHz' % (f/1e6))
     pp.show()
 
