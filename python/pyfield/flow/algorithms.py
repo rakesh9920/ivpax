@@ -1,21 +1,22 @@
 # flow / algorithms.py
 
-from pyfield.signal import xcorr, iqdemod
 import numpy as np
 from scipy.interpolate import interp1d
 import h5py
+
+from pyfield.signal import xcorr, iqdemod
 
 def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1, 
     interpolate=1, resample=1, threshold=0, retcoeff=False, vel_key=None, 
     coeff_key=None, **kwargs):
     
     if isinstance(bfdata, tuple):
-        hdf5 = True
+        h5 = True
         root = h5py.File(bfdata[0], 'a')
         bfdata = root[bfdata[1]][:] # copy all bfdata to memory... more memory
             # intensive but much much faster than looped access
     else:
-        hdf5 = False
+        h5 = False
     
     try:
         if len(bfdata.shape) == 3:
@@ -26,8 +27,8 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
         
         nestimate = nframe - interleave 
         
-        # pre-allocate velocity and coeff arrays, use hdf5 file if specified
-        if hdf5:
+        # pre-allocate velocity and coeff arrays, use h5 file if specified
+        if h5:
             if vel_key in root:
                 del root[vel_key]
                 
@@ -113,7 +114,7 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
                     else:
                         velocity[pos,est] = 0
         
-        if not hdf5:
+        if not h5:
             if retcoeff:
                 return velocity, coeff
             else:

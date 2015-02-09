@@ -212,7 +212,127 @@ class cyl_mgrid_class:
         return x[mask], y[mask], z[mask]
 
 cyl_mgrid = cyl_mgrid_class()
+
+def read_daq(path, frame=None, channels=None):
+    
+    if channels is None:
+        channels = np.arange(128)
+    
+    channel_route = np.array([0, 16, 32, 48, 64, 80, 96, 112, 1, 17, 33, 49, 65,
+        81, 97, 113, 2, 18, 34, 50, 66, 82, 98, 114, 3, 19, 35, 51, 67, 83, 99,
+        115, 4, 20, 36, 52, 68, 84, 100, 116, 5, 21, 37, 53, 69, 85, 101, 117, 
+        6, 22, 38, 54, 70, 86, 102, 118, 7, 23, 39, 55, 71, 87, 103, 119, 8, 24,
+        40, 56, 72, 88, 104, 120, 9, 25, 41, 57, 73, 89, 105, 121, 10, 26, 42,
+        58, 74, 90, 106, 122, 11, 27, 43, 59, 75, 91, 107, 123, 12, 28, 44, 60,
+        76, 92, 108, 124, 13, 29, 45, 61, 77, 93, 109, 125, 14, 30, 46, 62, 78,
+        94, 110, 126, 15, 31, 47, 63, 79, 95, 111, 127])
+    
+    nchannel = channels.size
+    
+    for idx, ch in enumerate(channels):
         
+        if ch < 10:
+            filename = path + 'CH' + '00' + str(ch) + '.daq'
+        elif ch < 100:
+            filename = path + 'CH' + '0' + str(ch)  + '.daq'
+        else:
+            filename = path + 'CH' + str(ch)  + '.daq'
+        
+        if idx == 0:
+            
+            header = np.fromfile(filename, dtype='int32', count=3)
+            _, nframe, nsample = header
+            
+            if frame is None:
+                rfdata = np.zeros((nsample, nchannel, nframe), dtype='int16')
+            else:
+                rfdata = np.zeros((nsample, nchannel), dtype='int16')
+        
+        with open(filename, 'rb') as f:
+        
+            f.seek(12) # skips over header
+            ch_idx = channel_route[ch]
+            
+            if frame is None:
+
+                rfdata[:, ch_idx, :] = np.fromfile(f, dtype='int16', 
+                    count=-1).reshape((nsample, nframe))
+            else:
+                
+                f.seek(nsample*2*frame, 1)
+                rfdata[:, ch_idx] = np.fromfile(f, dtype='int16', 
+                    count=nsample)
+    
+    return rfdata, header
+
+def daq2h5(path, h5file, h5key, channels=None, overwrite=False):
+    '''
+    '''
+    rfdata, header = read_daq(path, frame=0, channels=channels)
+    _, nframe, nsample = header
+    nchannel = rfdata.shape[1]
+    
+    with h5py.File(h5file, 'a') as root:
+             
+        if h5key in root and overwrite:
+            del root[h5key]
+
+        root.create_dataset(h5key, shape=(nsample, nchannel, nframe), 
+            dtype='int16')
+        
+        root[h5key][:,:,0] = rfdata
+        
+        for fr in xrange(1, nframe):
+            
+            rfdata, _ = read_daq(path, frame=fr, channels=channels)
+            root[h5key][:,:,fr] = rfdata
+        
+        
+def daq_to_h5(path, h5file, h5key, channels=None, overwrite=False):
+    '''
+    '''
+    if channels is None:
+        channels = np.arange(128)
+    
+    channel_route = np.array([0, 16, 32, 48, 64, 80, 96, 112, 1, 17, 33, 49, 65,
+        81, 97, 113, 2, 18, 34, 50, 66, 82, 98, 114, 3, 19, 35, 51, 67, 83, 99,
+        115, 4, 20, 36, 52, 68, 84, 100, 116, 5, 21, 37, 53, 69, 85, 101, 117, 
+        6, 22, 38, 54, 70, 86, 102, 118, 7, 23, 39, 55, 71, 87, 103, 119, 8, 24,
+        40, 56, 72, 88, 104, 120, 9, 25, 41, 57, 73, 89, 105, 121, 10, 26, 42,
+        58, 74, 90, 106, 122, 11, 27, 43, 59, 75, 91, 107, 123, 12, 28, 44, 60,
+        76, 92, 108, 124, 13, 29, 45, 61, 77, 93, 109, 125, 14, 30, 46, 62, 78,
+        94, 110, 126, 15, 31, 47, 63, 79, 95, 111, 127])
+        
+    rfdata, header = read_daq(path, frame=0, channels=channels)
+    _, nframe, nsample = header
+    nchannel = channels.size
+    
+    with h5py.File(h5file, 'a') as root:
+             
+        if h5key in root and overwrite:
+            del root[h5key]
+
+        root.create_dataset(h5key, shape=(nsample, nchannel, nframe), 
+            dtype='int16', compression='gzip')
+    
+        for idx, ch in enumerate(channels):
+            
+            if ch < 10:
+                filename = path + 'CH' + '00' + str(ch) + '.daq'
+            elif ch < 100:
+                filename = path + 'CH' + '0' + str(ch)  + '.daq'
+            else:
+                filename = path + 'CH' + str(ch)  + '.daq'
+            
+            with open(filename, 'rb') as f:
+            
+                f.seek(12) # skips over header
+                ch_idx = channel_route[ch]
+            
+                root[h5key][:, ch_idx, :] = np.fromfile(f, dtype='int16', 
+                    count=-1).reshape((nsample, nframe), order='F')
+                
+                root.flush()
 
     
     
