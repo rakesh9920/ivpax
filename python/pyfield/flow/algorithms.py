@@ -24,6 +24,7 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
         else:
             nsample, nframe = bfdata.shape
             npos = 1
+            bfdata = bfdata[None,...]
         
         nestimate = nframe - interleave 
         
@@ -121,7 +122,9 @@ def corr_lag_doppler(bfdata, c=None, fs=None, prf=None, interleave=1,
                 return velocity
     
     finally:
-        root.close()
+        
+        if h5:
+            root.close()
 
 def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None, 
     interleave=1, ensemble=1, gate=1, resample=1, vel_key=None, **kwargs):
@@ -142,6 +145,7 @@ def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None,
         else:
             nsample, nframe = bfdata.shape
             npos = 1
+            bfdata = bfdata[None,...]
         
         midsample = np.floor(nsample/2).astype(int)
         gate_start = midsample - np.floor(gate/2.0)
@@ -197,7 +201,8 @@ def inst_phase_doppler(bfdata, fc=None, bw=None, fs=None, c=None, prf=None,
             return velocity
                     
     finally:
-        root.close()           
+        if hdf5:
+            root.close()           
 
 def corr_match_doppler():
 	pass		

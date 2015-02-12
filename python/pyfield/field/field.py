@@ -311,12 +311,12 @@ class Field:
             rect[15,:] = info[3,:]
             rect[16:19,:] = info[7:10,:]
             
-            centers = info[23:26,:].T
+            centers = info[23:26,:].T # NEEDS FIX
             
             focus_times = focus[:,0]
             focus_delays = focus[:,1:]
             
-            aperture = self.xdc_rectangles(rect, centers, np.array([[0,0,300]]))
+            aperture = self.xdc_rectangles(rect.T, centers, np.array([[0,0,300]]))
             self.xdc_focus_times(aperture, focus_times, focus_delays)
         
         return aperture

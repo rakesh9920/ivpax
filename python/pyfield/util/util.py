@@ -313,7 +313,7 @@ def daq_to_h5(path, h5file, h5key, channels=None, overwrite=False):
             del root[h5key]
 
         root.create_dataset(h5key, shape=(nsample, nchannel, nframe), 
-            dtype='int16', compression='gzip')
+            dtype='double', compression='gzip')
     
         for idx, ch in enumerate(channels):
             
