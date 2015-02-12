@@ -1,6 +1,6 @@
 //
 // MATLAB Compiler: 5.0 (R2013b)
-// Date: Wed Feb 11 20:54:21 2015
+// Date: Wed Jun  4 18:12:53 2014
 // Arguments: "-B" "macro_default" "-v" "-W" "cpplib:libfield" "-T" "link:lib"
 // "-B" "functionlist.txt" "calc_scat" "calc_scat_multi" "calc_scat_all"
 // "calc_h" "calc_hhp" "calc_hp" "field_end" "field_init" "set_field"
@@ -17,27 +17,6 @@
 static HMCRINSTANCE _mcr_inst = NULL;
 
 
-#if defined( _MSC_VER) || defined(__BORLANDC__) || defined(__WATCOMC__) || defined(__LCC__)
-#ifdef __LCC__
-#undef EXTERN_C
-#endif
-#include <windows.h>
-
-static char path_to_dll[_MAX_PATH];
-
-BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, void *pv)
-{
-    if (dwReason == DLL_PROCESS_ATTACH)
-    {
-        if (GetModuleFileName(hInstance, path_to_dll, _MAX_PATH) == 0)
-            return FALSE;
-    }
-    else if (dwReason == DLL_PROCESS_DETACH)
-    {
-    }
-    return TRUE;
-}
-#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -87,11 +66,9 @@ bool MW_CALL_CONV libfieldInitializeWithHandlers(
     return true;
   if (!mclmcrInitialize())
     return false;
-  if (!GetModuleFileName(GetModuleHandle("libfield"), path_to_dll, _MAX_PATH))
-    return false;
     {
         mclCtfStream ctfStream = 
-            mclGetEmbeddedCtfStream(path_to_dll);
+            mclGetEmbeddedCtfStream((void *)(libfieldInitializeWithHandlers));
         if (ctfStream) {
             bResult = mclInitializeComponentInstanceEmbedded(   &_mcr_inst,
                                                                 error_handler, 
