@@ -362,7 +362,90 @@ class View():
         pass
     
     
+def time_beamform(rfdata, fieldpos, **kwargs):
+    
+    # get data attribtues and beamforming options
+    txpos = kwargs['txpos']
+    rxpos = kwargs['rxpos']
+    nwin = kwargs['nwin']
+    fs = kwargs['fs']
+    c = kwargs['c']
+    resample = kwargs['resample']
+    planetx = kwargs['planetx']
+    chmask = kwargs['chmask']
+    t0 = kwargs['t0']
+    apod = kwargs['apodization']
+    useapod = kwargs['useapodization']
         
+    npos = fieldpos.shape[0]
+    
+    if rfdata.ndim == 3:
+        nsample, nchannel, nframe = rfdata.shape
+    elif rfdata.ndim == 2:
+        nsample, nchannel = rfdata.shape
+    
+    if chmask is False:
+        chmask = np.ones(nchannel)
+    
+    # calculate delays
+    if planetx:
+        txdelay = np.abs(fieldpos[:,2,None])/c
+    else:
+        if txpos.ndim == 1:
+            txpos = txpos[None,:]
+        txdelay = distance(fieldpos, txpos)/c
+    
+    rxdelay = distance(fieldpos, rxpos)/c
+    sdelay = np.round((txdelay + rxdelay - t0)*fs*resample).astype(int)
+    
+    # resample data
+    if resample != 1:
+        
+        rfdata = sp.signal.resample(rfdata, nsample*resample)
+        nsample = rfdata.shape[0]
+    
+    # pad data
+    if not nwin % 2:
+        nwin += 1
+    
+    nwinhalf = (nwin - 1)/2
+    pad_width = ((nwin, nwin), (0, 0), (0, 0))
+    rfdata = np.pad(rfdata, pad_width, mode='constant')
+    
+    bfdata = np.zeros((npos, nwin, nframe))
+    
+    # apply delays in loop over field points and channels
+    for pos in xrange(npos):
+        
+        pdelay = sdelay[pos,:]
+        valid_delay = (pdelay <= (nsample + nwinhalf)) & \
+            (pdelay >= -(nwinhalf + 1))
+        
+        if not np.any(valid_delay):
+            continue
+        
+        bfsig = np.zeros((nwin, nframe))
+        
+        #center_ch = np.argmin(fieldpos[pos,0] - rxpos[:,0])
+        
+        for ch in xrange(nchannel):
+            
+            if not valid_delay[ch]:
+                continue
+            
+            if not chmask[ch]:
+                continue
+            
+            delay = pdelay[ch] + nwin - nwinhalf
+            
+            if useapod:
+                bfsig += apod[ch]*rfdata[delay:(delay + nwin),ch,:]
+            else:
+                bfsig += rfdata[delay:(delay + nwin),ch,:]
+        
+        bfdata[pos,:,:] = bfsig
+    
+    return bfdata
         
         
         
