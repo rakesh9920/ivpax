@@ -1,4 +1,4 @@
-from scipy.signal import correlate, butter, filtfilt, fftconvolve
+from scipy.signal import correlate, butter, filtfilt, fftconvolve, lfilter
 from scipy.fftpack import fft, ifft, fftshift, ifftshift
 import numpy as np
 
@@ -46,21 +46,21 @@ def xcorr2(in1, in2, mode='full', norm=True, fs=1):
 
 def lowpass(in1, fh, fs, order=6, axis=-1):
     
-    b, a = butter(order, fh/fs/2.0, 'lowpass', analog=False)
+    b, a = butter(order, fh/fs/2.0, 'lowpass', analog=True)
     
-    return filtfilt(b, a, in1, axis=axis)
+    return lfilter(b, a, in1, axis=axis)
     
 def bandpass(in1, fc, fs, order=6, axis=-1):
 
-    b, a = butter(order, (fc[0]/fs/2.0, fc[1]/fs/2.0), 'bandpass', analog=False)
+    b, a = butter(order, (fc[0]/fs/2.0, fc[1]/fs/2.0), 'bandpass', analog=True)
     
-    return filtfilt(b, a, in1, axis=axis)
+    return lfilter(b, a, in1, axis=axis)
 
 def highpass(in1, fl, fs, order=6, axis=-1):
     
-    b, a = butter(order, fl/fs/2.0, 'highpass', analog=False)
+    b, a = butter(order, fl/fs/2.0, 'highpass', analog=True)
     
-    return filtfilt(b, a, in1, axis=axis)
+    return lfilter(b, a, in1, axis=axis)
 
 def iqdemod(in1, fc, bw, fs, axis=-1):
     
